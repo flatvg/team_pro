@@ -119,7 +119,13 @@ void CrossBomb::hit(OBJ2D* src, OBJ2D* dst) const
 {
     if (dst->behavior_->getType() != OBJ_TYPE::PLAYER) return;
 
-    dst->actorComponent_->hasSword_ = true;
+    VECTOR2 surroundingBlockPos[4] = {
+        {src->transform_->position_.x - this->getParam()->SIZE.x,src->transform_->position_.y},                             //¶
+        {src->transform_->position_.x                           ,src->transform_->position_.y - this->getParam()->SIZE.y},  //ã
+        {src->transform_->position_.x + this->getParam()->SIZE.x,src->transform_->position_.y},                             //‰E
+        {src->transform_->position_.x                           ,src->transform_->position_.y + this->getParam()->SIZE.y},  //‰º
+    };
+
     src->behavior_ = nullptr;
 }
 
