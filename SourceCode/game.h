@@ -1,0 +1,43 @@
+#ifndef INCLUDED_GAME
+#define	INCLUDED_GAME
+
+//******************************************************************************
+//
+//
+//      ゲームシーン
+//
+//
+//******************************************************************************
+
+//==============================================================================
+//
+//      Gameクラス
+//
+//==============================================================================
+
+#include "bg.h"
+
+class Game : public Scene
+{
+public:
+    // クラス内での定数の定義の仕方
+    // int型であればconstで良いが、それ以外はconstexprを使用する
+    static constexpr float GROUND_POS_Y = 640.0f;
+
+public:
+    static Game* instance() { return &instance_; }
+
+    void init();
+    void deinit();
+    void update();
+    void draw();
+private:
+    bool                isPaused;
+    BG bg;
+
+    static Game instance_;
+};
+
+//******************************************************************************
+
+#endif // !INCLUDED_GAME
