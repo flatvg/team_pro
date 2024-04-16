@@ -108,6 +108,9 @@
     <ClInclude Include="SourceCode\select.h">
       <Filter>Headers</Filter>
     </ClInclude>
+    <ClInclude Include="SourceCode\work.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="GameLib\primitive.hlsli">
@@ -214,6 +217,9 @@
       <Filter>Sources</Filter>
     </ClCompile>
     <ClCompile Include="SourceCode\select.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceCode\bomb.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
   </ItemGroup>
