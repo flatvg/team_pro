@@ -41,9 +41,9 @@ namespace GameLib
         { PAD_TRG2      , Keyboard::N },            // 'N'
         { PAD_TRG3      , Keyboard::M },            // 'M'
 
-        //{ PAD_START    , VK_LBUTTON },              // マウス左ボタン
-        //{ PAD_TRG4     , VK_RBUTTON },              // マウス右ボタン
-        //{ PAD_R3       , VK_MBUTTON },              // マウス中ボタン
+        { PAD_START    , VK_LBUTTON },              // マウス左ボタン
+        { PAD_TRG4     , VK_RBUTTON },              // マウス右ボタン
+        { PAD_R3       , VK_MBUTTON },              // マウス中ボタン
 
         { 0x00, 0x00 }                              // 終了コード
     };
