@@ -45,24 +45,27 @@ public:
     // ï`âÊ
     void drawTerrain();                                     // ínå`ï`âÊ
 
-    //îöî≠â”èäê⁄íu
+    //îöî≠â”èäåvéZ
     DirectX::XMINT2 CalcExplosionPoint(DirectX::XMINT2 BaseExplosionPoint, ExplosionPoint point);
-
     DirectX::XMINT2 CalcCenterPoint(DirectX::XMINT2 BaseExplosionPoint);
-
     DirectX::XMINT2 CalcLeftPoint(DirectX::XMINT2 BaseExplosionPoint);
-
     DirectX::XMINT2 CalcTopPoint(DirectX::XMINT2 BaseExplosionPoint);
-
     DirectX::XMINT2 CalcRightPoint(DirectX::XMINT2 BaseExplosionPoint);
-
     DirectX::XMINT2 CalcBottomPoint(DirectX::XMINT2 BaseExplosionPoint);
 
-    int SetExplosionPoint(DirectX::XMINT2 ExplosionPoint);
+    //îöî≠
+    int SetExplosionPoint(DirectX::XMINT2 explosionPoint, ExplosionPoint point);
+    int SetCenterPoint(int center);
+    int SetLeftPoint(int center, int left);
+    int SetTopPoint(int center, int top);
+    int SetRightPoint(int center, int right);
+    int SetBottomPoint(int center, int bottom);
+
 
 private:
 
     int timer;
     int explosionTime = 60;
     DirectX::XMFLOAT2  cursorPos;
+    DirectX::XMINT2 ExplodePos[EXPLOSION_CHIP_NUM];
 };
