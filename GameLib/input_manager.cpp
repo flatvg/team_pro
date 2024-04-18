@@ -41,9 +41,12 @@ namespace GameLib
         { PAD_TRG2      , Keyboard::N },            // 'N'
         { PAD_TRG3      , Keyboard::M },            // 'M'
 
-        { PAD_START    , VK_LBUTTON },              // マウス左ボタン
-        { PAD_TRG4     , VK_RBUTTON },              // マウス右ボタン
-        { PAD_R3       , VK_MBUTTON },              // マウス中ボタン
+        //{ PAD_START    , VK_LBUTTON },              // マウス左ボタン
+        //{ PAD_TRG4     , VK_RBUTTON },              // マウス右ボタン
+        //{ PAD_R3       , VK_MBUTTON },              // マウス中ボタン
+
+        { PAD_LC        , VK_LBUTTON},
+        { PAD_RC        , VK_RBUTTON},
 
         { 0x00, 0x00 }                              // 終了コード
     };
@@ -159,7 +162,7 @@ namespace GameLib
         for (int i = 0; i < GAMEPAD_NUM; i++)
             gpad[i] = gamePad->GetState(i);
 
-        // 
+        //
         for (int i = 0; i < GAMEPAD_NUM; i++)
         {
             PadState* p = &pad[i];
