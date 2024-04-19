@@ -55,11 +55,11 @@ public:
 
     //”š”­
     int SetExplosionPoint(DirectX::XMINT2 explosionPoint, ExplosionPoint point);
-    int SetCenterPoint(int center);
-    int SetLeftPoint(int center, int left);
-    int SetTopPoint(int center, int top);
-    int SetRightPoint(int center, int right);
-    int SetBottomPoint(int center, int bottom);
+    int SetCenterPoint(int center, DirectX::XMINT2 centerPos);
+    int SetLeftPoint(int center, int left, DirectX::XMINT2 leftPos, DirectX::XMINT2 centerPos);
+    int SetTopPoint(int center, int top, DirectX::XMINT2 topPos, DirectX::XMINT2 centerPos);
+    int SetRightPoint(int center, int right, DirectX::XMINT2 rightPos, DirectX::XMINT2 centerPos);
+    int SetBottomPoint(int center, int bottom, DirectX::XMINT2 bottomPos, DirectX::XMINT2 centerPos);
 
 
 private:
