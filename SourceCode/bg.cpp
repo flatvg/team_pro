@@ -72,6 +72,14 @@ void BG::init(int stagenum)
         }
     }
 
+    for (int x = 0; x < CHIP_NUM_X; x++)
+    {
+        for (int y = 0; y < CHIP_NUM_Y; y++)
+        {
+            terrainFlag[y][x] = false;
+        }
+    }
+
     texture::load(0, L"./Data/Images/test_tile.png", 256U);    //îwåi
     texture::load(1, L"./Data/Images/test_tile02.png", 256U);    //îwåi
 
@@ -125,11 +133,21 @@ void BG::update()
         //îöîj
         if (isBomb && isClickR)
         {
-            terrain[ExplodePos[ExplosionPoint::CENTER].x][ExplodePos[ExplosionPoint::CENTER].y] = SetExplosionPoint(Cpos,ExplosionPoint::CENTER);
-            terrain[ExplodePos[ExplosionPoint::LEFT].x][ExplodePos[ExplosionPoint::LEFT].y]     = SetExplosionPoint(ExplodePos[ExplosionPoint::LEFT],ExplosionPoint::LEFT);
-            terrain[ExplodePos[ExplosionPoint::TOP].x][ExplodePos[ExplosionPoint::TOP].y]       = SetExplosionPoint(ExplodePos[ExplosionPoint::TOP],ExplosionPoint::TOP);
-            terrain[ExplodePos[ExplosionPoint::RIGHT].x][ExplodePos[ExplosionPoint::RIGHT].y]   = SetExplosionPoint(ExplodePos[ExplosionPoint::RIGHT],ExplosionPoint::RIGHT);
-            terrain[ExplodePos[ExplosionPoint::BOTTOM].x][ExplodePos[ExplosionPoint::BOTTOM].y] = SetExplosionPoint(ExplodePos[ExplosionPoint::BOTTOM],ExplosionPoint::BOTTOM);
+            //if (!terrainFlag[ExplodePos[ExplosionPoint::CENTER].x][ExplodePos[ExplosionPoint::CENTER].y]) {
+                terrain[ExplodePos[ExplosionPoint::CENTER].x][ExplodePos[ExplosionPoint::CENTER].y] = SetExplosionPoint(Cpos, ExplosionPoint::CENTER);
+            //}
+            //if (!terrainFlag[ExplodePos[ExplosionPoint::LEFT].x][ExplodePos[ExplosionPoint::LEFT].y]) {
+                terrain[ExplodePos[ExplosionPoint::LEFT].x][ExplodePos[ExplosionPoint::LEFT].y] = SetExplosionPoint(ExplodePos[ExplosionPoint::LEFT], ExplosionPoint::LEFT);
+            //}
+            //if (!terrainFlag[ExplodePos[ExplosionPoint::RIGHT].x][ExplodePos[ExplosionPoint::RIGHT].y]) {
+                terrain[ExplodePos[ExplosionPoint::TOP].x][ExplodePos[ExplosionPoint::TOP].y] = SetExplosionPoint(ExplodePos[ExplosionPoint::TOP], ExplosionPoint::TOP);
+            //}
+            //if (!terrainFlag[ExplodePos[ExplosionPoint::RIGHT].x][ExplodePos[ExplosionPoint::RIGHT].y]) {
+                terrain[ExplodePos[ExplosionPoint::RIGHT].x][ExplodePos[ExplosionPoint::RIGHT].y] = SetExplosionPoint(ExplodePos[ExplosionPoint::RIGHT], ExplosionPoint::RIGHT);
+            //}
+            //if (!terrainFlag[ExplodePos[ExplosionPoint::BOTTOM].x][ExplodePos[ExplosionPoint::BOTTOM].y]) {
+                terrain[ExplodePos[ExplosionPoint::BOTTOM].x][ExplodePos[ExplosionPoint::BOTTOM].y] = SetExplosionPoint(ExplodePos[ExplosionPoint::BOTTOM], ExplosionPoint::BOTTOM);
+            //}
         }
     }
 
@@ -194,6 +212,7 @@ void BG::drawTerrain()
                 if (terrainTimer[y][x] < 0) {
                     terrain[y][x] = 0;
                     terrainTimer[y][x] = explosionTime;
+                    terrainFlag[y][x] = false;
                 }
             }
         }
@@ -307,6 +326,8 @@ int BG::SetCenterPoint(int center, DirectX::XMINT2 centerPos)
         return center;
     }
 
+    terrainFlag[centerPos.x][centerPos.y] = true;
+
     return 2;
 }
 
@@ -314,10 +335,12 @@ int BG::SetLeftPoint(int center, int left, DirectX::XMINT2 leftPos, DirectX::XMI
 {
     bool isNotEdge = leftPos.x < 0 || leftPos.y < 0 || leftPos.x > CHIP_NUM_Y || leftPos.y > CHIP_NUM_X;
 
-    if (isNotEdge || center == -1 || left == -1)
+    if (isNotEdge || center == -1 || left == -1 || left == 2)
     {
         return left;
     }
+
+    terrainFlag[leftPos.x][leftPos.y] = true;
 
     if (left == 1)
     {
@@ -333,9 +356,15 @@ int BG::SetLeftPoint(int center, int left, DirectX::XMINT2 leftPos, DirectX::XMI
         };
 
         //îöíeê›íu
-        terrain[explodePos[ExplosionPoint::LEFT].x][explodePos[ExplosionPoint::LEFT].y] = SetExplosionPoint(explodePos[LEFT], ExplosionPoint::LEFT);
-        terrain[explodePos[ExplosionPoint::TOP].x][explodePos[ExplosionPoint::TOP].y] = SetExplosionPoint(explodePos[TOP], ExplosionPoint::TOP);
-        terrain[explodePos[ExplosionPoint::BOTTOM].x][explodePos[ExplosionPoint::BOTTOM].y] = SetExplosionPoint(explodePos[BOTTOM], ExplosionPoint::BOTTOM);
+        //if (!terrainFlag[explodePos[ExplosionPoint::LEFT].x][explodePos[ExplosionPoint::LEFT].y]) {
+            terrain[explodePos[ExplosionPoint::LEFT].x][explodePos[ExplosionPoint::LEFT].y] = SetExplosionPoint(explodePos[LEFT], ExplosionPoint::LEFT);
+        //}
+        //if (!terrainFlag[explodePos[ExplosionPoint::TOP].x][explodePos[ExplosionPoint::TOP].y]) {
+            terrain[explodePos[ExplosionPoint::TOP].x][explodePos[ExplosionPoint::TOP].y] = SetExplosionPoint(explodePos[TOP], ExplosionPoint::TOP);
+        //}
+        //if (!terrainFlag[explodePos[ExplosionPoint::BOTTOM].x][explodePos[ExplosionPoint::BOTTOM].y]) {
+            terrain[explodePos[ExplosionPoint::BOTTOM].x][explodePos[ExplosionPoint::BOTTOM].y] = SetExplosionPoint(explodePos[BOTTOM], ExplosionPoint::BOTTOM);
+        //}
     }
 
     return 2;
@@ -345,7 +374,7 @@ int BG::SetTopPoint(int center, int top, DirectX::XMINT2 topPos, DirectX::XMINT2
 {
     bool isNotEdge = topPos.x < 0 || topPos.y < 0 || topPos.x > CHIP_NUM_Y || topPos.y > CHIP_NUM_X;
 
-    if (isNotEdge || center == -1 || top == -1)
+    if (isNotEdge || center == -1 || top == -1 || top == 2)
     {
         return top;
     }
@@ -363,10 +392,19 @@ int BG::SetTopPoint(int center, int top, DirectX::XMINT2 topPos, DirectX::XMINT2
             DirectX::XMINT2(-1,-1),//BOTTOM
         };
 
+
+        terrainFlag[topPos.x][topPos.y] = true;
+
         //îöíeê›íu
-        terrain[explodePos[ExplosionPoint::LEFT].x][explodePos[ExplosionPoint::LEFT].y] = SetExplosionPoint(explodePos[ExplosionPoint::LEFT], ExplosionPoint::LEFT);
-        terrain[explodePos[ExplosionPoint::TOP].x][explodePos[ExplosionPoint::TOP].y] = SetExplosionPoint(explodePos[ExplosionPoint::TOP], ExplosionPoint::TOP);
-        terrain[explodePos[ExplosionPoint::RIGHT].x][explodePos[ExplosionPoint::RIGHT].y] = SetExplosionPoint(explodePos[ExplosionPoint::RIGHT], ExplosionPoint::RIGHT);
+        //if (!terrainFlag[explodePos[ExplosionPoint::LEFT].x][explodePos[ExplosionPoint::LEFT].y]) {
+            terrain[explodePos[ExplosionPoint::LEFT].x][explodePos[ExplosionPoint::LEFT].y] = SetExplosionPoint(explodePos[ExplosionPoint::LEFT], ExplosionPoint::LEFT);
+        //}
+        //if (!terrainFlag[explodePos[ExplosionPoint::TOP].x][explodePos[ExplosionPoint::TOP].y]) {
+            terrain[explodePos[ExplosionPoint::TOP].x][explodePos[ExplosionPoint::TOP].y] = SetExplosionPoint(explodePos[ExplosionPoint::TOP], ExplosionPoint::TOP);
+        //}
+        //if (!terrainFlag[explodePos[ExplosionPoint::RIGHT].x][explodePos[ExplosionPoint::RIGHT].y]) {
+            terrain[explodePos[ExplosionPoint::RIGHT].x][explodePos[ExplosionPoint::RIGHT].y] = SetExplosionPoint(explodePos[ExplosionPoint::RIGHT], ExplosionPoint::RIGHT);
+        //}
     }
 
     return 2;
@@ -376,7 +414,7 @@ int BG::SetRightPoint(int center, int right, DirectX::XMINT2 rightPos, DirectX::
 {
     bool isNotEdge = rightPos.x < 0 || rightPos.y < 0 || rightPos.x >= CHIP_NUM_Y || rightPos.y >= CHIP_NUM_X;
 
-    if (isNotEdge || center == -1 || right == -1)
+    if (isNotEdge || center == -1 || right == -1 || right == 2)
     {
         return right;
     }
@@ -395,10 +433,18 @@ int BG::SetRightPoint(int center, int right, DirectX::XMINT2 rightPos, DirectX::
         };
 
         //îöíeê›íu
-        terrain[explodePos[ExplosionPoint::TOP].x][explodePos[ExplosionPoint::TOP].y] = SetExplosionPoint(explodePos[ExplosionPoint::TOP], ExplosionPoint::TOP);
-        terrain[explodePos[ExplosionPoint::RIGHT].x][explodePos[ExplosionPoint::RIGHT].y] = SetExplosionPoint(explodePos[ExplosionPoint::RIGHT], ExplosionPoint::RIGHT);
-        terrain[explodePos[ExplosionPoint::BOTTOM].x][explodePos[ExplosionPoint::BOTTOM].y] = SetExplosionPoint(explodePos[ExplosionPoint::BOTTOM], ExplosionPoint::BOTTOM);
+        if (!terrainFlag[explodePos[ExplosionPoint::TOP].x][explodePos[ExplosionPoint::TOP].y]) {
+            terrain[explodePos[ExplosionPoint::TOP].x][explodePos[ExplosionPoint::TOP].y] = SetExplosionPoint(explodePos[ExplosionPoint::TOP], ExplosionPoint::TOP);
+        }
+        if (!terrainFlag[explodePos[ExplosionPoint::RIGHT].x][explodePos[ExplosionPoint::RIGHT].y]) {
+            terrain[explodePos[ExplosionPoint::RIGHT].x][explodePos[ExplosionPoint::RIGHT].y] = SetExplosionPoint(explodePos[ExplosionPoint::RIGHT], ExplosionPoint::RIGHT);
+        }
+        if (!terrainFlag[explodePos[ExplosionPoint::BOTTOM].x][explodePos[ExplosionPoint::BOTTOM].y]) {
+            terrain[explodePos[ExplosionPoint::BOTTOM].x][explodePos[ExplosionPoint::BOTTOM].y] = SetExplosionPoint(explodePos[ExplosionPoint::BOTTOM], ExplosionPoint::BOTTOM);
+        }
     }
+
+    terrainFlag[rightPos.x][rightPos.y] = true;
 
     return 2;
 }
@@ -407,10 +453,12 @@ int BG::SetBottomPoint(int center, int bottom, DirectX::XMINT2 bottomPos, Direct
 {
     bool isNotEdge = bottomPos.x < 0 || bottomPos.y < 0 || bottomPos.x >= CHIP_NUM_Y || bottomPos.y >= CHIP_NUM_X;
 
-    if (isNotEdge || center == -1 || bottom == -1)
+    if (isNotEdge || center == -1 || bottom == -1 || bottom == 2)
     {
         return bottom;
     }
+
+    terrainFlag[bottomPos.x][bottomPos.y] = true;
 
     if (bottom == 1)
     {
@@ -426,9 +474,15 @@ int BG::SetBottomPoint(int center, int bottom, DirectX::XMINT2 bottomPos, Direct
         };
 
         //îöíeê›íu
-        terrain[explodePos[ExplosionPoint::LEFT].x][explodePos[ExplosionPoint::LEFT].y] = SetExplosionPoint(explodePos[ExplosionPoint::LEFT], ExplosionPoint::LEFT);
-        terrain[explodePos[ExplosionPoint::RIGHT].x][explodePos[ExplosionPoint::RIGHT].y] = SetExplosionPoint(explodePos[ExplosionPoint::RIGHT], ExplosionPoint::RIGHT);
-        terrain[explodePos[ExplosionPoint::BOTTOM].x][explodePos[ExplosionPoint::BOTTOM].y] = SetExplosionPoint(explodePos[ExplosionPoint::BOTTOM], ExplosionPoint::BOTTOM);
+        if (!terrainFlag[explodePos[ExplosionPoint::LEFT].x][explodePos[ExplosionPoint::LEFT].y]) {
+            terrain[explodePos[ExplosionPoint::LEFT].x][explodePos[ExplosionPoint::LEFT].y] = SetExplosionPoint(explodePos[ExplosionPoint::LEFT], ExplosionPoint::LEFT);
+        }
+        if (!terrainFlag[explodePos[ExplosionPoint::RIGHT].x][explodePos[ExplosionPoint::RIGHT].y]) {
+            terrain[explodePos[ExplosionPoint::RIGHT].x][explodePos[ExplosionPoint::RIGHT].y] = SetExplosionPoint(explodePos[ExplosionPoint::RIGHT], ExplosionPoint::RIGHT);
+        }
+        if (!terrainFlag[explodePos[ExplosionPoint::BOTTOM].x][explodePos[ExplosionPoint::BOTTOM].y]) {
+            terrain[explodePos[ExplosionPoint::BOTTOM].x][explodePos[ExplosionPoint::BOTTOM].y] = SetExplosionPoint(explodePos[ExplosionPoint::BOTTOM], ExplosionPoint::BOTTOM);
+        }
     }
 
     return 2;

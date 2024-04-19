@@ -30,6 +30,8 @@ private:
     int terrain[BG::CHIP_NUM_Y][BG::CHIP_NUM_X]; //
 
     int terrainTimer[BG::CHIP_NUM_Y][BG::CHIP_NUM_X];
+
+    int terrainFlag[BG::CHIP_NUM_Y][BG::CHIP_NUM_X];
 public:
     BG();
     ~BG();
