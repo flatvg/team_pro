@@ -10,6 +10,14 @@ enum ExplosionPoint
     BOTTOM
 };
 
+enum TerrainStatus
+{
+    UnBreakable = -1,
+    Normal = 0,
+    BomB = 1,
+    InExplosion = 2
+};
+
 class BG
 {
 public:
@@ -62,7 +70,6 @@ public:
     int SetTopPoint(int center, int top, DirectX::XMINT2 topPos, DirectX::XMINT2 centerPos);
     int SetRightPoint(int center, int right, DirectX::XMINT2 rightPos, DirectX::XMINT2 centerPos);
     int SetBottomPoint(int center, int bottom, DirectX::XMINT2 bottomPos, DirectX::XMINT2 centerPos);
-
 
 private:
 

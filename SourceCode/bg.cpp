@@ -321,7 +321,7 @@ int BG::SetCenterPoint(int center, DirectX::XMINT2 centerPos)
 {
     bool isNotEdge = centerPos.x < 0 || centerPos.y < 0 || centerPos.x >= CHIP_NUM_Y || centerPos.y >= CHIP_NUM_X;
 
-    if (isNotEdge && center == -1)
+    if (isNotEdge && center == UnBreakable)
     {
         return center;
     }
@@ -335,7 +335,7 @@ int BG::SetLeftPoint(int center, int left, DirectX::XMINT2 leftPos, DirectX::XMI
 {
     bool isNotEdge = leftPos.x < 0 || leftPos.y < 0 || leftPos.x > CHIP_NUM_Y || leftPos.y > CHIP_NUM_X;
 
-    if (isNotEdge || center == -1 || left == -1 || left == 2)
+    if (isNotEdge || center == UnBreakable || left == UnBreakable || left == InExplosion)
     {
         return left;
     }
@@ -374,7 +374,7 @@ int BG::SetTopPoint(int center, int top, DirectX::XMINT2 topPos, DirectX::XMINT2
 {
     bool isNotEdge = topPos.x < 0 || topPos.y < 0 || topPos.x > CHIP_NUM_Y || topPos.y > CHIP_NUM_X;
 
-    if (isNotEdge || center == -1 || top == -1 || top == 2)
+    if (isNotEdge || center == UnBreakable || top == UnBreakable || top == InExplosion)
     {
         return top;
     }
