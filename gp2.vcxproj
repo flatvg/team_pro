@@ -284,6 +284,7 @@
     <ClCompile Include="GameLib\vector.cpp" />
     <ClCompile Include="GameLib\view_settings.cpp" />
     <ClCompile Include="GameLib\wnd_proc.cpp" />
+    <ClCompile Include="SourceCode\audio.cpp" />
     <ClCompile Include="SourceCode\bg.cpp" />
     <ClCompile Include="SourceCode\bomb.cpp" />
     <ClCompile Include="SourceCode\game.cpp" />

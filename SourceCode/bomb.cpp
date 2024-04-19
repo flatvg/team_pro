@@ -126,6 +126,8 @@ void CrossBomb::hit(OBJ2D* src, OBJ2D* dst) const
         {src->transform_->position_.x                           ,src->transform_->position_.y + this->getParam()->SIZE.y},  //‰º
     };
 
+
+
     src->behavior_ = nullptr;
 }
 
