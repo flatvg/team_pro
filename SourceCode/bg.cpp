@@ -107,11 +107,13 @@ void BG::update()
 
     bool isBomb = terrain[Cpos.y][Cpos.x] == 1;
 
-    ExplodePos[CENTER] = CalcExplosionPoint(Cpos, ExplosionPoint::CENTER);
-    ExplodePos[LEFT]   = CalcExplosionPoint(Cpos, ExplosionPoint::LEFT);
-    ExplodePos[TOP]    = CalcExplosionPoint(Cpos, ExplosionPoint::TOP);
-    ExplodePos[RIGHT]  = CalcExplosionPoint(Cpos, ExplosionPoint::RIGHT);
-    ExplodePos[BOTTOM] = CalcExplosionPoint(Cpos, ExplosionPoint::BOTTOM);
+    DirectX::XMINT2 ExplodePos[EXPLOSION_CHIP_NUM] = {
+        CalcExplosionPoint(Cpos, ExplosionPoint::CENTER),
+        CalcExplosionPoint(Cpos, ExplosionPoint::LEFT),
+        CalcExplosionPoint(Cpos, ExplosionPoint::TOP),
+        CalcExplosionPoint(Cpos, ExplosionPoint::RIGHT),
+        CalcExplosionPoint(Cpos, ExplosionPoint::BOTTOM),
+    };
 
     if (isInStage)
     {

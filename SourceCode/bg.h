@@ -67,5 +67,4 @@ private:
     int timer;
     int explosionTime = 60;
     DirectX::XMFLOAT2  cursorPos;
-    DirectX::XMINT2 ExplodePos[EXPLOSION_CHIP_NUM];
 };
