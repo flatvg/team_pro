@@ -57,37 +57,34 @@ void BG::init(int stagenum)
         for (int y = 0; y < CHIP_NUM_Y; y++)
         {
             terrain[y][x] = terrain_back[stagenum][y][x];
-            if (terrain[y][x] != -1)
+            if (terrain[y][x] != UnBreakable)
             {
-                terrain[y][x] = 0;
+                terrain[y][x] = Normal;
             }
         }
     }
 
+    //bomb地形の情報を初期化
     for (int x = 0; x < CHIP_NUM_X; x++)
     {
         for (int y = 0; y < CHIP_NUM_Y; y++)
         {
-            terrainTimer[y][x] = explosionTime;
-        }
-    }
-
-    for (int x = 0; x < CHIP_NUM_X; x++)
-    {
-        for (int y = 0; y < CHIP_NUM_Y; y++)
-        {
-            terrainFlag[y][x] = false;
+            terrainData[y][x].explosionTimer = explosionTime;
+            terrainData[y][x].isAlredyChanged = false;
+            terrainData[y][x].DelayTimer = delayTime;
         }
     }
 
     texture::load(0, L"./Data/Images/test_tile.png", 256U);    //背景
     texture::load(1, L"./Data/Images/test_tile02.png", 256U);    //背景
 
+    //タイマー初期化
     timer = 0;
 }
 
 void BG::deinit()
 {
+    //テクスチャ解放
     texture::releaseAll();
 }
 
@@ -96,25 +93,35 @@ void BG::deinit()
 //--------------------------------
 void BG::update()
 {
+    //カーソルの位置を取得
     cursorPos = { static_cast<float>(GameLib::input::getCursorPosX()), static_cast<float>(GameLib::input::getCursorPosY()) };
 
+    //カーソルの位置を背景に対応
     DirectX::XMINT2 Cpos = {
     static_cast<int>((cursorPos.x - Mapterrain_correction.x) / CHIP_SIZE),
     static_cast<int>((cursorPos.y - Mapterrain_correction.y) / CHIP_SIZE)
     };
 
+    //カーソルがbomb背景内に存在しているか
     bool isInStage = cursorPos.x >  Mapterrain_correction.x
-                  && cursorPos.x < (Mapterrain_correction.x + 64 * BG::CHIP_NUM_X)
+                  && cursorPos.x < (Mapterrain_correction.x + CHIP_SIZE * BG::CHIP_NUM_X)
                   && cursorPos.y >  Mapterrain_correction.y
-                  && cursorPos.y < (Mapterrain_correction.y + 64 * BG::CHIP_NUM_Y);
+                  && cursorPos.y < (Mapterrain_correction.y + CHIP_SIZE * BG::CHIP_NUM_Y);
 
-    bool isClickL = timer > 5 && GameLib::input::STATE(0) & GameLib::input::PAD_LC;
-    bool isClickR = timer > 5 && GameLib::input::STATE(0) & GameLib::input::PAD_RC;
+    //右、左クリックをしているか否か
+    bool isClickL = timer > operatbleCursorTime && GameLib::input::STATE(0) & GameLib::input::PAD_LC;
+    bool isClickR = timer > operatbleCursorTime && GameLib::input::STATE(0) & GameLib::input::PAD_RC;
 
-    bool isNotBomb = (terrain[Cpos.y][Cpos.x] == 0 || terrain[Cpos.y][Cpos.x] == 2) && terrain[Cpos.y][Cpos.x] != -1;
+    //カーソルをさしている箇所が爆弾でないか否か
+    bool isNotBomb = (terrain[Cpos.y][Cpos.x] == Normal || terrain[Cpos.y][Cpos.x] == InExplosion) && terrain[Cpos.y][Cpos.x] != UnBreakable;
 
-    bool isBomb = terrain[Cpos.y][Cpos.x] == 1;
+    //カーソルをさしている箇所が爆弾か否か
+    bool isBomb = terrain[Cpos.y][Cpos.x] == Bomb;
 
+    //爆初の連鎖の係数
+    int delayIndex = -1;
+
+    //爆発させる箇所の設定
     DirectX::XMINT2 ExplodePos[EXPLOSION_CHIP_NUM] = {
         CalcExplosionPoint(Cpos, ExplosionPoint::CENTER),
         CalcExplosionPoint(Cpos, ExplosionPoint::LEFT),
@@ -128,26 +135,17 @@ void BG::update()
         //爆弾設置
         if (isNotBomb && isClickL)
         {
-            terrain[Cpos.y][Cpos.x] = 1;
+            terrain[Cpos.y][Cpos.x] = Bomb;
         }
         //爆破
         if (isBomb && isClickR)
         {
-            //if (!terrainFlag[ExplodePos[ExplosionPoint::CENTER].x][ExplodePos[ExplosionPoint::CENTER].y]) {
-                terrain[ExplodePos[ExplosionPoint::CENTER].x][ExplodePos[ExplosionPoint::CENTER].y] = SetExplosionPoint(Cpos, ExplosionPoint::CENTER);
-            //}
-            //if (!terrainFlag[ExplodePos[ExplosionPoint::LEFT].x][ExplodePos[ExplosionPoint::LEFT].y]) {
-                terrain[ExplodePos[ExplosionPoint::LEFT].x][ExplodePos[ExplosionPoint::LEFT].y] = SetExplosionPoint(ExplodePos[ExplosionPoint::LEFT], ExplosionPoint::LEFT);
-            //}
-            //if (!terrainFlag[ExplodePos[ExplosionPoint::RIGHT].x][ExplodePos[ExplosionPoint::RIGHT].y]) {
-                terrain[ExplodePos[ExplosionPoint::TOP].x][ExplodePos[ExplosionPoint::TOP].y] = SetExplosionPoint(ExplodePos[ExplosionPoint::TOP], ExplosionPoint::TOP);
-            //}
-            //if (!terrainFlag[ExplodePos[ExplosionPoint::RIGHT].x][ExplodePos[ExplosionPoint::RIGHT].y]) {
-                terrain[ExplodePos[ExplosionPoint::RIGHT].x][ExplodePos[ExplosionPoint::RIGHT].y] = SetExplosionPoint(ExplodePos[ExplosionPoint::RIGHT], ExplosionPoint::RIGHT);
-            //}
-            //if (!terrainFlag[ExplodePos[ExplosionPoint::BOTTOM].x][ExplodePos[ExplosionPoint::BOTTOM].y]) {
-                terrain[ExplodePos[ExplosionPoint::BOTTOM].x][ExplodePos[ExplosionPoint::BOTTOM].y] = SetExplosionPoint(ExplodePos[ExplosionPoint::BOTTOM], ExplosionPoint::BOTTOM);
-            //}
+
+            SetBomb(ExplodePos[ExplosionPoint::CENTER], ExplosionPoint::CENTER, delayIndex);
+            SetBomb(ExplodePos[ExplosionPoint::LEFT], ExplosionPoint::LEFT, delayIndex);
+            SetBomb(ExplodePos[ExplosionPoint::TOP], ExplosionPoint::TOP, delayIndex);
+            SetBomb(ExplodePos[ExplosionPoint::RIGHT], ExplosionPoint::RIGHT, delayIndex);
+            SetBomb(ExplodePos[ExplosionPoint::BOTTOM], ExplosionPoint::BOTTOM, delayIndex);
         }
     }
 
@@ -168,10 +166,10 @@ void BG::drawTerrain()
             float a = terrain_back[0][y][x];
             texture::draw(
                 0,
-                Mapterrain_correction.x + (x * 64.0f), Mapterrain_correction.y + (y * 64.0f),
+                Mapterrain_correction.x + (x * CHIP_SIZE_F), Mapterrain_correction.y + (y * CHIP_SIZE_F),
                 1.0, 1.0,
-                CHIP_SIZE * a, 0,
-                CHIP_SIZE * (a + 1), CHIP_SIZE
+                CHIP_SIZE_F * a, 0,
+                CHIP_SIZE_F * (a + 1), CHIP_SIZE_F
             );
         }
     }
@@ -183,43 +181,86 @@ void BG::drawTerrain()
     {
         for (int y = 0; y < CHIP_NUM_Y; y++)
         {
-            if (terrain[y][x] == 1)
+            if (terrain[y][x] == Bomb)
             {
                 texture::draw(
                     1,
-                    Mapterrain_correction.x + (x * 64.0f), Mapterrain_correction.y + (y * 64.0f),
-                    1.0, 1.0,
+                    Mapterrain_correction.x + (x * CHIP_SIZE_F), Mapterrain_correction.y + (y * CHIP_SIZE_F),
+                    1.0f, 1.0f,
                     0, 0,
-                    CHIP_SIZE, CHIP_SIZE,
+                    CHIP_SIZE_F, CHIP_SIZE_F,
                     0, 0,
                     0,
                     1, 0, 0, 1
                 );
             }
-            if(terrain[y][x] == 2)
+            if(terrain[y][x] == InExplosion)
             {
-                texture::draw(
-                    1,
-                    Mapterrain_correction.x + (x * 64.0f), Mapterrain_correction.y + (y * 64.0f),
-                    1.0, 1.0,
-                    0, 0,
-                    CHIP_SIZE, CHIP_SIZE,
-                    0, 0,
-                    0,
-                    0, 0, 1, 1
-                );
-                terrainTimer[y][x]--;
-                if (terrainTimer[y][x] < 0) {
-                    terrain[y][x] = 0;
-                    terrainTimer[y][x] = explosionTime;
-                    terrainFlag[y][x] = false;
+                if (terrainData[y][x].DelayTimer < 0)
+                {
+                    //連鎖するための時間のずらしが完了したのでバクダンを描画
+                    texture::draw(
+                        1,
+                        Mapterrain_correction.x + (x * CHIP_SIZE_F), Mapterrain_correction.y + (y * CHIP_SIZE_F),
+                        1.0f, 1.0f,
+                        0, 0,
+                        CHIP_SIZE_F, CHIP_SIZE_F,
+                        0, 0,
+                        0,
+                        0, 0, 1, 1
+                    );
+                    terrainData[y][x].explosionTimer--;
                 }
+                if (terrainData[y][x].isAlredyChanged)
+                {
+                    terrainData[y][x].DelayTimer--;
+                }
+            }
+            //爆発終了
+            if (terrainData[y][x].explosionTimer < 0) {
+                terrain[y][x] = Normal;
+                terrainData[y][x].explosionTimer = explosionTime;
+                terrainData[y][x].DelayTimer = delayTime;
+                terrainData[y][x].isAlredyChanged = false;
             }
         }
     }
     texture::end(1);
 }
 
+//--------------------------------
+//  指定した箇所にすでに変更が加えられているか
+//--------------------------------
+bool BG::IsAlreadyChanged(DirectX::XMINT2 terrainPos)
+{
+    return terrainData[terrainPos.x][terrainPos.y].isAlredyChanged;
+}
+
+//--------------------------------
+//  バクダンを設置
+//--------------------------------
+void BG::SetBomb(DirectX::XMINT2 terrainPos, ExplosionPoint point, int delayIndex)
+{
+    if (!IsAlreadyChanged(terrainPos)) {
+        terrain[terrainPos.x][terrainPos.y] = SetExplosionPoint(terrainPos, point, delayIndex);
+    }
+}
+
+//--------------------------------
+//  指定した箇所の情報をセット
+//--------------------------------
+void BG::SetTerrainData(DirectX::XMINT2 terrainPos, int delayIndex)
+{
+    if (!terrainData[terrainPos.x][terrainPos.y].isAlredyChanged)
+    {
+        terrainData[terrainPos.x][terrainPos.y].DelayTimer = delayIndex * delayTime;
+        terrainData[terrainPos.x][terrainPos.y].isAlredyChanged = true;
+    }
+}
+
+//--------------------------------
+//  爆発箇所の計算
+//--------------------------------
 DirectX::XMINT2 BG::CalcExplosionPoint(DirectX::XMINT2 BaseExplosionPoint, ExplosionPoint point)
 {
     switch (point)
@@ -272,38 +313,41 @@ DirectX::XMINT2 BG::CalcBottomPoint(DirectX::XMINT2 BaseExplosionPoint)
     return bottomPoint;
 }
 
-int BG::SetExplosionPoint(DirectX::XMINT2 explosionPoint, ExplosionPoint point)
+//--------------------------------
+//  初期設定
+//--------------------------------
+int BG::SetExplosionPoint(DirectX::XMINT2 explosionPoint, ExplosionPoint point, int delayIndex)
 {
     switch (point)
     {
     case ExplosionPoint::CENTER:
     {
         int center = terrain[explosionPoint.x][explosionPoint.y];
-        return SetCenterPoint(center, explosionPoint);
+        return SetCenterPoint(center, explosionPoint, ++delayIndex);
         break;
     }
     case ExplosionPoint::LEFT:
     {
         DirectX::XMINT2 centerPos{ explosionPoint.x,explosionPoint.y + 1 };
         int center = terrain[explosionPoint.x][explosionPoint.y + 1];
-        int left = terrain[explosionPoint.x][explosionPoint.y];
-        return SetLeftPoint(center, left, explosionPoint, centerPos);
+        int left   = terrain[explosionPoint.x][explosionPoint.y];
+        return SetLeftPoint(center, left, explosionPoint, centerPos, ++delayIndex);
         break;
     }
     case ExplosionPoint::TOP:
     {
         DirectX::XMINT2 centerPos{ explosionPoint.x + 1,explosionPoint.y};
         int center = terrain[explosionPoint.x + 1][explosionPoint.y];
-        int top = terrain[explosionPoint.x][explosionPoint.y];
-        return SetTopPoint(center, top, explosionPoint, centerPos);
+        int top    = terrain[explosionPoint.x][explosionPoint.y];
+        return SetTopPoint(center, top, explosionPoint, centerPos, ++delayIndex);
         break;
     }
     case ExplosionPoint::RIGHT:
     {
         DirectX::XMINT2 centerPos{ explosionPoint.x,explosionPoint.y - 1 };
         int center = terrain[explosionPoint.x][explosionPoint.y - 1];
-        int right = terrain[explosionPoint.x][explosionPoint.y];
-        return SetRightPoint(center, right, explosionPoint, centerPos);
+        int right  = terrain[explosionPoint.x][explosionPoint.y];
+        return SetRightPoint(center, right, explosionPoint, centerPos, ++delayIndex);
         break;
     }
     case ExplosionPoint::BOTTOM:
@@ -311,38 +355,43 @@ int BG::SetExplosionPoint(DirectX::XMINT2 explosionPoint, ExplosionPoint point)
         DirectX::XMINT2 centerPos{ explosionPoint.x - 1,explosionPoint.y };
         int center = terrain[explosionPoint.x - 1][explosionPoint.y];
         int bottom = terrain[explosionPoint.x][explosionPoint.y];
-        return SetBottomPoint(center, bottom, explosionPoint, centerPos);
+        return SetBottomPoint(center, bottom, explosionPoint, centerPos, ++delayIndex);
         break;
     }
     }
 }
 
-int BG::SetCenterPoint(int center, DirectX::XMINT2 centerPos)
+int BG::SetCenterPoint(int center, DirectX::XMINT2 centerPos, int delayIndex)
 {
+    //該当ブロックがステージの外に出ていないか
     bool isNotEdge = centerPos.x < 0 || centerPos.y < 0 || centerPos.x >= CHIP_NUM_Y || centerPos.y >= CHIP_NUM_X;
 
-    if (isNotEdge && center == -1)
+    if (isNotEdge && center == InExplosion)
     {
         return center;
     }
 
-    terrainFlag[centerPos.x][centerPos.y] = true;
+    //該当ブロックのデータ設定
+    SetTerrainData(centerPos, delayIndex);
 
-    return 2;
+    return InExplosion;
 }
 
-int BG::SetLeftPoint(int center, int left, DirectX::XMINT2 leftPos, DirectX::XMINT2 centerPos)
+int BG::SetLeftPoint(int center, int left, DirectX::XMINT2 leftPos, DirectX::XMINT2 centerPos, int delayIndex)
 {
+    //該当ブロックがステージの外に出ていないか
     bool isNotEdge = leftPos.x < 0 || leftPos.y < 0 || leftPos.x > CHIP_NUM_Y || leftPos.y > CHIP_NUM_X;
 
-    if (isNotEdge || center == -1 || left == -1 || left == 2)
+    if (isNotEdge || center == UnBreakable || left == UnBreakable || left == InExplosion)
     {
         return left;
     }
 
-    terrainFlag[leftPos.x][leftPos.y] = true;
+    //該当ブロックのデータ設定
+    SetTerrainData(leftPos, delayIndex);
 
-    if (left == 1)
+    //連鎖爆破処理
+    if (left == Bomb)
     {
         DirectX::XMINT2 inversePos{ leftPos.y, leftPos.x };
 
@@ -356,30 +405,29 @@ int BG::SetLeftPoint(int center, int left, DirectX::XMINT2 leftPos, DirectX::XMI
         };
 
         //爆弾設置
-        //if (!terrainFlag[explodePos[ExplosionPoint::LEFT].x][explodePos[ExplosionPoint::LEFT].y]) {
-            terrain[explodePos[ExplosionPoint::LEFT].x][explodePos[ExplosionPoint::LEFT].y] = SetExplosionPoint(explodePos[LEFT], ExplosionPoint::LEFT);
-        //}
-        //if (!terrainFlag[explodePos[ExplosionPoint::TOP].x][explodePos[ExplosionPoint::TOP].y]) {
-            terrain[explodePos[ExplosionPoint::TOP].x][explodePos[ExplosionPoint::TOP].y] = SetExplosionPoint(explodePos[TOP], ExplosionPoint::TOP);
-        //}
-        //if (!terrainFlag[explodePos[ExplosionPoint::BOTTOM].x][explodePos[ExplosionPoint::BOTTOM].y]) {
-            terrain[explodePos[ExplosionPoint::BOTTOM].x][explodePos[ExplosionPoint::BOTTOM].y] = SetExplosionPoint(explodePos[BOTTOM], ExplosionPoint::BOTTOM);
-        //}
+        SetBomb(explodePos[ExplosionPoint::LEFT], ExplosionPoint::LEFT, delayIndex);
+        SetBomb(explodePos[ExplosionPoint::TOP], ExplosionPoint::TOP, delayIndex);
+        SetBomb(explodePos[ExplosionPoint::BOTTOM], ExplosionPoint::BOTTOM, delayIndex);
     }
 
-    return 2;
+    return InExplosion;
 }
 
-int BG::SetTopPoint(int center, int top, DirectX::XMINT2 topPos, DirectX::XMINT2 centerPos)
+int BG::SetTopPoint(int center, int top, DirectX::XMINT2 topPos, DirectX::XMINT2 centerPos, int delayIndex)
 {
+    //該当ブロックがステージの外に出ていないか
     bool isNotEdge = topPos.x < 0 || topPos.y < 0 || topPos.x > CHIP_NUM_Y || topPos.y > CHIP_NUM_X;
 
-    if (isNotEdge || center == -1 || top == -1 || top == 2)
+    if (isNotEdge || center == UnBreakable || top == UnBreakable || top == InExplosion)
     {
         return top;
     }
 
-    if (top == 1)
+    //該当ブロックのデータ設定
+    SetTerrainData(topPos, delayIndex);
+
+    //連鎖爆破処理
+    if (top == Bomb)
     {
         DirectX::XMINT2 inversePos{ topPos.y, topPos.x };
 
@@ -392,34 +440,30 @@ int BG::SetTopPoint(int center, int top, DirectX::XMINT2 topPos, DirectX::XMINT2
             DirectX::XMINT2(-1,-1),//BOTTOM
         };
 
-
-        terrainFlag[topPos.x][topPos.y] = true;
-
         //爆弾設置
-        //if (!terrainFlag[explodePos[ExplosionPoint::LEFT].x][explodePos[ExplosionPoint::LEFT].y]) {
-            terrain[explodePos[ExplosionPoint::LEFT].x][explodePos[ExplosionPoint::LEFT].y] = SetExplosionPoint(explodePos[ExplosionPoint::LEFT], ExplosionPoint::LEFT);
-        //}
-        //if (!terrainFlag[explodePos[ExplosionPoint::TOP].x][explodePos[ExplosionPoint::TOP].y]) {
-            terrain[explodePos[ExplosionPoint::TOP].x][explodePos[ExplosionPoint::TOP].y] = SetExplosionPoint(explodePos[ExplosionPoint::TOP], ExplosionPoint::TOP);
-        //}
-        //if (!terrainFlag[explodePos[ExplosionPoint::RIGHT].x][explodePos[ExplosionPoint::RIGHT].y]) {
-            terrain[explodePos[ExplosionPoint::RIGHT].x][explodePos[ExplosionPoint::RIGHT].y] = SetExplosionPoint(explodePos[ExplosionPoint::RIGHT], ExplosionPoint::RIGHT);
-        //}
+        SetBomb(explodePos[ExplosionPoint::LEFT], ExplosionPoint::LEFT, delayIndex);
+        SetBomb(explodePos[ExplosionPoint::TOP], ExplosionPoint::TOP, delayIndex);
+        SetBomb(explodePos[ExplosionPoint::RIGHT], ExplosionPoint::RIGHT, delayIndex);
     }
 
-    return 2;
+    return InExplosion;
 }
 
-int BG::SetRightPoint(int center, int right, DirectX::XMINT2 rightPos, DirectX::XMINT2 centerPos)
+int BG::SetRightPoint(int center, int right, DirectX::XMINT2 rightPos, DirectX::XMINT2 centerPos, int delayIndex)
 {
+    //該当ブロックがステージの外に出ていないか
     bool isNotEdge = rightPos.x < 0 || rightPos.y < 0 || rightPos.x >= CHIP_NUM_Y || rightPos.y >= CHIP_NUM_X;
 
-    if (isNotEdge || center == -1 || right == -1 || right == 2)
+    if (isNotEdge || center == UnBreakable || right == UnBreakable || right == InExplosion)
     {
         return right;
     }
 
-    if (right == 1)
+    //該当ブロックのデータ設定
+    SetTerrainData(rightPos, delayIndex);
+
+    //連鎖爆破処理
+    if (right == Bomb)
     {
         DirectX::XMINT2 inversePos{ rightPos.y, rightPos.x };
 
@@ -433,34 +477,29 @@ int BG::SetRightPoint(int center, int right, DirectX::XMINT2 rightPos, DirectX::
         };
 
         //爆弾設置
-        if (!terrainFlag[explodePos[ExplosionPoint::TOP].x][explodePos[ExplosionPoint::TOP].y]) {
-            terrain[explodePos[ExplosionPoint::TOP].x][explodePos[ExplosionPoint::TOP].y] = SetExplosionPoint(explodePos[ExplosionPoint::TOP], ExplosionPoint::TOP);
-        }
-        if (!terrainFlag[explodePos[ExplosionPoint::RIGHT].x][explodePos[ExplosionPoint::RIGHT].y]) {
-            terrain[explodePos[ExplosionPoint::RIGHT].x][explodePos[ExplosionPoint::RIGHT].y] = SetExplosionPoint(explodePos[ExplosionPoint::RIGHT], ExplosionPoint::RIGHT);
-        }
-        if (!terrainFlag[explodePos[ExplosionPoint::BOTTOM].x][explodePos[ExplosionPoint::BOTTOM].y]) {
-            terrain[explodePos[ExplosionPoint::BOTTOM].x][explodePos[ExplosionPoint::BOTTOM].y] = SetExplosionPoint(explodePos[ExplosionPoint::BOTTOM], ExplosionPoint::BOTTOM);
-        }
+        SetBomb(explodePos[ExplosionPoint::TOP], ExplosionPoint::TOP, delayIndex);
+        SetBomb(explodePos[ExplosionPoint::RIGHT], ExplosionPoint::RIGHT, delayIndex);
+        SetBomb(explodePos[ExplosionPoint::BOTTOM], ExplosionPoint::BOTTOM, delayIndex);
     }
 
-    terrainFlag[rightPos.x][rightPos.y] = true;
-
-    return 2;
+    return InExplosion;
 }
 
-int BG::SetBottomPoint(int center, int bottom, DirectX::XMINT2 bottomPos, DirectX::XMINT2 centerPos)
+int BG::SetBottomPoint(int center, int bottom, DirectX::XMINT2 bottomPos, DirectX::XMINT2 centerPos, int delayIndex)
 {
+    //該当ブロックがステージの外に出ていないか
     bool isNotEdge = bottomPos.x < 0 || bottomPos.y < 0 || bottomPos.x >= CHIP_NUM_Y || bottomPos.y >= CHIP_NUM_X;
 
-    if (isNotEdge || center == -1 || bottom == -1 || bottom == 2)
+    if (isNotEdge || center == UnBreakable || bottom == UnBreakable || bottom == InExplosion)
     {
         return bottom;
     }
 
-    terrainFlag[bottomPos.x][bottomPos.y] = true;
+    //該当ブロックのデータ設定
+    SetTerrainData(bottomPos, delayIndex);
 
-    if (bottom == 1)
+    //連鎖爆破処理
+    if (bottom == Bomb)
     {
         DirectX::XMINT2 inversePos{ bottomPos.y, bottomPos.x };
 
@@ -474,16 +513,10 @@ int BG::SetBottomPoint(int center, int bottom, DirectX::XMINT2 bottomPos, Direct
         };
 
         //爆弾設置
-        if (!terrainFlag[explodePos[ExplosionPoint::LEFT].x][explodePos[ExplosionPoint::LEFT].y]) {
-            terrain[explodePos[ExplosionPoint::LEFT].x][explodePos[ExplosionPoint::LEFT].y] = SetExplosionPoint(explodePos[ExplosionPoint::LEFT], ExplosionPoint::LEFT);
-        }
-        if (!terrainFlag[explodePos[ExplosionPoint::RIGHT].x][explodePos[ExplosionPoint::RIGHT].y]) {
-            terrain[explodePos[ExplosionPoint::RIGHT].x][explodePos[ExplosionPoint::RIGHT].y] = SetExplosionPoint(explodePos[ExplosionPoint::RIGHT], ExplosionPoint::RIGHT);
-        }
-        if (!terrainFlag[explodePos[ExplosionPoint::BOTTOM].x][explodePos[ExplosionPoint::BOTTOM].y]) {
-            terrain[explodePos[ExplosionPoint::BOTTOM].x][explodePos[ExplosionPoint::BOTTOM].y] = SetExplosionPoint(explodePos[ExplosionPoint::BOTTOM], ExplosionPoint::BOTTOM);
-        }
+        SetBomb(explodePos[ExplosionPoint::LEFT], ExplosionPoint::LEFT, delayIndex);
+        SetBomb(explodePos[ExplosionPoint::RIGHT], ExplosionPoint::RIGHT, delayIndex);
+        SetBomb(explodePos[ExplosionPoint::BOTTOM], ExplosionPoint::BOTTOM, delayIndex);
     }
 
-    return 2;
+    return InExplosion;
 }
