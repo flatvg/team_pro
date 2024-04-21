@@ -7,15 +7,15 @@ enum ExplosionPoint
     LEFT,
     TOP,
     RIGHT,
-    BOTTOM
+    BOTTOM,
 };
 
 enum TerrainStatus
 {
     UnBreakable = -1,
-    Normal = 0,
-    Bomb = 1,
-    InExplosion = 2
+    Normal,
+    Bomb,
+    InExplosion,
 };
 
 class BG
@@ -36,7 +36,6 @@ public:
 
 private:
     //------< •Ï” >------------------------------------------------------------
-    //‘¼‚ÌêŠ‚ÅQÆ‚·‚éÛ‚ÍêŠ‚Ìî•ñ‚Ì‚İ‚Ìê‡‚ª‘½‚¢‚Ì‚Å•ª—£‚·‚é
     int terrain[BG::CHIP_NUM_Y][BG::CHIP_NUM_X];
 
     struct TerrainData

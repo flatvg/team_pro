@@ -14,12 +14,16 @@
 #include "scene.h"
 #include "game.h"
 #include "title.h"
+#include "Effect.h"
 
 //------< using >---------------------------------------------------------------
 using namespace GameLib;
 
 //------< 変数 >----------------------------------------------------------------
 Game Game::instance_;
+
+Effect effects_fire[5];
+Effect effects_bomb[5];
 
 int stageNum;
 
@@ -85,6 +89,27 @@ void Game::update()
     case 1:
         //////// 通常時の処理 ////////
         bg.update();
+
+        //エフェクトの生成
+        if (TRG(0) & PAD_TRG1) {
+            for (auto& effect : effects_fire) {
+                if (!effect.exist) {
+                    effect.exist = true;
+                    effect.pos = { 300.0f, 200.0f };
+                    break;
+                }
+            }
+        }
+        if (TRG(0) & PAD_TRG4) {
+            for (auto& effect : effects_bomb) {
+                if (!effect.exist) {
+                    effect.exist = true;
+                    effect.pos = { 700.0f, 200.0f };
+                    break;
+                }
+            }
+        }
+
         timer++;
 
         break;
@@ -127,6 +152,21 @@ void Game::draw()
 
     //map
     bg.drawTerrain();
+
+    //エフェクト
+    static GameLib::Sprite* fire_img = sprite_load(L"./Data/Images/fire03.png");
+    static GameLib::Sprite* bomb_img = sprite_load(L"./Data/Images/bomb01.png");
+
+    for (auto& effect : effects_fire) {
+        if (effect.exist) {
+            effect.effectFire(fire_img, 6);
+        }
+    }
+    for (auto& effect : effects_bomb) {
+        if (effect.exist) {
+            effect.effectBomb(bomb_img, 3);
+        }
+    }
 
     // デバッグ文字列表示
     debug::setString("state:%d", state);
