@@ -111,6 +111,12 @@
     <ClInclude Include="SourceCode\work.h">
       <Filter>Headers</Filter>
     </ClInclude>
+    <ClInclude Include="SourceCode\Effect.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceCode\sprite_data.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="GameLib\primitive.hlsli">
@@ -220,6 +226,15 @@
       <Filter>Sources</Filter>
     </ClCompile>
     <ClCompile Include="SourceCode\bomb.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceCode\audio.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceCode\Effect.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceCode\sprite_data.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
   </ItemGroup>
