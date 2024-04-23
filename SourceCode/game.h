@@ -31,6 +31,10 @@ public:
     void deinit();
     void update();
     void draw();
+
+    void SetStageNum(int stageNum) { this->stageNum = stageNum; }
+
+    int stageNum;
 private:
     bool                isPaused;
     BG bg;

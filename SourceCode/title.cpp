@@ -45,7 +45,7 @@ void Title::update()
         timer++;                            // タイマーを足す
 
         if (TRG(0) & PAD_START)             // PAD_TRG1が押されたら
-            changeScene(Game::instance());  // ゲームシーンに切り替え
+            changeScene(Select::instance());  // ゲームシーンに切り替え
 
         break;
     }
