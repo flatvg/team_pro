@@ -89,7 +89,7 @@ public:
     void SetBomb(DirectX::XMINT2 terrainPos, ExplosionPoint point, int delayIndex);
 
 private:
-
+    int a;
     int timer;                      //‘S‘Ì‚ÌŠÔ
     int explosionTime = 60;         //”š”­‚ªc—¯‚·‚éŠÔ
     int delayTime = 30;             //”š”­‚Ì˜A½‚·‚éŠÔŠu
