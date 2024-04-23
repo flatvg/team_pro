@@ -92,7 +92,7 @@ private:
 
     int timer;                      //全体の時間
     int explosionTime = 60;         //爆発が残留する時間
-    int delayTime = 30;             //爆発の連鎖する間隔
+    int delayTime = 15;             //爆発の連鎖する間隔
     int operatbleCursorTime = 5;    //誤操作を防ぐための操作不能時間
     DirectX::XMFLOAT2  cursorPos;   //カーソルの位置
 };
