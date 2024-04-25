@@ -34,7 +34,7 @@ public:
     DirectX::XMFLOAT2 chip_size_xmfloat2 = { CHIP_SIZE * 0.5 ,CHIP_SIZE * 0.5 };
     static const int EXPLOSION_CHIP_NUM = 5;
     static const int BOMB_NUM = 3;
-    static const int BOMB_PATTERN_MAX = 3;
+    static const int BOMB_ROTATE_MAX = 3;
     static const int BOMB_TYPE_MAX = 3;
 
     static constexpr float CHIP_SIZE_F = 64.0f;
@@ -129,7 +129,7 @@ private:
     DirectX::XMFLOAT2  cursorPos;   //カーソルの位置
     bool drag_con = false;
     int bomb_typenum[BOMB_TYPE_MAX];
-    int bomb_trun[BOMB_PATTERN_MAX];
+    int bomb_trun[BOMB_ROTATE_MAX];
     int bomb_waitingarea;
     bool bomb_notset = false;
     bool bomb_release = false;

@@ -433,7 +433,7 @@ void BG::update()
                     //爆弾1ブロック中心座標(スクリーン座標＋配列[y][x]目のブロック)
                     DirectX::XMFLOAT2 bomb_pos_b = { bomb_changepos[bomb_waitingarea].x + CHIP_SIZE * x,bomb_changepos[bomb_waitingarea].y + CHIP_SIZE * y };
                     //マップチップの配列の場所
-                    DirectX::XMINT2 Cpos = { static_cast<int>((bomb_pos_b.x - Mapterrain_correction.x) / 64.0f) , static_cast<int>((bomb_pos_b.y - Mapterrain_correction.y) / 64.0f) };
+                    DirectX::XMINT2 Cpos = { static_cast<int>((bomb_pos_b.x - Mapterrain_correction.x) / CHIP_SIZE_F) , static_cast<int>((bomb_pos_b.y - Mapterrain_correction.y) / CHIP_SIZE_F) };
 
                     if (pt_bomb == PatternStatus::IsBomb)
                     {
@@ -454,12 +454,12 @@ void BG::update()
                         }
                         if (bomb_roopchecker)
                         {
-                            if (terrain[Cpos.y][Cpos.x] != 0)bomb_release = true;
+                            if (terrain[Cpos.y][Cpos.x] != TerrainStatus::Normal)bomb_release = true;
                             if (bomb_release)break;
-                            if (i == 1 && GameLib::input::TRG_RELEASE(0) & GameLib::input::PAD_LC && terrain[Cpos.y][Cpos.x] == 0)
+                            if (i == 1 && GameLib::input::TRG_RELEASE(0) & GameLib::input::PAD_LC && terrain[Cpos.y][Cpos.x] == TerrainStatus::Normal)
                             {
                                 //爆弾設置
-                                terrain[Cpos.y][Cpos.x] = Bomb;
+                                terrain[Cpos.y][Cpos.x] = TerrainStatus::Bomb;
                                 //爆弾リセット
                                 bomb_reset = true;
                             }
@@ -554,7 +554,7 @@ void BG::drawTerrain()
             }
             //爆発終了
             if (terrainData[y][x].explosionTimer < 0) {
-                terrain[y][x] = Normal;
+                terrain[y][x] = TerrainStatus::Normal;
                 terrainData[y][x].explosionTimer = explosionTime;
                 terrainData[y][x].DelayTimer = delayTime;
                 terrainData[y][x].isAlredyChanged = false;
@@ -593,7 +593,7 @@ void BG::drawTerrain()
 //爆弾をドラッグ
 void BG::dragBomb()
 {
-    for (int bomb_array = 0; bomb_array < BOMB_PATTERN_MAX; bomb_array++)
+    for (int bomb_array = 0; bomb_array < BOMB_ROTATE_MAX; bomb_array++)
     {
         for (int x = 0; x < 3; ++x)
         {
@@ -801,7 +801,7 @@ int BG::SetCenterPoint(int center, DirectX::XMINT2 centerPos, int delayIndex)
     //該当ブロックがステージの外に出ていないか
     bool isNotEdge = centerPos.x < 0 || centerPos.y < 0 || centerPos.x >= CHIP_NUM_Y || centerPos.y >= CHIP_NUM_X;
 
-    if (isNotEdge && center == InExplosion)
+    if (isNotEdge && center == TerrainStatus::InExplosion)
     {
         return center;
     }
@@ -809,7 +809,7 @@ int BG::SetCenterPoint(int center, DirectX::XMINT2 centerPos, int delayIndex)
     //該当ブロックのデータ設定
     SetTerrainData(centerPos, delayIndex);
 
-    return InExplosion;
+    return TerrainStatus::InExplosion;
 }
 
 int BG::SetLeftPoint(int center, int left, DirectX::XMINT2 leftPos, DirectX::XMINT2 centerPos, int delayIndex)
@@ -817,7 +817,7 @@ int BG::SetLeftPoint(int center, int left, DirectX::XMINT2 leftPos, DirectX::XMI
     //該当ブロックがステージの外に出ていないか
     bool isNotEdge = leftPos.x < 0 || leftPos.y < 0 || leftPos.x > CHIP_NUM_Y || leftPos.y > CHIP_NUM_X;
 
-    if (isNotEdge || center == UnBreakable || left == UnBreakable || left == InExplosion)
+    if (isNotEdge || center == TerrainStatus::UnBreakable || left == TerrainStatus::UnBreakable || left == TerrainStatus::InExplosion)
     {
         return left;
     }
@@ -826,11 +826,11 @@ int BG::SetLeftPoint(int center, int left, DirectX::XMINT2 leftPos, DirectX::XMI
     SetTerrainData(leftPos, delayIndex);
 
     //連鎖爆破処理
-    if (left == Bomb)
+    if (left == TerrainStatus::Bomb)
     {
         DirectX::XMINT2 inversePos{ leftPos.y, leftPos.x };
 
-        //爆破箇所計算
+        //連鎖爆破箇所計算
         DirectX::XMINT2 explodePos[EXPLOSION_CHIP_NUM] = {
             DirectX::XMINT2(-1,-1),//CENTER
             CalcExplosionPoint(inversePos,ExplosionPoint::LEFT),
@@ -845,7 +845,7 @@ int BG::SetLeftPoint(int center, int left, DirectX::XMINT2 leftPos, DirectX::XMI
         SetBomb(explodePos[ExplosionPoint::BOTTOM], ExplosionPoint::BOTTOM, delayIndex);
     }
 
-    return InExplosion;
+    return TerrainStatus::InExplosion;
 }
 
 int BG::SetTopPoint(int center, int top, DirectX::XMINT2 topPos, DirectX::XMINT2 centerPos, int delayIndex)
@@ -853,7 +853,7 @@ int BG::SetTopPoint(int center, int top, DirectX::XMINT2 topPos, DirectX::XMINT2
     //該当ブロックがステージの外に出ていないか
     bool isNotEdge = topPos.x < 0 || topPos.y < 0 || topPos.x > CHIP_NUM_Y || topPos.y > CHIP_NUM_X;
 
-    if (isNotEdge || center == UnBreakable || top == UnBreakable || top == InExplosion)
+    if (isNotEdge || center == TerrainStatus::UnBreakable || top == TerrainStatus::UnBreakable || top == TerrainStatus::InExplosion)
     {
         return top;
     }
@@ -862,11 +862,11 @@ int BG::SetTopPoint(int center, int top, DirectX::XMINT2 topPos, DirectX::XMINT2
     SetTerrainData(topPos, delayIndex);
 
     //連鎖爆破処理
-    if (top == Bomb)
+    if (top == TerrainStatus::Bomb)
     {
         DirectX::XMINT2 inversePos{ topPos.y, topPos.x };
 
-        //爆破箇所計算
+        //連鎖爆破箇所計算
         DirectX::XMINT2 explodePos[EXPLOSION_CHIP_NUM] = {
             DirectX::XMINT2(-1,-1),//CENTER
             CalcExplosionPoint(inversePos,ExplosionPoint::LEFT),
@@ -881,7 +881,7 @@ int BG::SetTopPoint(int center, int top, DirectX::XMINT2 topPos, DirectX::XMINT2
         SetBomb(explodePos[ExplosionPoint::RIGHT], ExplosionPoint::RIGHT, delayIndex);
     }
 
-    return InExplosion;
+    return TerrainStatus::InExplosion;
 }
 
 int BG::SetRightPoint(int center, int right, DirectX::XMINT2 rightPos, DirectX::XMINT2 centerPos, int delayIndex)
@@ -889,7 +889,7 @@ int BG::SetRightPoint(int center, int right, DirectX::XMINT2 rightPos, DirectX::
     //該当ブロックがステージの外に出ていないか
     bool isNotEdge = rightPos.x < 0 || rightPos.y < 0 || rightPos.x >= CHIP_NUM_Y || rightPos.y >= CHIP_NUM_X;
 
-    if (isNotEdge || center == UnBreakable || right == UnBreakable || right == InExplosion)
+    if (isNotEdge || center == TerrainStatus::UnBreakable || right == TerrainStatus::UnBreakable || right == TerrainStatus::InExplosion)
     {
         return right;
     }
@@ -898,11 +898,11 @@ int BG::SetRightPoint(int center, int right, DirectX::XMINT2 rightPos, DirectX::
     SetTerrainData(rightPos, delayIndex);
 
     //連鎖爆破処理
-    if (right == Bomb)
+    if (right == TerrainStatus::Bomb)
     {
         DirectX::XMINT2 inversePos{ rightPos.y, rightPos.x };
 
-        //爆破箇所計算
+        //連鎖爆破箇所計算
         DirectX::XMINT2 explodePos[EXPLOSION_CHIP_NUM] = {
             DirectX::XMINT2(-1,-1),//CENTER
             DirectX::XMINT2(-1,-1),//LEFT
@@ -917,7 +917,7 @@ int BG::SetRightPoint(int center, int right, DirectX::XMINT2 rightPos, DirectX::
         SetBomb(explodePos[ExplosionPoint::BOTTOM], ExplosionPoint::BOTTOM, delayIndex);
     }
 
-    return InExplosion;
+    return TerrainStatus::InExplosion;
 }
 
 int BG::SetBottomPoint(int center, int bottom, DirectX::XMINT2 bottomPos, DirectX::XMINT2 centerPos, int delayIndex)
@@ -925,7 +925,7 @@ int BG::SetBottomPoint(int center, int bottom, DirectX::XMINT2 bottomPos, Direct
     //該当ブロックがステージの外に出ていないか
     bool isNotEdge = bottomPos.x < 0 || bottomPos.y < 0 || bottomPos.x >= CHIP_NUM_Y || bottomPos.y >= CHIP_NUM_X;
 
-    if (isNotEdge || center == UnBreakable || bottom == UnBreakable || bottom == InExplosion)
+    if (isNotEdge || center == TerrainStatus::UnBreakable || bottom == TerrainStatus::UnBreakable || bottom == TerrainStatus::InExplosion)
     {
         return bottom;
     }
@@ -934,11 +934,11 @@ int BG::SetBottomPoint(int center, int bottom, DirectX::XMINT2 bottomPos, Direct
     SetTerrainData(bottomPos, delayIndex);
 
     //連鎖爆破処理
-    if (bottom == Bomb)
+    if (bottom == TerrainStatus::Bomb)
     {
         DirectX::XMINT2 inversePos{ bottomPos.y, bottomPos.x };
 
-        //爆破箇所計算
+        //連鎖爆破箇所計算
         DirectX::XMINT2 explodePos[EXPLOSION_CHIP_NUM] = {
             DirectX::XMINT2(-1,-1),//CENTER
             CalcExplosionPoint(inversePos,ExplosionPoint::LEFT),
@@ -953,5 +953,5 @@ int BG::SetBottomPoint(int center, int bottom, DirectX::XMINT2 bottomPos, Direct
         SetBomb(explodePos[ExplosionPoint::BOTTOM], ExplosionPoint::BOTTOM, delayIndex);
     }
 
-    return InExplosion;
+    return TerrainStatus::InExplosion;
 }
