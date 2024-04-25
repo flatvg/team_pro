@@ -1,5 +1,3 @@
-#include "bg.h"
-#include "all.h"
 //******************************************************************************
 //
 //
@@ -9,7 +7,9 @@
 //******************************************************************************
 
 //------< インクルード >--------------------------------------------------------
+#include "bg.h"
 #include "all.h"
+#include "collision.h"
 
 //------< using >---------------------------------------------------------------
 using namespace GameLib;
@@ -19,18 +19,275 @@ int terrain_back[4][BG::CHIP_NUM_Y][BG::CHIP_NUM_X] =// 地形データ[ステージ数][X
 {
     //stage0
     {
-        {-1,-1,-1, 0, 1, 0, 1, 0, 1, 0, 1, 0},
-        {-1,-1,-1, 1, 0, 1, 0, 1, 0, 1, 0, 1},
-        {-1,-1,-1, 0, 1, 0,-1, 0, 1, 0, 1, 0},
-        { 1, 1, 0, 1, 0, 1,-1, 1, 0,-1,-1,-1},
-        { 1, 0, 1, 0, 1, 0,-1, 0, 1,-1,-1,-1},
-        { 1, 1, 0, 1,-1,-1,-1, 1, 0,-1,-1,-1},
-        { 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0},
-        { 1, 1,-1,-1,-1, 1, 0, 1, 0, 1, 0, 1},
-        { 1, 0,-1,-1,-1, 0, 1, 0, 1, 0, 1, 0},
-        { 1, 1,-1,-1,-1, 1, 0, 1, 0, 1, 0, 1},
+        {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
+        {-1,-1,-1,-1, 0, 1, 0, 1, 0, 1, 0, 1, 0,-1},
+        {-1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1,-1},
+        {-1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,-1},
+        {-1, 1, 1, 0, 1, 0, 1,-1, 1, 0,-1,-1,-1,-1},
+        {-1, 1, 0, 1, 0, 1, 0,-1, 0, 1,-1,-1,-1,-1},
+        {-1, 1, 1, 0, 1,-1,-1,-1, 1, 0,-1,-1,-1,-1},
+        {-1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,-1},
+        {-1, 1, 1,-1,-1,-1, 1, 0, 1, 0, 1, 0, 1,-1},
+        {-1, 1, 0,-1,-1,-1, 0, 1, 0, 1, 0, 1, 0,-1},
+        {-1, 1, 1,-1,-1,-1, 1, 0, 1, 0, 1, 0, 1,-1},
+        {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
     },
 };
+
+int bomb_pattern[8][4][3][3]//[爆弾の種類][回転の種類][y][x]
+{
+    //pattern0
+    {
+        //pattern0-0
+        {
+            {1,0,0},
+            {1,0,0},
+            {1,0,0},
+        },
+        //pattern0-1
+        {
+            {1,1,1},
+            {0,0,0},
+            {0,0,0},
+        },
+        //pattern0-2
+        {
+            {1,0,0},
+            {1,0,0},
+            {1,0,0},
+        },
+        //pattern0-3
+        {
+            {1,1,1},
+            {0,0,0},
+            {0,0,0},
+        },
+    },
+    //pattern1
+    {
+        //pattern1-0
+        {
+            {1,1,0},
+            {1,1,0},
+            {0,0,0},
+        },
+        //pattern1-1
+        {
+            {1,1,0},
+            {1,1,0},
+            {0,0,0},
+        },
+        //pattern1-2
+        {
+            {1,1,0},
+            {1,1,0},
+            {0,0,0},
+        },
+        //pattern1-3
+        {
+            {1,1,0},
+            {1,1,0},
+            {0,0,0},
+        },
+    },
+    //pattern2
+    {
+        //pattern2-0
+        {
+            {0,1,0},
+            {1,1,1},
+            {0,0,0},
+        },
+        //pattern2-1
+        {
+            {0,0,1},
+            {0,1,1},
+            {0,0,1},
+        },
+        //pattern2-2
+        {
+            {1,1,1},
+            {0,1,0},
+            {0,0,0},
+        },
+        //pattern2-3
+        {
+            {1,0,0},
+            {1,1,0},
+            {1,0,0},
+        },
+    },
+    //pattern3
+    {
+        //pattern3-0
+        {
+            {1,0,0},
+            {1,1,0},
+            {0,1,0},
+        },
+        //pattern3-1
+        {
+            {0,1,1},
+            {1,1,0},
+            {0,0,0},
+        },
+        //pattern3-2
+        {
+            {1,0,0},
+            {1,1,0},
+            {0,1,0},
+        },
+        //pattern3-3
+        {
+            {0,1,1},
+            {1,1,0},
+            {0,0,0},
+        },
+    },
+    //pattern4
+    {
+        //pattern4-0
+        {
+            {0,1,0},
+            {1,1,0},
+            {1,0,0},
+        },
+        //pattern4-1
+        {
+            {1,1,0},
+            {0,1,1},
+            {0,0,0},
+        },
+        //pattern4-2
+        {
+            {0,1,0},
+            {1,1,0},
+            {1,0,0},
+        },
+        //pattern4-3
+        {
+            {1,1,0},
+            {0,1,1},
+            {0,0,0},
+        },
+    },
+    //pattern5
+    {
+        //pattern5-0
+        {
+            {1,1,0},
+            {1,0,0},
+            {0,0,0},
+        },
+        //pattern5-1
+        {
+            {1,0,0},
+            {1,1,0},
+            {0,0,0},
+        },
+        //pattern5-2
+        {
+            {0,1,0},
+            {1,1,0},
+            {0,0,0},
+        },
+        //pattern5-3
+        {
+            {1,1,0},
+            {0,1,0},
+            {0,0,0},
+        },
+    },
+    //pattern6
+    {
+        //pattern6-0
+        {
+            {1,1,0},
+            {1,0,0},
+            {1,0,0},
+        },
+        //pattern6-1
+        {
+            {1,0,0},
+            {1,1,1},
+            {0,0,0},
+        },
+        //pattern6-2
+        {
+            {0,1,0},
+            {0,1,0},
+            {1,1,0},
+        },
+        //pattern6-3
+        {
+            {1,1,1},
+            {0,0,1},
+            {0,0,0},
+        },
+    },
+    //pattern7
+    {
+        //pattern7-0
+        {
+            {1,1,0},
+            {0,1,0},
+            {0,1,0},
+        },
+        //pattern7-1
+        {
+            {0,0,1},
+            {1,1,1},
+            {0,0,0},
+        },
+        //pattern7-2
+        {
+            {1,0,0},
+            {1,0,0},
+            {1,1,0},
+        },
+        //pattern7-3
+        {
+            {1,1,1},
+            {1,0,0},
+            {0,0,0},
+        },
+    },
+
+    //pattern-sample
+    //{
+    //    //pattern4-0
+    //    {
+    //        {0,0,0},
+    //        {0,0,0},
+    //        {0,0,0},
+    //    },
+    //    //pattern4-1
+    //    {
+    //        {0,0,0},
+    //        {0,0,0},
+    //        {0,0,0},
+    //    },
+    //    //pattern4-2
+    //    {
+    //        {0,0,0},
+    //        {0,0,0},
+    //        {0,0,0},
+    //    },
+    //    //pattern4-3
+    //    {
+    //        {0,0,0},
+    //        {0,0,0},
+    //        {0,0,0},
+    //    },
+    //},
+};
+
+//爆弾の種類を変える
+int bomb_numchanger(int now, int past)
+{
+    while (now == past)now = rand() % 8;
+    return now;
+}
 
 //--------------------------------
 //  コンストラクタ
@@ -78,10 +335,26 @@ void BG::init(int stagenum)
     texture::load(0, L"./Data/Images/test_tile.png", 256U);    //背景
     texture::load(1, L"./Data/Images/test_tile02.png", 256U);    //背景
 
+    //バクダンの種類を初期化
+    for (int i = 0; i < BOMB_TYPE_MAX; i++)
+    {
+        //爆弾の種類決定
+        int defnum = bomb_typenum[i];
+        bomb_typenum[i] = bomb_numchanger(bomb_typenum[i], defnum);
+        if (i > 1 && bomb_typenum[i] == bomb_typenum[i - 2])bomb_typenum[i] = bomb_numchanger(bomb_typenum[i], bomb_typenum[i - 2]);//1週目の爆弾と同じ種類なら変更
+        if (i > 0 && bomb_typenum[i] == bomb_typenum[i - 1])bomb_typenum[i] = bomb_numchanger(bomb_typenum[i], bomb_typenum[i - 1]);//0週目の爆弾と同じ種類なら変更
+        bomb_trun[i] = 0;
+    }
+    bomb_movingtype = false;
+    bomb_roopchecker = false;
+
     //タイマー初期化
     timer = 0;
 }
 
+//--------------------------------
+//  終了処理
+//--------------------------------
 void BG::deinit()
 {
     //テクスチャ解放
@@ -95,6 +368,10 @@ void BG::update()
 {
     //カーソルの位置を取得
     cursorPos = { static_cast<float>(GameLib::input::getCursorPosX()), static_cast<float>(GameLib::input::getCursorPosY()) };
+    if (cursorPos.x < 0)cursorPos.x = 0;
+    if (cursorPos.x > GameLib::window::getWidth())cursorPos.x = GameLib::window::getWidth();
+    if (cursorPos.y < 0)cursorPos.y = 0;
+    if (cursorPos.y > GameLib::window::getHeight())cursorPos.y = GameLib::window::getHeight();
 
     //カーソルの位置を背景に対応
     DirectX::XMINT2 Cpos = {
@@ -108,9 +385,10 @@ void BG::update()
                   && cursorPos.y >  Mapterrain_correction.y
                   && cursorPos.y < (Mapterrain_correction.y + CHIP_SIZE * BG::CHIP_NUM_Y);
 
-    //右、左クリックをしているか否か
+    //右、左クリックなどをしているか否か
     bool isClickL = timer > operatbleCursorTime && GameLib::input::STATE(0) & GameLib::input::PAD_LC;
     bool isClickR = timer > operatbleCursorTime && GameLib::input::STATE(0) & GameLib::input::PAD_RC;
+    bool isZ      = timer > operatbleCursorTime && GameLib::input::STATE(0) & GameLib::input::PAD_TRG1;
 
     //カーソルをさしている箇所が爆弾でないか否か
     bool isNotBomb = (terrain[Cpos.y][Cpos.x] == Normal || terrain[Cpos.y][Cpos.x] == InExplosion) && terrain[Cpos.y][Cpos.x] != UnBreakable;
@@ -119,6 +397,7 @@ void BG::update()
     bool isBomb = terrain[Cpos.y][Cpos.x] == Bomb;
 
     //爆初の連鎖の係数
+    //0以上にすると最初の方は連鎖せず一気に爆発するようになる
     int delayIndex = -1;
 
     //爆発させる箇所の設定
@@ -130,22 +409,80 @@ void BG::update()
         CalcExplosionPoint(Cpos, ExplosionPoint::BOTTOM),
     };
 
+    //爆弾をドラッグ
+    dragBomb();
+
+    //爆弾を回転
+    rotateBomb();
+
+    //爆弾をドロップ
+    dropBomb();
+
     if (isInStage)
     {
         //爆弾設置
-        if (isNotBomb && isClickL)
+        for (int i = 0; i < 2; ++i)//0週目で全部の爆弾読み込んで「隣が壁or爆弾」&「開いてるマスがないと置けない」ことを調べて配置可能なら1週目で配置
         {
-            terrain[Cpos.y][Cpos.x] = Bomb;
+            for (int x = 0; x < 3; ++x)
+            {
+                for (int y = 0; y < 3; ++y)
+                {
+                    //爆弾の種類取得
+                    int pt_bomb = bomb_pattern[bomb_typenum[bomb_waitingarea]][bomb_trun[bomb_waitingarea]][y][x];
+
+                    //爆弾1ブロック中心座標(スクリーン座標＋配列[y][x]目のブロック)
+                    DirectX::XMFLOAT2 bomb_pos_b = { bomb_changepos[bomb_waitingarea].x + CHIP_SIZE * x,bomb_changepos[bomb_waitingarea].y + CHIP_SIZE * y };
+                    //マップチップの配列の場所
+                    DirectX::XMINT2 Cpos = { static_cast<int>((bomb_pos_b.x - Mapterrain_correction.x) / 64.0f) , static_cast<int>((bomb_pos_b.y - Mapterrain_correction.y) / 64.0f) };
+
+                    if (pt_bomb == PatternStatus::IsBomb)
+                    {
+                        if (
+                            //隣が壁だったら
+                            terrain[Cpos.y - 1][Cpos.x] == TerrainStatus::UnBreakable ||//上
+                            terrain[Cpos.y + 1][Cpos.x] == TerrainStatus::UnBreakable ||//下
+                            terrain[Cpos.y][Cpos.x + 1] == TerrainStatus::UnBreakable ||//右
+                            terrain[Cpos.y][Cpos.x - 1] == TerrainStatus::UnBreakable ||//左
+                            //隣が爆弾だったら
+                            terrain[Cpos.y - 1][Cpos.x] == TerrainStatus::Bomb ||//上
+                            terrain[Cpos.y + 1][Cpos.x] == TerrainStatus::Bomb ||//下
+                            terrain[Cpos.y][Cpos.x + 1] == TerrainStatus::Bomb ||//右
+                            terrain[Cpos.y][Cpos.x - 1] == TerrainStatus::Bomb   //左
+                            )
+                        {
+                            bomb_roopchecker = true;
+                        }
+                        if (bomb_roopchecker)
+                        {
+                            if (terrain[Cpos.y][Cpos.x] != 0)bomb_release = true;
+                            if (bomb_release)break;
+                            if (i == 1 && GameLib::input::TRG_RELEASE(0) & GameLib::input::PAD_LC && terrain[Cpos.y][Cpos.x] == 0)
+                            {
+                                //爆弾設置
+                                terrain[Cpos.y][Cpos.x] = Bomb;
+                                //爆弾リセット
+                                bomb_reset = true;
+                            }
+                        }
+                    }
+
+                }
+            }
         }
+        bomb_roopchecker = false;
+        bomb_release = false;
+
         //爆破
-        if (isBomb && isClickR)
+        if (isBomb && isZ)
         {
             SetBomb(ExplodePos[ExplosionPoint::CENTER], ExplosionPoint::CENTER, delayIndex);
             SetBomb(ExplodePos[ExplosionPoint::LEFT], ExplosionPoint::LEFT, delayIndex);
             SetBomb(ExplodePos[ExplosionPoint::TOP], ExplosionPoint::TOP, delayIndex);
             SetBomb(ExplodePos[ExplosionPoint::RIGHT], ExplosionPoint::RIGHT, delayIndex);
             SetBomb(ExplodePos[ExplosionPoint::BOTTOM], ExplosionPoint::BOTTOM, delayIndex);
+            Mapterrain_correction = { Mapterrain_correction.x + rand() % 4 - 2,Mapterrain_correction.y + rand() % 4 - 2 };
         }
+        else         Mapterrain_correction = { 200.0f + 32.0f - 64.0f ,0.0f + 32.0f - 64.0f };
     }
 
     timer++;
@@ -224,7 +561,106 @@ void BG::drawTerrain()
             }
         }
     }
+
+    //爆弾があるかないか
+    for (int bomb_array = 0; bomb_array < 3; bomb_array++)
+    {
+        for (int x = 0; x < 3; ++x)
+        {
+            for (int y = 0; y < 3; ++y)
+            {
+                int pt_bomb = bomb_pattern[bomb_typenum[bomb_array]][bomb_trun[bomb_waitingarea]][y][x];
+                if (pt_bomb == PatternStatus::IsBomb)
+                {
+                    texture::draw(
+                        1,
+                        bomb_changepos[bomb_array].x + (x * CHIP_SIZE_F), bomb_changepos[bomb_array].y + (y * CHIP_SIZE_F),
+                        1.0f, 1.0f,
+                        0, 0,
+                        CHIP_SIZE_F, CHIP_SIZE_F,
+                        CHIP_SIZE_F * 0.5f, CHIP_SIZE_F * 0.5f,
+                        0,
+                        1, 1, 0, 1
+                    );
+                }
+            }
+        }
+    }
+
     texture::end(1);
+}
+
+//爆弾をドラッグ
+void BG::dragBomb()
+{
+    for (int bomb_array = 0; bomb_array < BOMB_PATTERN_MAX; bomb_array++)
+    {
+        for (int x = 0; x < 3; ++x)
+        {
+            for (int y = 0; y < 3; ++y)
+            {
+                //爆弾の種類取得
+                int pt_bomb = bomb_pattern[bomb_typenum[bomb_array]][bomb_trun[bomb_array]][y][x];
+
+                if (pt_bomb == PatternStatus::IsBomb)
+                {
+                    int bomb_array_vaut = bomb_array;
+                    if (bomb_movingtype)bomb_array = bomb_waitingarea;
+                    DirectX::XMFLOAT2 bomb_pos;
+                    //爆弾1ブロック中心座標(スクリーン座標＋配列[y][x]目のブロック)
+                    bomb_pos = { bomb_changepos[bomb_array].x + CHIP_SIZE * x,bomb_changepos[bomb_array].y + CHIP_SIZE * y };
+                    //あたり判定||カーソル速度が速すぎることの対応
+                    if (collision_center(cursorPos, bomb_pos, chip_size_xmfloat2) || drag_con)
+                    {
+                        if (GameLib::input::STATE(0) & GameLib::input::PAD_LC)
+                        {
+                            //爆弾の位置をカーソルの位置に追従
+                            bomb_changepos[bomb_array] = cursorPos;
+                            bomb_waitingarea = bomb_array;
+                            bomb_movingtype = true;
+                            drag_con = true;
+                        }
+                    }
+                    bomb_array = bomb_array_vaut;
+                }
+
+            }
+        }
+        if (drag_con)break;//ドラッグしている場合1つの爆弾に固定
+
+        //爆弾を置いた後のリセット
+        if (bomb_reset)
+        {
+            bomb_changepos[bomb_waitingarea] = bomb_defpos[bomb_waitingarea];//位置を初期位置に戻す
+
+            //爆弾の種類を変える
+            int  defnum = bomb_typenum[bomb_waitingarea];
+            bomb_typenum[bomb_waitingarea] = bomb_numchanger(bomb_typenum[bomb_waitingarea], defnum);
+            bomb_trun[bomb_waitingarea] = 0;//回転を初期角度に戻す
+            bomb_movingtype = false;
+            bomb_roopchecker = false;
+            bomb_reset = false;//リセットを解除してドラッグできるようにする
+        }
+    }
+}
+
+//爆弾を回転
+void BG::rotateBomb()
+{
+    if (GameLib::input::TRG(0) & GameLib::input::PAD_RC)
+    {
+        bomb_trun[bomb_waitingarea]++;
+        if (bomb_trun[bomb_waitingarea] > 3)bomb_trun[bomb_waitingarea] = 0;
+    }
+}
+
+//爆弾をドロップ
+void BG::dropBomb()
+{
+    if (GameLib::input::TRG_RELEASE(0) & GameLib::input::PAD_LC)
+    {
+        drag_con = false;
+    }
 }
 
 //--------------------------------

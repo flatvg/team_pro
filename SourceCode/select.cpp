@@ -53,7 +53,7 @@ bool Select::isClickRect(DirectX::XMFLOAT2 cursorPos, GameLib::fRECT rect)
     if (cursorPos.y > rect.bottom)return false;
 
     //ƒNƒŠƒbƒN‚³‚ê‚Ä‚¢‚é‚©
-    if (!(input::TRG(0) & input::PAD_RC))return false;
+    if (!(input::TRG(0) & input::PAD_LC))return false;
 
     return true;
 }

@@ -18,14 +18,24 @@ enum TerrainStatus
     InExplosion,
 };
 
+enum PatternStatus
+{
+    IsNotBomb,
+    IsBomb
+};
+
 class BG
 {
 public:
     //------< 定数 >------------------------------------------------------------
-    static const int CHIP_NUM_X = 12;       // マップの横方向のチップ数
-    static const int CHIP_NUM_Y = 10;       // マップの縦方向のチップ数
+    static const int CHIP_NUM_X = 14;       // マップの横方向のチップ数
+    static const int CHIP_NUM_Y = 12;       // マップの縦方向のチップ数
     static const int CHIP_SIZE = 64;       // %演算子を使用するためint型を使用する
+    DirectX::XMFLOAT2 chip_size_xmfloat2 = { CHIP_SIZE * 0.5 ,CHIP_SIZE * 0.5 };
     static const int EXPLOSION_CHIP_NUM = 5;
+    static const int BOMB_NUM = 3;
+    static const int BOMB_PATTERN_MAX = 3;
+    static const int BOMB_TYPE_MAX = 3;
 
     static constexpr float CHIP_SIZE_F = 64.0f;
     static constexpr float WIDTH = static_cast<float>(CHIP_NUM_X * CHIP_SIZE);   // マップの幅（ドット）
@@ -33,6 +43,19 @@ public:
 
     //ステージの余白
     DirectX::XMFLOAT2 Mapterrain_correction{ 200.0f + 32.0f ,0.0f + 32.0f };
+    //バクダン初期位置
+    DirectX::XMFLOAT2 bomb_defpos[BOMB_NUM] =
+    {
+        {1096.0f,CHIP_SIZE_F + CHIP_SIZE * 0 + 10.0f},
+        {1096.0f,CHIP_SIZE_F + CHIP_SIZE * 3 + 20.0f},
+        {1096.0f,CHIP_SIZE_F + CHIP_SIZE * 6 + 30.0f},
+    };
+    DirectX::XMFLOAT2 bomb_changepos[BOMB_NUM] =
+    {
+        bomb_defpos[0],
+        bomb_defpos[1],
+        bomb_defpos[2],
+    };
 
 private:
     //------< 変数 >------------------------------------------------------------
@@ -62,6 +85,15 @@ public:
 
     // 描画
     void drawTerrain();
+
+    //爆弾をドラッグ
+    void dragBomb();
+
+    //爆弾を回転
+    void rotateBomb();
+
+    //爆弾をドロップ
+    void dropBomb();
 
     //爆発箇所計算
     DirectX::XMINT2 CalcExplosionPoint(DirectX::XMINT2 BaseExplosionPoint, ExplosionPoint point);
@@ -95,4 +127,13 @@ private:
     int delayTime = 15;             //爆発の連鎖する間隔
     int operatbleCursorTime = 5;    //誤操作を防ぐための操作不能時間
     DirectX::XMFLOAT2  cursorPos;   //カーソルの位置
+    bool drag_con = false;
+    int bomb_typenum[BOMB_TYPE_MAX];
+    int bomb_trun[BOMB_PATTERN_MAX];
+    int bomb_waitingarea;
+    bool bomb_notset = false;
+    bool bomb_release = false;
+    bool bomb_reset = false;
+    bool bomb_movingtype = false;
+    bool bomb_roopchecker = false;
 };
