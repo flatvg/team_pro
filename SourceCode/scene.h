@@ -34,6 +34,10 @@ public:
     virtual void update() {};   // 更新処理
     virtual void draw()   {};   // 描画処理
 
+    GameLib::fRECT makeRect(DirectX::XMFLOAT2 pos, DirectX::XMFLOAT2 size) { return GameLib::fRECT(pos.x, pos.y, pos.x + size.x, pos.y + size.y); }
+
+    virtual bool isClickRect(DirectX::XMFLOAT2 cursorPos, GameLib::fRECT rect) { return false; }
+
     void changeScene(Scene *scene) { nextScene = scene; }   // シーン変更処理
     Scene *getScene() const { return nextScene; }           // nextSceneのゲッター
 };

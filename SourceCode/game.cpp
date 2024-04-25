@@ -25,8 +25,6 @@ Game Game::instance_;
 Effect effects_fire[5];
 Effect effects_bomb[5];
 
-int stageNum;
-
 //--------------------------------
 //  初期化処理
 //--------------------------------
@@ -34,7 +32,6 @@ void Game::init()
 {
     Scene::init();	    // 基底クラスのinitを呼ぶ
 
-    stageNum = 0;
     bg.init(stageNum);  //BGで地形データ読み込み
 
     isPaused = false;   // ポーズフラグの初期化
