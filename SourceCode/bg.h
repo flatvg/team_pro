@@ -1,5 +1,6 @@
 #pragma once
 #include "../GameLib/vector.h"
+#include "Effect.h"
 
 enum ExplosionPoint
 {
@@ -12,10 +13,11 @@ enum ExplosionPoint
 
 enum TerrainStatus
 {
-    UnBreakable = -1,
+    UnBreakble = -1,
     Normal,
     Bomb,
     InExplosion,
+    BurningFuse
 };
 
 enum PatternStatus
@@ -136,4 +138,6 @@ private:
     bool bomb_reset = false;
     bool bomb_movingtype = false;
     bool bomb_roopchecker = false;
+
+    Effect burningFuse;
 };

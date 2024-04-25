@@ -314,7 +314,7 @@ void BG::init(int stagenum)
         for (int y = 0; y < CHIP_NUM_Y; y++)
         {
             terrain[y][x] = terrain_back[stagenum][y][x];
-            if (terrain[y][x] != UnBreakable)
+            if (terrain[y][x] != UnBreakble)
             {
                 terrain[y][x] = Normal;
             }
@@ -389,12 +389,16 @@ void BG::update()
     bool isClickL = timer > operatbleCursorTime && GameLib::input::STATE(0) & GameLib::input::PAD_LC;
     bool isClickR = timer > operatbleCursorTime && GameLib::input::STATE(0) & GameLib::input::PAD_RC;
     bool isZ      = timer > operatbleCursorTime && GameLib::input::STATE(0) & GameLib::input::PAD_TRG1;
+    bool isX      = timer > operatbleCursorTime && GameLib::input::STATE(0) & GameLib::input::PAD_TRG2;
 
     //カーソルをさしている箇所が爆弾でないか否か
-    bool isNotBomb = (terrain[Cpos.y][Cpos.x] == Normal || terrain[Cpos.y][Cpos.x] == InExplosion) && terrain[Cpos.y][Cpos.x] != UnBreakable;
+    bool isNotBomb = (terrain[Cpos.y][Cpos.x] == Normal || terrain[Cpos.y][Cpos.x] == InExplosion) && terrain[Cpos.y][Cpos.x] != UnBreakble;
 
     //カーソルをさしている箇所が爆弾か否か
-    bool isBomb = terrain[Cpos.y][Cpos.x] == Bomb;
+    bool isBomb = terrain[Cpos.y][Cpos.x] == TerrainStatus::Bomb;
+
+    //カーソルをさしている箇所が壁か否か
+    bool isUnBreakble = terrain[Cpos.y][Cpos.x] == TerrainStatus::UnBreakble;
 
     //爆初の連鎖の係数
     //0以上にすると最初の方は連鎖せず一気に爆発するようになる
@@ -439,10 +443,10 @@ void BG::update()
                     {
                         if (
                             //隣が壁だったら
-                            terrain[Cpos.y - 1][Cpos.x] == TerrainStatus::UnBreakable ||//上
-                            terrain[Cpos.y + 1][Cpos.x] == TerrainStatus::UnBreakable ||//下
-                            terrain[Cpos.y][Cpos.x + 1] == TerrainStatus::UnBreakable ||//右
-                            terrain[Cpos.y][Cpos.x - 1] == TerrainStatus::UnBreakable ||//左
+                            terrain[Cpos.y - 1][Cpos.x] == TerrainStatus::UnBreakble ||//上
+                            terrain[Cpos.y + 1][Cpos.x] == TerrainStatus::UnBreakble ||//下
+                            terrain[Cpos.y][Cpos.x + 1] == TerrainStatus::UnBreakble ||//右
+                            terrain[Cpos.y][Cpos.x - 1] == TerrainStatus::UnBreakble ||//左
                             //隣が爆弾だったら
                             terrain[Cpos.y - 1][Cpos.x] == TerrainStatus::Bomb ||//上
                             terrain[Cpos.y + 1][Cpos.x] == TerrainStatus::Bomb ||//下
@@ -483,6 +487,15 @@ void BG::update()
             Mapterrain_correction = { Mapterrain_correction.x + rand() % 4 - 2,Mapterrain_correction.y + rand() % 4 - 2 };
         }
         else         Mapterrain_correction = { 200.0f + 32.0f - 64.0f ,0.0f + 32.0f - 64.0f };
+
+        if (!isUnBreakble && isX)
+        {
+            burningFuse.exist = true;
+            burningFuse.pos = VECTOR2(
+                Mapterrain_correction.x + Cpos.x * CHIP_SIZE_F - (CHIP_SIZE_F / 2),
+                Mapterrain_correction.y + Cpos.y * CHIP_SIZE_F - (CHIP_SIZE_F / 2)
+            );
+        }
     }
 
     timer++;
@@ -588,6 +601,18 @@ void BG::drawTerrain()
     }
 
     texture::end(1);
+
+    static GameLib::Sprite* fire_image = sprite_load(L"./Data/Images/fire03.png");
+    //for (int x = 0; x < CHIP_NUM_X; x++)
+    //{
+    //    for (int y = 0; y < CHIP_NUM_Y; y++)
+    //    {
+            if (burningFuse.exist)
+            {
+                burningFuse.effectFire(fire_image, 6);
+            }
+    //    }
+    //}
 }
 
 //爆弾をドラッグ
@@ -817,7 +842,7 @@ int BG::SetLeftPoint(int center, int left, DirectX::XMINT2 leftPos, DirectX::XMI
     //該当ブロックがステージの外に出ていないか
     bool isNotEdge = leftPos.x < 0 || leftPos.y < 0 || leftPos.x > CHIP_NUM_Y || leftPos.y > CHIP_NUM_X;
 
-    if (isNotEdge || center == TerrainStatus::UnBreakable || left == TerrainStatus::UnBreakable || left == TerrainStatus::InExplosion)
+    if (isNotEdge || center == TerrainStatus::UnBreakble || left == TerrainStatus::UnBreakble || left == TerrainStatus::InExplosion)
     {
         return left;
     }
@@ -853,7 +878,7 @@ int BG::SetTopPoint(int center, int top, DirectX::XMINT2 topPos, DirectX::XMINT2
     //該当ブロックがステージの外に出ていないか
     bool isNotEdge = topPos.x < 0 || topPos.y < 0 || topPos.x > CHIP_NUM_Y || topPos.y > CHIP_NUM_X;
 
-    if (isNotEdge || center == TerrainStatus::UnBreakable || top == TerrainStatus::UnBreakable || top == TerrainStatus::InExplosion)
+    if (isNotEdge || center == TerrainStatus::UnBreakble || top == TerrainStatus::UnBreakble || top == TerrainStatus::InExplosion)
     {
         return top;
     }
@@ -889,7 +914,7 @@ int BG::SetRightPoint(int center, int right, DirectX::XMINT2 rightPos, DirectX::
     //該当ブロックがステージの外に出ていないか
     bool isNotEdge = rightPos.x < 0 || rightPos.y < 0 || rightPos.x >= CHIP_NUM_Y || rightPos.y >= CHIP_NUM_X;
 
-    if (isNotEdge || center == TerrainStatus::UnBreakable || right == TerrainStatus::UnBreakable || right == TerrainStatus::InExplosion)
+    if (isNotEdge || center == TerrainStatus::UnBreakble || right == TerrainStatus::UnBreakble || right == TerrainStatus::InExplosion)
     {
         return right;
     }
@@ -925,7 +950,7 @@ int BG::SetBottomPoint(int center, int bottom, DirectX::XMINT2 bottomPos, Direct
     //該当ブロックがステージの外に出ていないか
     bool isNotEdge = bottomPos.x < 0 || bottomPos.y < 0 || bottomPos.x >= CHIP_NUM_Y || bottomPos.y >= CHIP_NUM_X;
 
-    if (isNotEdge || center == TerrainStatus::UnBreakable || bottom == TerrainStatus::UnBreakable || bottom == TerrainStatus::InExplosion)
+    if (isNotEdge || center == TerrainStatus::UnBreakble || bottom == TerrainStatus::UnBreakble || bottom == TerrainStatus::InExplosion)
     {
         return bottom;
     }
