@@ -1,5 +1,6 @@
 #pragma once
 #include"all.h"
+#include <DirectXMath.h>
 
 class Effect
 {
@@ -9,6 +10,7 @@ public:
     bool exist = false;
     int timer;
     VECTOR2 pos;
+    DirectX::XMINT2 Cpos;
     int animeNum = 0;
 
 private:

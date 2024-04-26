@@ -427,6 +427,12 @@ void BG::update()
         //爆弾設置
         for (int i = 0; i < 2; ++i)//0週目で全部の爆弾読み込んで「隣が壁or爆弾」&「開いてるマスがないと置けない」ことを調べて配置可能なら1週目で配置
         {
+            //置く予定の場所のデータ
+            int locatTerrainStatus = terrain[Cpos.y][Cpos.x];
+            //bool isExplode;
+            //if(
+            //    terrain[ExplodePos[CENTER].x][ExplodePos[CENTER].y] == TerrainStatus::BurningFuse
+            //    )
             for (int x = 0; x < 3; ++x)
             {
                 for (int y = 0; y < 3; ++y)
@@ -458,7 +464,7 @@ void BG::update()
                         }
                         if (bomb_roopchecker)
                         {
-                            if (terrain[Cpos.y][Cpos.x] != TerrainStatus::Normal)bomb_release = true;
+                            if (terrain[Cpos.y][Cpos.x] != TerrainStatus::Normal && terrain[Cpos.y][Cpos.x] != TerrainStatus::BurningFuse)bomb_release = true;
                             if (bomb_release)break;
                             if (i == 1 && GameLib::input::TRG_RELEASE(0) & GameLib::input::PAD_LC && terrain[Cpos.y][Cpos.x] == TerrainStatus::Normal)
                             {
@@ -469,8 +475,16 @@ void BG::update()
                             }
                         }
                     }
-
                 }
+            }
+            //爆弾を置いた箇所が導火線(TerrainStatus::BurningFuse)なら爆発する
+            if (locatTerrainStatus == TerrainStatus::BurningFuse && terrain[Cpos.y][Cpos.x] == TerrainStatus::Bomb)
+            {
+                SetBomb(ExplodePos[ExplosionPoint::CENTER], ExplosionPoint::CENTER, delayIndex);
+                SetBomb(ExplodePos[ExplosionPoint::LEFT], ExplosionPoint::LEFT, delayIndex);
+                SetBomb(ExplodePos[ExplosionPoint::TOP], ExplosionPoint::TOP, delayIndex);
+                SetBomb(ExplodePos[ExplosionPoint::RIGHT], ExplosionPoint::RIGHT, delayIndex);
+                SetBomb(ExplodePos[ExplosionPoint::BOTTOM], ExplosionPoint::BOTTOM, delayIndex);
             }
         }
         bomb_roopchecker = false;
@@ -484,9 +498,15 @@ void BG::update()
             SetBomb(ExplodePos[ExplosionPoint::TOP], ExplosionPoint::TOP, delayIndex);
             SetBomb(ExplodePos[ExplosionPoint::RIGHT], ExplosionPoint::RIGHT, delayIndex);
             SetBomb(ExplodePos[ExplosionPoint::BOTTOM], ExplosionPoint::BOTTOM, delayIndex);
+
+            //画面が揺れる
             Mapterrain_correction = { Mapterrain_correction.x + rand() % 4 - 2,Mapterrain_correction.y + rand() % 4 - 2 };
         }
-        else         Mapterrain_correction = { 200.0f + 32.0f - 64.0f ,0.0f + 32.0f - 64.0f };
+        else
+        {
+            //揺れた画面を元に戻す
+            Mapterrain_correction = { 200.0f + 32.0f - 64.0f ,0.0f + 32.0f - 64.0f };
+        }
 
         if (!isUnBreakble && isX)
         {
@@ -495,6 +515,8 @@ void BG::update()
                 Mapterrain_correction.x + Cpos.x * CHIP_SIZE_F - (CHIP_SIZE_F / 2),
                 Mapterrain_correction.y + Cpos.y * CHIP_SIZE_F - (CHIP_SIZE_F / 2)
             );
+            burningFuse.Cpos = Cpos;
+            terrain[Cpos.y][Cpos.x] = TerrainStatus::BurningFuse;
         }
     }
 
@@ -530,7 +552,7 @@ void BG::drawTerrain()
     {
         for (int y = 0; y < CHIP_NUM_Y; y++)
         {
-            if (terrain[y][x] == Bomb)
+            if (terrain[y][x] == TerrainStatus::Bomb)
             {
                 texture::draw(
                     1,
@@ -543,7 +565,7 @@ void BG::drawTerrain()
                     1, 0, 0, 1
                 );
             }
-            if(terrain[y][x] == InExplosion)
+            if(terrain[y][x] == TerrainStatus::InExplosion)
             {
                 if (terrainData[y][x].DelayTimer < 0)
                 {
@@ -563,6 +585,26 @@ void BG::drawTerrain()
                 if (terrainData[y][x].isAlredyChanged)
                 {
                     terrainData[y][x].DelayTimer--;
+                }
+            }
+            if (terrain[y][x] == TerrainStatus::BurningFuse)
+            {
+                if (burningFuse.Cpos.x == x && burningFuse.Cpos.y == y)
+                {
+                    texture::draw(
+                        1,
+                        Mapterrain_correction.x + (x * CHIP_SIZE_F), Mapterrain_correction.y + (y * CHIP_SIZE_F),
+                        1.0f, 1.0f,
+                        0, 0,
+                        CHIP_SIZE_F, CHIP_SIZE_F,
+                        0, 0,
+                        0,
+                        0, 1, 0, 1
+                    );
+                }
+                else
+                {
+                    terrain[y][x] = TerrainStatus::Normal;
                 }
             }
             //爆発終了
