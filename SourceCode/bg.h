@@ -17,7 +17,8 @@ enum TerrainStatus
     Normal,
     Bomb,
     InExplosion,
-    BurningFuse
+    BurningFuse,
+    None
 };
 
 enum PatternStatus
@@ -67,6 +68,7 @@ private:
     {
         int explosionTimer;     //爆破時間
         bool isAlredyChanged;   //すでに情報が変更されているか
+        bool isChained;         //爆破が連鎖によって引き起こされたか否か
         int DelayTimer;         //爆発の連鎖をずらす時間
     };
     //1マスが持つ情報
@@ -121,6 +123,13 @@ public:
 
     //バクダンを設置
     void SetBomb(DirectX::XMINT2 terrainPos, ExplosionPoint point, int delayIndex);
+
+    //連鎖が終わる
+    void finishChain(DirectX::XMINT2 terrainPos);
+
+    //terrainの初期化
+    void InitTerrain(TerrainStatus terrainStatus, DirectX::XMINT2 terrainPos);
+    void InitTerrain(TerrainStatus terrainStatus, int x, int y);
 
 private:
 

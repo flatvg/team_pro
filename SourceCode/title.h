@@ -29,7 +29,6 @@ public:
 private:
     static Title instance_;
 
-    
     VECTOR2 cursorPos;
     VECTOR2 correctPos = { -60.0f,-72.0f };
     DirectX::XMVECTOR V1 = DirectX::XMVectorSet(0, 0, 0, 0);

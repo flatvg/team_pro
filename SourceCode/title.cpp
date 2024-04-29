@@ -245,13 +245,14 @@ void Title::draw()
         VECTOR4(0, 1, 0, 1)
     );
 
-    static GameLib::Sprite* fire_image = sprite_load(L"./Data/Images/fire03.png");
+    static GameLib::Sprite* fire_image = nullptr;
+    fire_image = sprite_load(L"./Data/Images/fire03.png");
     for (auto& effect : effects_fires) {
         if (effect.exist) {
             effect.effectFire(fire_image, 6);
         }
     }
-
+    delete fire_image;
 }
 
 //******************************************************************************
