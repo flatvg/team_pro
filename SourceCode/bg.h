@@ -62,8 +62,6 @@ public:
 
 private:
     //------< •Ï” >------------------------------------------------------------
-    int terrain[BG::CHIP_NUM_Y][BG::CHIP_NUM_X];
-
     struct TerrainData
     {
         int status;             //ó‘Ô

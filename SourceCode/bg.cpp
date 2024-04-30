@@ -7,7 +7,6 @@
 //******************************************************************************
 
 //TODO
-//terrainDataにStatusのメンバ変数を入れる
 //ボムを描画
 
 //------< インクルード >--------------------------------------------------------
@@ -319,7 +318,7 @@ void BG::init(int stagenum)
         for (int y = 0; y < CHIP_NUM_Y; y++)
         {
             //地形データterrain_backをbomb地形データterrainに代入する
-            terrain[y][x] = terrain_back[stagenum][y][x];
+            terrainData[y][x].status = terrain_back[stagenum][y][x];
 
             //bomb地形の情報を初期化
             InitTerrain(TerrainStatus::Normal, x, y);
@@ -331,15 +330,16 @@ void BG::init(int stagenum)
             }
 
             //エフェクトの情報を初期化
-            TerrainBomb[y][x].pos = VECTOR2(x * CHIP_SIZE_F, y * CHIP_SIZE_F);
-            TerrainBomb[y][x].animeNum = 3;
-            TerrainBomb[y][x].exist = false;
+            //TerrainBomb[y][x].pos = VECTOR2(x * CHIP_SIZE_F, y * CHIP_SIZE_F);
+            //TerrainBomb[y][x].animeNum = 3;
+            //TerrainBomb[y][x].exist = false;
         }
     }
 
     texture::load(0, L"./Data/Images/test_tile.png", 256U);    //背景
     texture::load(1, L"./Data/Images/test_tile02.png", 256U);    //背景
     texture::load(2, L"./Data/Images/bomb_re01.png", 256U);    //爆弾
+    texture::load(3, EXPLOSION, 256U);    //爆発
 
     //バクダンの種類を初期化
     for (int i = 0; i < BOMB_TYPE_MAX; i++)
@@ -404,7 +404,7 @@ void BG::update()
     bool isChangeedFuelToBomb = false;
 
     //カーソルをさしているマスが壁か否か
-    bool isUnBreakble = terrain[Cpos.y][Cpos.x] == TerrainStatus::UnBreakble;
+    bool isUnBreakble = terrainData[Cpos.y][Cpos.x].status == TerrainStatus::UnBreakble;
 
     //爆初の連鎖の係数
     //0以上にすると最初の方は連鎖せず一気に爆発するようになる
@@ -444,27 +444,27 @@ void BG::update()
                     {
                         if (
                             //隣が壁だったら
-                            terrain[Cpos.y - 1][Cpos.x] == TerrainStatus::UnBreakble ||//上
-                            terrain[Cpos.y + 1][Cpos.x] == TerrainStatus::UnBreakble ||//下
-                            terrain[Cpos.y][Cpos.x + 1] == TerrainStatus::UnBreakble ||//右
-                            terrain[Cpos.y][Cpos.x - 1] == TerrainStatus::UnBreakble ||//左
+                            terrainData[Cpos.y - 1][Cpos.x].status == TerrainStatus::UnBreakble ||//上
+                            terrainData[Cpos.y + 1][Cpos.x].status == TerrainStatus::UnBreakble ||//下
+                            terrainData[Cpos.y][Cpos.x + 1].status == TerrainStatus::UnBreakble ||//右
+                            terrainData[Cpos.y][Cpos.x - 1].status == TerrainStatus::UnBreakble ||//左
                             //隣が爆弾だったら
-                            terrain[Cpos.y - 1][Cpos.x] == TerrainStatus::Bomb ||//上
-                            terrain[Cpos.y + 1][Cpos.x] == TerrainStatus::Bomb ||//下
-                            terrain[Cpos.y][Cpos.x + 1] == TerrainStatus::Bomb ||//右
-                            terrain[Cpos.y][Cpos.x - 1] == TerrainStatus::Bomb   //左
+                            terrainData[Cpos.y - 1][Cpos.x].status == TerrainStatus::Bomb ||//上
+                            terrainData[Cpos.y + 1][Cpos.x].status == TerrainStatus::Bomb ||//下
+                            terrainData[Cpos.y][Cpos.x + 1].status == TerrainStatus::Bomb ||//右
+                            terrainData[Cpos.y][Cpos.x - 1].status == TerrainStatus::Bomb   //左
                             )
                         {
                             bomb_roopchecker = true;
                         }
                         if (bomb_roopchecker)
                         {
-                            if (terrain[Cpos.y][Cpos.x] != TerrainStatus::Normal && terrain[Cpos.y][Cpos.x] != TerrainStatus::BurningFuse)bomb_release = true;
+                            if (terrainData[Cpos.y][Cpos.x].status != TerrainStatus::Normal && terrainData[Cpos.y][Cpos.x].status != TerrainStatus::BurningFuse)bomb_release = true;
                             if (bomb_release)break;
-                            if (i == 1 && GameLib::input::TRG_RELEASE(0) & GameLib::input::PAD_LC && (terrain[Cpos.y][Cpos.x] == TerrainStatus::Normal || terrain[Cpos.y][Cpos.x] == TerrainStatus::BurningFuse))
+                            if (i == 1 && GameLib::input::TRG_RELEASE(0) & GameLib::input::PAD_LC && (terrainData[Cpos.y][Cpos.x].status == TerrainStatus::Normal || terrainData[Cpos.y][Cpos.x].status == TerrainStatus::BurningFuse))
                             {
                                 //爆弾設置
-                                if (terrain[Cpos.y][Cpos.x] == TerrainStatus::BurningFuse && !isChangeedFuelToBomb)
+                                if (terrainData[Cpos.y][Cpos.x].status == TerrainStatus::BurningFuse && !isChangeedFuelToBomb)
                                 {
                                     isChangeedFuelToBomb = true;
                                     ExplodePos[ExplosionPoint::CENTER] = CalcExplosionPoint(Cpos, ExplosionPoint::CENTER);
@@ -473,7 +473,7 @@ void BG::update()
                                     ExplodePos[ExplosionPoint::RIGHT] = CalcExplosionPoint(Cpos, ExplosionPoint::RIGHT);
                                     ExplodePos[ExplosionPoint::BOTTOM] = CalcExplosionPoint(Cpos, ExplosionPoint::BOTTOM);
                                 }
-                                terrain[Cpos.y][Cpos.x] = TerrainStatus::Bomb;
+                                terrainData[Cpos.y][Cpos.x].status = TerrainStatus::Bomb;
                                 act++;
                                 //爆弾リセット
                                 bomb_reset = true;
@@ -524,7 +524,7 @@ void BG::update()
                 Mapterrain_correction.y + Cpos.y * CHIP_SIZE_F - (CHIP_SIZE_F / 2)
             );
             burningFuse.Cpos = Cpos;
-            terrain[Cpos.y][Cpos.x] = TerrainStatus::BurningFuse;
+            terrainData[Cpos.y][Cpos.x].status = TerrainStatus::BurningFuse;
         }
     }
     if (act > 4)finish_game = true;
@@ -561,7 +561,7 @@ void BG::drawTerrain()
     {
         for (int y = 0; y < CHIP_NUM_Y; y++)
         {
-            if (terrain[y][x] == TerrainStatus::Bomb)
+            if (terrainData[y][x].status == TerrainStatus::Bomb)
             {
                 //バクダンの描画
                 texture::draw(
@@ -575,7 +575,7 @@ void BG::drawTerrain()
                     RED
                 );
             }
-            if(terrain[y][x] == TerrainStatus::InExplosion)
+            if(terrainData[y][x].status == TerrainStatus::InExplosion)
             {
                 if (terrainData[y][x].DelayTimer < 0)
                 {
@@ -612,7 +612,7 @@ void BG::drawTerrain()
                     terrainData[y][x].DelayTimer--;
                 }
             }
-            if (terrain[y][x] == TerrainStatus::BurningFuse)
+            if (terrainData[y][x].status == TerrainStatus::BurningFuse)
             {
                 if (burningFuse.Cpos.x == x && burningFuse.Cpos.y == y)
                 {
@@ -631,7 +631,7 @@ void BG::drawTerrain()
                 else
                 {
                     //導火線の位置が変更されたのでterrainの状態も変更する
-                    terrain[y][x] = TerrainStatus::Normal;
+                    terrainData[y][x].status = TerrainStatus::Normal;
                 }
             }
             //爆発終了
@@ -699,12 +699,34 @@ void BG::drawTerrain()
     debug::setString("act:%d", act);
     debug::setString("score:%d", score);
 
+    texture::begin(3);
+    for (int x = 0; x < CHIP_NUM_X; x++)
+    {
+        for (int y = 0; y < CHIP_NUM_Y; y++)
+        {
+            if (terrainData[y][x].status == TerrainStatus::InExplosion)
+            {
+                texture::draw(
+                    3,
+                    Mapterrain_correction.x + x * CHIP_SIZE_F, Mapterrain_correction.y + y * CHIP_NUM_Y,
+                    1.0f, 1.0f,
+                    0.0f, 0.0f,
+                    CHIP_SIZE_F, CHIP_SIZE_F,
+                    CHIP_SIZE_F * 0.5f, CHIP_SIZE_F * 0.5f,
+                    0,
+                    1, 1, 1, 1
+                );
+            }
+        }
+    }
+    texture::end(3);
+
     bool isBurningFuse = false;
     for (int x = 0; x < CHIP_NUM_X; x++)
     {
         for (int y = 0; y < CHIP_NUM_Y; y++)
         {
-            if (terrain[y][x] == TerrainStatus::BurningFuse)
+            if (terrainData[y][x].status == TerrainStatus::BurningFuse)
                 isBurningFuse = true;
         }
     }
@@ -808,7 +830,7 @@ bool BG::IsAlreadyChanged(DirectX::XMINT2 terrainPos)
 void BG::SetBomb(DirectX::XMINT2 terrainPos, ExplosionPoint point, int delayIndex)
 {
     if (!IsAlreadyChanged(terrainPos)) {
-        terrain[terrainPos.x][terrainPos.y] = SetExplosionPoint(terrainPos, point, delayIndex);
+        terrainData[terrainPos.x][terrainPos.y].status = SetExplosionPoint(terrainPos, point, delayIndex);
     }
     score_add += 10;
     score_counter++;
@@ -831,8 +853,8 @@ void BG::InitTerrain(TerrainStatus terrainStatus, DirectX::XMINT2 terrainPos)
     //TerrainStatus::Noneの時、状態を変更しない
     if (terrainStatus != TerrainStatus::None)
     {
-        if(terrain[terrainPos.y][terrainPos.x] != TerrainStatus::UnBreakble)
-        terrain[terrainPos.y][terrainPos.x] = terrainStatus;
+        if(terrainData[terrainPos.y][terrainPos.x].status != TerrainStatus::UnBreakble)
+        terrainData[terrainPos.y][terrainPos.x].status = terrainStatus;
     }
     //terrainDataを初期化
     terrainData[terrainPos.y][terrainPos.x].explosionTimer = explosionTime;
@@ -922,39 +944,39 @@ int BG::SetExplosionPoint(DirectX::XMINT2 explosionPoint, ExplosionPoint point, 
     {
     case ExplosionPoint::CENTER:
     {
-        int center = terrain[explosionPoint.x][explosionPoint.y];
+        int center = terrainData[explosionPoint.x][explosionPoint.y].status;
         return SetCenterPoint(center, explosionPoint, ++delayIndex);
         break;
     }
     case ExplosionPoint::LEFT:
     {
         DirectX::XMINT2 centerPos{ explosionPoint.x,explosionPoint.y + 1 };
-        int center = terrain[explosionPoint.x][explosionPoint.y + 1];
-        int left   = terrain[explosionPoint.x][explosionPoint.y];
+        int center = terrainData[explosionPoint.x][explosionPoint.y + 1].status;
+        int left   = terrainData[explosionPoint.x][explosionPoint.y].status;
         return SetLeftPoint(center, left, explosionPoint, centerPos, ++delayIndex);
         break;
     }
     case ExplosionPoint::TOP:
     {
         DirectX::XMINT2 centerPos{ explosionPoint.x + 1,explosionPoint.y};
-        int center = terrain[explosionPoint.x + 1][explosionPoint.y];
-        int top    = terrain[explosionPoint.x][explosionPoint.y];
+        int center = terrainData[explosionPoint.x + 1][explosionPoint.y].status;
+        int top    = terrainData[explosionPoint.x][explosionPoint.y].status;
         return SetTopPoint(center, top, explosionPoint, centerPos, ++delayIndex);
         break;
     }
     case ExplosionPoint::RIGHT:
     {
         DirectX::XMINT2 centerPos{ explosionPoint.x,explosionPoint.y - 1 };
-        int center = terrain[explosionPoint.x][explosionPoint.y - 1];
-        int right  = terrain[explosionPoint.x][explosionPoint.y];
+        int center = terrainData[explosionPoint.x][explosionPoint.y - 1].status;
+        int right  = terrainData[explosionPoint.x][explosionPoint.y].status;
         return SetRightPoint(center, right, explosionPoint, centerPos, ++delayIndex);
         break;
     }
     case ExplosionPoint::BOTTOM:
     {
         DirectX::XMINT2 centerPos{ explosionPoint.x - 1,explosionPoint.y };
-        int center = terrain[explosionPoint.x - 1][explosionPoint.y];
-        int bottom = terrain[explosionPoint.x][explosionPoint.y];
+        int center = terrainData[explosionPoint.x - 1][explosionPoint.y].status;
+        int bottom = terrainData[explosionPoint.x][explosionPoint.y].status;
         return SetBottomPoint(center, bottom, explosionPoint, centerPos, ++delayIndex);
         break;
     }
