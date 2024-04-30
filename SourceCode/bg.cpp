@@ -6,6 +6,10 @@
 //
 //******************************************************************************
 
+//TODO
+//terrainDataにStatusのメンバ変数を入れる
+//ボムを描画
+
 //------< インクルード >--------------------------------------------------------
 #include "all.h"
 #include "common.h"
@@ -314,25 +318,21 @@ void BG::init(int stagenum)
     {
         for (int y = 0; y < CHIP_NUM_Y; y++)
         {
+            //地形データterrain_backをbomb地形データterrainに代入する
             terrain[y][x] = terrain_back[stagenum][y][x];
-            if (terrain[y][x] != UnBreakble)
-            {
-                terrain[y][x] = Normal;
-            }
-        }
-    }
 
-    //bomb地形の情報を初期化
-    for (int x = 0; x < CHIP_NUM_X; x++)
-    {
-        for (int y = 0; y < CHIP_NUM_Y; y++)
-        {
-            InitTerrain(TerrainStatus::None, x, y);
+            //bomb地形の情報を初期化
+            InitTerrain(TerrainStatus::Normal, x, y);
+
+            //エフェクトの情報を初期化
+            TerrainBomb[y][x].pos = VECTOR2(x * CHIP_SIZE_F, y * CHIP_SIZE_F);
+            TerrainBomb[y][x].animeNum = 3;
+            TerrainBomb[y][x].exist = false;
         }
     }
 
     texture::load(0, L"./Data/Images/test_tile.png", 256U);    //背景
-    texture::load(1, L"./Data/Images/test_tile02.png", 256U);    //背景
+    texture::load(1, L"./Data/Images/test_tile02.png", 256U);  //背景
 
     //バクダンの種類を初期化
     for (int i = 0; i < BOMB_TYPE_MAX; i++)
@@ -776,6 +776,7 @@ void BG::InitTerrain(TerrainStatus terrainStatus, DirectX::XMINT2 terrainPos)
     //TerrainStatus::Noneの時、状態を変更しない
     if (terrainStatus != TerrainStatus::None)
     {
+        if(terrain[terrainPos.y][terrainPos.x] != TerrainStatus::UnBreakble)
         terrain[terrainPos.y][terrainPos.x] = terrainStatus;
     }
     //terrainDataを初期化

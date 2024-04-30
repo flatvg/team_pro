@@ -66,6 +66,7 @@ private:
 
     struct TerrainData
     {
+        int status;             //状態
         int explosionTimer;     //爆破時間
         bool isAlredyChanged;   //すでに情報が変更されているか
         bool isChained;         //爆破が連鎖によって引き起こされたか否か
@@ -73,6 +74,8 @@ private:
     };
     //1マスが持つ情報
     TerrainData terrainData[BG::CHIP_NUM_Y][BG::CHIP_NUM_X];
+
+    Effect TerrainBomb[BG::CHIP_NUM_Y][BG::CHIP_NUM_X];
 
 public:
     BG();

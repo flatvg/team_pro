@@ -24,7 +24,11 @@ using namespace DirectX;
 //------< 変数 >----------------------------------------------------------------
 Title Title::instance_;
 
-Effect effects_fires[5];
+//Effect effects_fires[5];
+
+Effect effects_bombs[5];
+
+static GameLib::Sprite* title;
 
 void Title::draw_init_status()
 {
@@ -132,7 +136,7 @@ void Title::update()
 
         //エフェクトの生成
         if (TRG(0) & PAD_RC) {
-            for (auto& effect : effects_fires) {
+            for (auto& effect : effects_bombs) {
                 if(!effect.exist)
                 {
                     effect.exist = true;
@@ -144,7 +148,7 @@ void Title::update()
             angleflag = true;
         }
         //エフェクトの更新
-        for (auto& effect : effects_fires) {
+        for (auto& effect : effects_bombs) {
             if (effect.exist)
             {
                 XMVECTOR p = XMVectorSet(effect.pos.x, effect.pos.y, 0, 0);
@@ -183,9 +187,9 @@ void Title::draw()
     // 画面クリア
     GameLib::clear(VECTOR4(0.2f, 0.3f, 1.0f, 1));
 
-    // タイトル表示
-    font::textOut(4, "ECC COMP", { 60, 60 }, { 4, 4 }, { 1, 1, 0, 1 });
-    font::textOut(4, "Game Programming II", { 60, 160 }, { 2, 2 }, { 0, 1, 1, 1 });
+    //背景画面表示
+    title = sprite_load(L"./Data/Images/back.png");
+    sprite_render(title, 0.0f, 0.0f, 2.0f, 1.5f, 0, 0, 640, 480, ToRadian(0));
 
     // タイトル表示
     texture::begin(1);
@@ -245,14 +249,18 @@ void Title::draw()
         VECTOR4(0, 1, 0, 1)
     );
 
-    static GameLib::Sprite* fire_image = nullptr;
-    fire_image = sprite_load(L"./Data/Images/fire03.png");
-    for (auto& effect : effects_fires) {
+    //static GameLib::Sprite* fire_image = nullptr;
+    static GameLib::Sprite* bomb_image = nullptr;
+    //fire_image = sprite_load(FIRE03);
+    bomb_image = sprite_load(BOMB01);
+    for (auto& effect : effects_bombs) {
         if (effect.exist) {
-            effect.effectFire(fire_image, 6);
+            effect.effectBomb(bomb_image, 3, DirectX::XMFLOAT2(2.5f,2.5f));
         }
     }
-    delete fire_image;
+    //delete fire_image;
+    delete bomb_image;
+    delete title;
 }
 
 //******************************************************************************
