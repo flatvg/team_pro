@@ -330,15 +330,15 @@ void BG::init(int stagenum)
             }
 
             //ƒGƒtƒFƒNƒg‚Ìî•ñ‚ð‰Šú‰»
-            //TerrainBomb[y][x].pos = VECTOR2(x * CHIP_SIZE_F, y * CHIP_SIZE_F);
-            //TerrainBomb[y][x].animeNum = 3;
-            //TerrainBomb[y][x].exist = false;
+            TerrainBomb[y][x].pos = VECTOR2(x * CHIP_SIZE_F, y * CHIP_SIZE_F);
+            TerrainBomb[y][x].animeNum = 3;
+            TerrainBomb[y][x].exist = false;
         }
     }
 
     texture::load(0, L"./Data/Images/test_tile.png", 256U);    //”wŒi
     texture::load(1, L"./Data/Images/test_tile02.png", 256U);    //”wŒi
-    texture::load(2, L"./Data/Images/bomb_re01.png", 256U);    //”š’e
+    texture::load(2, BOMB01, 256U);       //”š’e
     texture::load(3, EXPLOSION, 256U);    //”š”­
 
     //ƒoƒNƒ_ƒ“‚ÌŽí—Þ‚ð‰Šú‰»
@@ -527,7 +527,7 @@ void BG::update()
             terrainData[Cpos.y][Cpos.x].status = TerrainStatus::BurningFuse;
         }
     }
-    if (act > 4)finish_game = true;
+    if (act > 40)finish_game = true;
 
     timer++;
 }
@@ -579,6 +579,7 @@ void BG::drawTerrain()
             {
                 if (terrainData[y][x].DelayTimer < 0)
                 {
+                    TerrainBomb[y][x].exist = true;
                     //˜A½‚·‚é‚½‚ß‚ÌŽžŠÔ‚Ì‚¸‚ç‚µ‚ªŠ®—¹‚µ‚½‚Ì‚Å”š”­‚ð•`‰æ
                     texture::draw(
                         1,
@@ -638,6 +639,8 @@ void BG::drawTerrain()
             if (terrainData[y][x].explosionTimer < 0) {
                 //”š”­‚ªI—¹‚µ‚½‚Ì‚Återrain‚Ìó‘Ô‚ð‰Šú‰»‚·‚é
                 InitTerrain(TerrainStatus::Normal, x, y);
+
+                TerrainBomb[y][x].exist = false;
             }
         }
     }
@@ -704,15 +707,15 @@ void BG::drawTerrain()
     {
         for (int y = 0; y < CHIP_NUM_Y; y++)
         {
-            if (terrainData[y][x].status == TerrainStatus::InExplosion)
+            if (TerrainBomb[y][x].exist)
             {
                 texture::draw(
                     3,
-                    Mapterrain_correction.x + x * CHIP_SIZE_F, Mapterrain_correction.y + y * CHIP_NUM_Y,
+                    Mapterrain_correction.x + TerrainBomb[y][x].pos.x + CHIP_SIZE_F / 2, Mapterrain_correction.y + TerrainBomb[y][x].pos.y + CHIP_SIZE_F / 2,
                     1.0f, 1.0f,
                     0.0f, 0.0f,
-                    CHIP_SIZE_F, CHIP_SIZE_F,
-                    CHIP_SIZE_F * 0.5f, CHIP_SIZE_F * 0.5f,
+                    120.0f, 120.0f,
+                    120.0f / 2, 120.0f / 2,
                     0,
                     1, 1, 1, 1
                 );
