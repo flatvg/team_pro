@@ -75,7 +75,17 @@ private:
     //1ƒ}ƒX‚ª‚Âî•ñ
     TerrainData terrainData[BG::CHIP_NUM_Y][BG::CHIP_NUM_X];
 
-    Effect TerrainBomb[BG::CHIP_NUM_Y][BG::CHIP_NUM_X];
+    struct TerrainEffect
+    {
+        DirectX::XMFLOAT2 pos;
+        bool exist;
+        int animeMax;
+        int animeNum;
+        int timer;
+        int tx,ty;
+        float texSizeX;
+    };
+    TerrainEffect TerrainBomb[BG::CHIP_NUM_Y][BG::CHIP_NUM_X];
 
 public:
     BG();

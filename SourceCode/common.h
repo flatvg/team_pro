@@ -26,7 +26,7 @@ static float(*const ToDegree)(float) = DirectX::XMConvertToDegrees;  // ラジアン
 
 //画像パス
 #define FIRE03 L"./Data/Images/fire03.png"
-#define BOMB01 L"./Data/Images/bomb01.png"
+#define BOMB01 L"./Data/Images/bomb_re01.png"
 #define EXPLOSION L"./Data/Images/explosion02.png"
 
 #endif // !INCLUDED_COMMON

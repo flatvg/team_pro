@@ -312,6 +312,9 @@ BG::~BG()
 //--------------------------------
 void BG::init(int stagenum)
 {
+    static GameLib::Sprite* effect_explosion = nullptr;
+    effect_explosion = sprite_load(EXPLOSION);
+
     //地形データterrain_backをbomb地形データterrainに代入する
     for (int x = 0; x < CHIP_NUM_X; x++)
     {
@@ -330,11 +333,18 @@ void BG::init(int stagenum)
             }
 
             //エフェクトの情報を初期化
-            TerrainBomb[y][x].pos = VECTOR2(x * CHIP_SIZE_F, y * CHIP_SIZE_F);
-            TerrainBomb[y][x].animeNum = 3;
+            TerrainBomb[y][x].pos = DirectX::XMFLOAT2(x * CHIP_SIZE_F, y * CHIP_SIZE_F);
+            TerrainBomb[y][x].timer = 0;
+            TerrainBomb[y][x].animeMax = 7;
+            TerrainBomb[y][x].animeNum = 0;
             TerrainBomb[y][x].exist = false;
+            effect_explosion->getSize(TerrainBomb[y][x].tx, TerrainBomb[y][x].ty);
+            TerrainBomb[y][x].texSizeX = TerrainBomb[y][x].tx / TerrainBomb[y][x].animeMax;
         }
     }
+
+
+    delete effect_explosion;
 
     texture::load(0, L"./Data/Images/test_tile.png", 256U);    //背景
     texture::load(1, L"./Data/Images/test_tile02.png", 256U);    //背景
@@ -527,6 +537,30 @@ void BG::update()
             terrainData[Cpos.y][Cpos.x].status = TerrainStatus::BurningFuse;
         }
     }
+
+    for (int x = 0; x < CHIP_NUM_X; x++)
+    {
+        for (int y = 0; y < CHIP_NUM_Y; y++)
+        {
+            if (TerrainBomb[y][x].exist)
+            {
+                TerrainBomb[y][x].timer++;
+
+                if (TerrainBomb[y][x].timer > (TerrainBomb[y][x].tx / TerrainBomb[y][x].texSizeX))
+                {
+                    TerrainBomb[y][x].timer = 0;
+                    TerrainBomb[y][x].animeNum++;
+                    if (TerrainBomb[y][x].animeNum > TerrainBomb[y][x].animeMax)
+                    {
+                        TerrainBomb[y][x].timer = 0;
+                        TerrainBomb[y][x].animeNum = 0;
+                        TerrainBomb[y][x].exist = false;
+                    }
+                }
+            }
+        }
+    }
+
     if (act > 40)finish_game = true;
 
     timer++;
@@ -712,9 +746,9 @@ void BG::drawTerrain()
                 texture::draw(
                     3,
                     Mapterrain_correction.x + TerrainBomb[y][x].pos.x + CHIP_SIZE_F / 2, Mapterrain_correction.y + TerrainBomb[y][x].pos.y + CHIP_SIZE_F / 2,
-                    1.0f, 1.0f,
-                    0.0f, 0.0f,
-                    120.0f, 120.0f,
+                    0.8f, 0.8f,
+                    TerrainBomb[y][x].texSizeX * TerrainBomb[y][x].animeNum, 0.0f,
+                    TerrainBomb[y][x].texSizeX, TerrainBomb[y][x].ty,
                     120.0f / 2, 120.0f / 2,
                     0,
                     1, 1, 1, 1
