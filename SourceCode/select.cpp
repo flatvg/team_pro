@@ -12,7 +12,15 @@ void Select::init()
 
     timer = 0;
 
-    stage1 = setRectData(DirectX::XMFLOAT2(.0f, .0f), DirectX::XMFLOAT2(300.0f, 600.0f), DirectX::XMFLOAT4(0, 1, 0, 1));
+    int index = 0;
+    for (auto& stage : stages)
+    {
+        stage = setRectData(
+            DirectX::XMFLOAT2(index++ * 400.0f, 0.0f),
+            DirectX::XMFLOAT2(300.0f, 600.0f),
+            DirectX::XMFLOAT4(0, 1, 0, 1)
+        );
+    }
 }
 
 void Select::deinit()
@@ -28,11 +36,16 @@ void Select::update()
     cursorPos = { static_cast<float>(GameLib::input::getCursorPosX()), static_cast<float>(GameLib::input::getCursorPosY()) };
 
     int stageNum = 0;
-    if (isClickRect(cursorPos,stage1.rect))
+    for (auto& stage : stages)
     {
-        Game::instance()->SetStageNum(stageNum);
-        changeScene(Game::instance());  // ゲームシーンに切り替え
+        if (isClickRect(cursorPos, stage))
+        {
+            Game::instance()->SetStageNum(stageNum);
+            changeScene(Game::instance());  // ゲームシーンに切り替え
+        }
+        stageNum++;
     }
+
     timer++;
 }
 
@@ -41,21 +54,10 @@ void Select::draw()
     // 画面クリア
     GameLib::clear(VECTOR4(0, 0, 0, 1));
 
-    renderRect(stage1.rect, stage1.color);
-}
-
-bool Select::isClickRect(DirectX::XMFLOAT2 cursorPos, GameLib::fRECT rect)
-{
-    //カーソルが四角形の内部にあるか確認
-    if (cursorPos.x < rect.left)return false;
-    if (cursorPos.x > rect.right)return false;
-    if (cursorPos.y < rect.top)return false;
-    if (cursorPos.y > rect.bottom)return false;
-
-    //クリックされているか
-    if (!(input::TRG(0) & input::PAD_RC))return false;
-
-    return true;
+    for (auto& stage : stages)
+    {
+        renderRect(stage.rect, stage.color);
+    }
 }
 
 RectData Select::setRectData(DirectX::XMFLOAT2 pos, DirectX::XMFLOAT2 size, DirectX::XMFLOAT4 color)
@@ -68,6 +70,22 @@ RectData Select::setRectData(DirectX::XMFLOAT2 pos, DirectX::XMFLOAT2 size, Dire
     rectData.rect = makeRect(rectData.position, rectData.size);
 
     return rectData;
+}
+
+bool Select::isClickRect(DirectX::XMFLOAT2 cursorPos, RectData rectData)
+{
+    //カーソルが四角形の内部にあるか確認
+    GameLib::fRECT rect = rectData.rect;
+
+    if (cursorPos.x < rect.left)return false;
+    if (cursorPos.x > rect.right)return false;
+    if (cursorPos.y < rect.top)return false;
+    if (cursorPos.y > rect.bottom)return false;
+
+    //クリックされているか
+    if (!(input::TRG(0) & input::PAD_LC))return false;
+
+    return true;
 }
 
 void Select::renderRect(GameLib::fRECT rect, DirectX::XMFLOAT4 color)
