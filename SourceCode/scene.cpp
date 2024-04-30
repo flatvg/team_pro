@@ -30,7 +30,7 @@ Scene* Scene::execute()
 
     // 初期化処理
     init();
-
+    nextScene = nullptr;
     // ゲームループ
     while (GameLib::gameLoop(false))    // falseをtrueにするとタイトルバーにフレームレート表示
     {

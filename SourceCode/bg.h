@@ -71,6 +71,8 @@ private:
         bool isAlredyChanged;   //すでに情報が変更されているか
         bool isChained;         //爆破が連鎖によって引き起こされたか否か
         int DelayTimer;         //爆発の連鎖をずらす時間
+        int terrain_endurance;  //マップタイルの耐久値
+        int terrain_enduranceC; //マップタイルの耐久値のチェック用
     };
     //1マスが持つ情報
     TerrainData terrainData[BG::CHIP_NUM_Y][BG::CHIP_NUM_X];
@@ -134,14 +136,25 @@ public:
     void InitTerrain(TerrainStatus terrainStatus, DirectX::XMINT2 terrainPos);
     void InitTerrain(TerrainStatus terrainStatus, int x, int y);
 
+    bool finish_game;
+
 private:
 
+    int stageNum;
     int timer;                      //全体の時間
     int explosionTime = 60;         //爆発が残留する時間
     int delayTime = 15;             //爆発の連鎖する間隔
     int operatbleCursorTime = 5;    //誤操作を防ぐための操作不能時間
     DirectX::XMFLOAT2  cursorPos;   //カーソルの位置
     bool drag_con = false;
+
+    //スコア関連
+    int act;
+    int score;
+    int score_add;
+    int score_counter;
+
+    //ボム関連
     int bomb_typenum[BOMB_TYPE_MAX];
     int bomb_trun[BOMB_ROTATE_MAX];
     int bomb_waitingarea;

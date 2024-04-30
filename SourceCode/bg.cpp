@@ -324,6 +324,12 @@ void BG::init(int stagenum)
             //bomb’nŒ`‚Ìî•ñ‚ğ‰Šú‰»
             InitTerrain(TerrainStatus::Normal, x, y);
 
+            terrainData[y][x].terrain_endurance = 10000;
+            if (terrain_back[stagenum][y][x] == 2)
+            {
+                terrainData[y][x].terrain_endurance = 3;//3‰ñ”š”j‚·‚é‚Æ’u‚¯‚È‚­‚È‚é
+            }
+
             //ƒGƒtƒFƒNƒg‚Ìî•ñ‚ğ‰Šú‰»
             TerrainBomb[y][x].pos = VECTOR2(x * CHIP_SIZE_F, y * CHIP_SIZE_F);
             TerrainBomb[y][x].animeNum = 3;
@@ -332,7 +338,8 @@ void BG::init(int stagenum)
     }
 
     texture::load(0, L"./Data/Images/test_tile.png", 256U);    //”wŒi
-    texture::load(1, L"./Data/Images/test_tile02.png", 256U);  //”wŒi
+    texture::load(1, L"./Data/Images/test_tile02.png", 256U);    //”wŒi
+    texture::load(2, L"./Data/Images/bomb_re01.png", 256U);    //”š’e
 
     //ƒoƒNƒ_ƒ“‚Ìí—Ş‚ğ‰Šú‰»
     for (int i = 0; i < BOMB_TYPE_MAX; i++)
@@ -344,8 +351,11 @@ void BG::init(int stagenum)
         if (i > 0 && bomb_typenum[i] == bomb_typenum[i - 1])bomb_typenum[i] = bomb_numchanger(bomb_typenum[i], bomb_typenum[i - 1]);//0T–Ú‚Ì”š’e‚Æ“¯‚¶í—Ş‚È‚ç•ÏX
         bomb_trun[i] = 0;
     }
+    act = 0;
     bomb_movingtype = false;
     bomb_roopchecker = false;
+    score = 0;
+    finish_game = false;
 
     //ƒ^ƒCƒ}[‰Šú‰»
     timer = 0;
@@ -464,6 +474,7 @@ void BG::update()
                                     ExplodePos[ExplosionPoint::BOTTOM] = CalcExplosionPoint(Cpos, ExplosionPoint::BOTTOM);
                                 }
                                 terrain[Cpos.y][Cpos.x] = TerrainStatus::Bomb;
+                                act++;
                                 //”š’eƒŠƒZƒbƒg
                                 bomb_reset = true;
                             }
@@ -478,12 +489,20 @@ void BG::update()
         //”š”j
         if (isChangeedFuelToBomb)
         {
+            for (int x = 0; x < CHIP_NUM_X; x++)
+            {
+                for (int y = 0; y < CHIP_NUM_Y; y++)
+                {
+                    terrainData[y][x].terrain_endurance = terrainData[y][x].terrain_endurance;
+                }
+            }
             SetBomb(ExplodePos[ExplosionPoint::CENTER], ExplosionPoint::CENTER, delayIndex);
             SetBomb(ExplodePos[ExplosionPoint::LEFT], ExplosionPoint::LEFT, delayIndex);
             SetBomb(ExplodePos[ExplosionPoint::TOP], ExplosionPoint::TOP, delayIndex);
             SetBomb(ExplodePos[ExplosionPoint::RIGHT], ExplosionPoint::RIGHT, delayIndex);
             SetBomb(ExplodePos[ExplosionPoint::BOTTOM], ExplosionPoint::BOTTOM, delayIndex);
-
+            //ƒXƒRƒA
+            score += score_add * (score_counter * 1.05) * 0.01;
             //‰æ–Ê‚ª—h‚ê‚é
             Mapterrain_correction = { Mapterrain_correction.x + rand() % 4 - 2,Mapterrain_correction.y + rand() % 4 - 2 };
 
@@ -491,6 +510,8 @@ void BG::update()
         }
         else
         {
+            score_add = 0;
+            score_counter = 0;
             //—h‚ê‚½‰æ–Ê‚ğŒ³‚É–ß‚·
             Mapterrain_correction = { 200.0f + 32.0f - 64.0f ,0.0f + 32.0f - 64.0f };
         }
@@ -506,6 +527,7 @@ void BG::update()
             terrain[Cpos.y][Cpos.x] = TerrainStatus::BurningFuse;
         }
     }
+    if (act > 4)finish_game = true;
 
     timer++;
 }
@@ -627,7 +649,7 @@ void BG::drawTerrain()
         {
             for (int y = 0; y < 3; ++y)
             {
-                int pt_bomb = bomb_pattern[bomb_typenum[bomb_array]][bomb_trun[bomb_waitingarea]][y][x];
+                int pt_bomb = bomb_pattern[bomb_typenum[bomb_array]][bomb_trun[bomb_array]][y][x];
                 if (pt_bomb == PatternStatus::IsBomb)
                 {
                     texture::draw(
@@ -646,6 +668,36 @@ void BG::drawTerrain()
     }
 
     texture::end(1);
+
+    texture::begin(2);
+
+    for (int bomb_array = 0; bomb_array < 3; bomb_array++)
+    {
+        for (int x = 0; x < 3; ++x)
+        {
+            for (int y = 0; y < 3; ++y)
+            {
+                int pt_bomb = bomb_pattern[bomb_typenum[bomb_array]][bomb_trun[bomb_array]][y][x];
+                if (pt_bomb == 1)
+                {
+                    texture::draw(
+                        2,
+                        bomb_changepos[bomb_array].x + (x * CHIP_SIZE_F), bomb_changepos[bomb_array].y + (y * CHIP_SIZE_F),
+                        1.0f, 1.0f,
+                        0.0f, 0.0f,
+                        CHIP_SIZE_F, CHIP_SIZE_F,
+                        CHIP_SIZE_F * 0.5f, CHIP_SIZE_F * 0.5f,
+                        0,
+                        1, 1, 1, 1
+                    );
+                }
+            }
+        }
+    }
+
+    texture::end(2);
+    debug::setString("act:%d", act);
+    debug::setString("score:%d", score);
 
     bool isBurningFuse = false;
     for (int x = 0; x < CHIP_NUM_X; x++)
@@ -758,6 +810,9 @@ void BG::SetBomb(DirectX::XMINT2 terrainPos, ExplosionPoint point, int delayInde
     if (!IsAlreadyChanged(terrainPos)) {
         terrain[terrainPos.x][terrainPos.y] = SetExplosionPoint(terrainPos, point, delayIndex);
     }
+    score_add += 10;
+    score_counter++;
+    if (terrainData[terrainPos.x][terrainPos.y].terrain_enduranceC == terrainData[terrainPos.x][terrainPos.y].terrain_endurance)terrainData[terrainPos.x][terrainPos.y].terrain_endurance--;
 }
 
 //--------------------------------

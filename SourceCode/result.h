@@ -1,5 +1,3 @@
-#ifndef INCLUDED_GAME
-#define	INCLUDED_GAME
 
 //******************************************************************************
 //
@@ -16,8 +14,9 @@
 //==============================================================================
 
 #include "bg.h"
+#include "scene.h"
 
-class Game : public Scene
+class Result : public Scene
 {
 public:
     // クラス内での定数の定義の仕方
@@ -25,24 +24,16 @@ public:
     static constexpr float GROUND_POS_Y = 640.0f;
 
 public:
-    static Game* instance() { return &instance_; }
+    static Result* instance() { return &instance_; }
 
     void init();
     void deinit();
     void update();
     void draw();
-
-    void SetStageNum(int stageNum) { this->stageNum = stageNum; }
-
-    int stageNum;
 private:
-    bool                isPaused;
-    float A_timer;
     BG bg;
 
-    static Game instance_;
+    static Result instance_;
 };
 
 //******************************************************************************
-
-#endif // !INCLUDED_GAME

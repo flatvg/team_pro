@@ -120,6 +120,9 @@
     <ClInclude Include="SourceCode\collision.h">
       <Filter>Headers</Filter>
     </ClInclude>
+    <ClInclude Include="SourceCode\result.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="GameLib\primitive.hlsli">
@@ -241,6 +244,9 @@
       <Filter>Sources</Filter>
     </ClCompile>
     <ClCompile Include="SourceCode\collision.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceCode\result.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
   </ItemGroup>
