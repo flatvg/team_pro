@@ -25,6 +25,7 @@ static float(*const ToDegree)(float) = DirectX::XMConvertToDegrees;  // ラジアン
 #define BLACK 1,1,1,1
 
 //画像パス
+#define BACK L"./Data/Images/back.png"
 #define TILE01 L"./Data/Images/test_tile.png"
 #define TILE02 L"./Data/Images/test_tile02.png"
 #define FIRE03 L"./Data/Images/fire03.png"

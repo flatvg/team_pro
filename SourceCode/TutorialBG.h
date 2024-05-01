@@ -4,41 +4,41 @@
 #include "Effect.h"
 #include "focus.h"
 
-enum ExplosionPoint
+class TutorialBG
 {
-    CENTER,
-    LEFT,
-    TOP,
-    RIGHT,
-    BOTTOM,
-};
+public:
+    enum ExplosionPoint
+    {
+        CENTER,
+        LEFT,
+        TOP,
+        RIGHT,
+        BOTTOM,
+    };
 
-enum TerrainStatus
-{
-    UnBreakble = -1,
-    Normal,
-    Bomb,
-    InExplosion,
-    BurningFuse,
-    None
-};
+    enum TerrainStatus
+    {
+        UnBreakble = -1,
+        Normal,
+        Bomb,
+        InExplosion,
+        BurningFuse,
+        None
+    };
 
-enum PatternStatus
-{
-    IsNotBomb,
-    IsBomb
-};
+    enum PatternStatus
+    {
+        IsNotBomb,
+        IsBomb
+    };
 
-enum TexNo
-{
-    Tile01,
-    Tile02,
-    Bomb01,
-    Explosion
-};
-
-class BG
-{
+    enum TexNo
+    {
+        Tile01,
+        Tile02,
+        Bomb01,
+        Explosion
+    };
 public:
     //------< 定数 >------------------------------------------------------------
     static const int CHIP_NUM_X = 14;       // マップの横方向のチップ数
@@ -55,7 +55,7 @@ public:
     static constexpr float HEIGHT = static_cast<float>(CHIP_NUM_Y * CHIP_SIZE);   // マップの高さ（ドット）
 
     //ステージの余白
-    DirectX::XMFLOAT2 Mapterrain_correction{ 200.0f + 32.0f-64.0f ,0.0f + 32.0f- 64.0f };
+    DirectX::XMFLOAT2 Mapterrain_correction{ 200.0f + 32.0f - 64.0f ,0.0f + 32.0f - 64.0f };
     //バクダン初期位置
     DirectX::XMFLOAT2 bomb_defpos[BOMB_NUM] =
     {
@@ -78,12 +78,13 @@ private:
         int explosionTimer;     //爆破時間
         bool isAlredyChanged;   //すでに情報が変更されているか
         bool isChained;         //爆破が連鎖によって引き起こされたか否か
+        bool isPutOn;           //そのブロックがバクダンをおける状態か否か
         int DelayTimer;         //爆発の連鎖をずらす時間
         int terrain_endurance;  //マップタイルの耐久値
         int terrain_enduranceC; //マップタイルの耐久値のチェック用
     };
     //1マスが持つ情報
-    TerrainData terrainData[BG::CHIP_NUM_Y][BG::CHIP_NUM_X];
+    TerrainData terrainData[TutorialBG::CHIP_NUM_Y][TutorialBG::CHIP_NUM_X];
 
     //エフェクトの情報
     struct TerrainEffect
@@ -93,18 +94,18 @@ private:
         int animeMax;
         int animeNum;
         float timer;
-        int tx,ty;
+        int tx, ty;
         float texSizeX;
         float playSpeed;
     };
-    TerrainEffect TerrainExplosion[BG::CHIP_NUM_Y][BG::CHIP_NUM_X];
+    TerrainEffect TerrainExplosion[TutorialBG::CHIP_NUM_Y][TutorialBG::CHIP_NUM_X];
 
-    TerrainEffect TerrainBomb[BG::CHIP_NUM_Y][BG::CHIP_NUM_X];
+    TerrainEffect TerrainBomb[TutorialBG::CHIP_NUM_Y][TutorialBG::CHIP_NUM_X];
 
 
 public:
-    BG();
-    ~BG();
+    TutorialBG();
+    ~TutorialBG();
 
     // 初期化
     void init(int stagenum);
@@ -127,8 +128,11 @@ public:
     //爆弾をドロップ
     void dropBomb();
 
+    //そのブロックにバクダンが設置可能か
+    bool isPutOn();
+
     //エフェクトを更新
-    void updateEffect(TerrainEffect &effect);
+    void updateEffect(TerrainEffect& effect);
 
     //爆発箇所計算
     DirectX::XMINT2 CalcExplosionPoint(DirectX::XMINT2 BaseExplosionPoint, ExplosionPoint point);
@@ -139,7 +143,7 @@ public:
     DirectX::XMINT2 CalcBottomPoint(DirectX::XMINT2 BaseExplosionPoint);
 
     //爆発箇所を確定させる
-    int SetExplosionPoint(DirectX::XMINT2 explosionPoint, ExplosionPoint point , int delayIndex);
+    int SetExplosionPoint(DirectX::XMINT2 explosionPoint, ExplosionPoint point, int delayIndex);
     int SetCenterPoint(int center, DirectX::XMINT2 centerPos, int delayIndex);
     int SetLeftPoint(int center, int left, DirectX::XMINT2 leftPos, DirectX::XMINT2 centerPos, int delayIndex);
     int SetTopPoint(int center, int top, DirectX::XMINT2 topPos, DirectX::XMINT2 centerPos, int delayIndex);
@@ -197,4 +201,7 @@ private:
     bool unFocusFlag;
 
     std::unique_ptr<Focus> focus;
+
+    VECTOR2 circlePos;
+    float circleAngle;
 };

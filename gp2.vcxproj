@@ -176,6 +176,7 @@
     <ClInclude Include="SourceCode\collision.h" />
     <ClInclude Include="SourceCode\common.h" />
     <ClInclude Include="SourceCode\Effect.h" />
+    <ClInclude Include="SourceCode\focus.h" />
     <ClInclude Include="SourceCode\game.h" />
     <ClInclude Include="SourceCode\obj2d.h" />
     <ClInclude Include="SourceCode\result.h" />
@@ -183,6 +184,8 @@
     <ClInclude Include="SourceCode\select.h" />
     <ClInclude Include="SourceCode\sprite_data.h" />
     <ClInclude Include="SourceCode\title.h" />
+    <ClInclude Include="SourceCode\tutorial.h" />
+    <ClInclude Include="SourceCode\TutorialBG.h" />
     <ClInclude Include="SourceCode\work.h" />
   </ItemGroup>
   <ItemGroup>
@@ -293,6 +296,7 @@
     <ClCompile Include="SourceCode\bomb.cpp" />
     <ClCompile Include="SourceCode\collision.cpp" />
     <ClCompile Include="SourceCode\Effect.cpp" />
+    <ClCompile Include="SourceCode\focus.cpp" />
     <ClCompile Include="SourceCode\game.cpp" />
     <ClCompile Include="SourceCode\main.cpp" />
     <ClCompile Include="SourceCode\obj2d.cpp" />
@@ -301,6 +305,8 @@
     <ClCompile Include="SourceCode\select.cpp" />
     <ClCompile Include="SourceCode\sprite_data.cpp" />
     <ClCompile Include="SourceCode\title.cpp" />
+    <ClCompile Include="SourceCode\tutorial.cpp" />
+    <ClCompile Include="SourceCode\TutorialBG.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

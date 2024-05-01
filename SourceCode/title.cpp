@@ -14,6 +14,7 @@
 #include "title.h"
 #include "select.h"
 #include "game.h"
+#include "tutorial.h"
 #include "Effect.h"
 #include "collision.h"
 
@@ -48,6 +49,10 @@ void Title::draw_init_status()
     title_draw.scale = game_draw.scale = tutorial_draw.scale = { 1,1 };
     title_draw.angle = game_draw.angle = tutorial_draw.angle = 0;
     title_draw.color = game_draw.color = tutorial_draw.color = { 1,1,1,1 };
+
+    //flag
+    isGame = false;
+    isTutorial = false;
 }
 
 void Title::init()
@@ -102,9 +107,20 @@ void Title::update()
         {
             game_draw.scale = { 1.3f,1.3f };
 
-            if (TRG(0) & PAD_LC) // PAD_TRG1が押されたら
+            if (TRG(0) & PAD_LC && !isTutorial)
             {
                 A_timer += 0.1f;
+                isGame = true;
+            }
+        }
+        //tutorial
+        else if (collision_center(cursorPos, tutorial_draw.position, tutorial_draw.center))
+        {
+            tutorial_draw.scale = { 1.2f,1.2f };
+            if (TRG(0) & PAD_LC && !isGame)
+            {
+                A_timer += 0.1f;
+                isTutorial = true;
             }
         }
         if (A_timer > 0.0f)
@@ -112,14 +128,18 @@ void Title::update()
             A_timer += 0.01f;
             if (A_timer > 1.0f)
             {
-                changeScene(Game::instance());  // ゲームシーンに切り替え
+                // ゲームシーンに切り替え
+                if (isGame)
+                {
+                    changeScene(Select::instance());
+                }
+                else if(isTutorial)
+                {
+                    changeScene(Tutorial::instance());
+                }
             }
         }
-        //tutorial
-        else if (collision_center(cursorPos, tutorial_draw.position, tutorial_draw.center))
-        {
-            tutorial_draw.scale = { 1.2f,1.2f };
-        }
+
 
         //タイトル拡縮
         float timer_float = static_cast<float>(timer);
@@ -188,7 +208,7 @@ void Title::draw()
     GameLib::clear(VECTOR4(0.2f, 0.3f, 1.0f, 1));
 
     //背景画面表示
-    title = sprite_load(L"./Data/Images/back.png");
+    title = sprite_load(BACK);
     sprite_render(title, 0.0f, 0.0f, 2.0f, 1.5f, 0, 0, 640, 480, ToRadian(0));
 
     // タイトル表示

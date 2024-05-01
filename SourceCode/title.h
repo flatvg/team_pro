@@ -52,6 +52,9 @@ private:
     float title_timer;
     float A_timer;
     float slide_x;
+
+    bool isGame;
+    bool isTutorial;
 };
 
 //******************************************************************************

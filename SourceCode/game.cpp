@@ -97,24 +97,24 @@ void Game::update()
             //////// 通常時の処理 ////////
             bg.update();
             //エフェクトの生成
-            if (TRG(0) & PAD_TRG1) {
-                for (auto& effect : effects_fire) {
-                    if (!effect.exist) {
-                        effect.exist = true;
-                        effect.pos = { 300.0f, 200.0f };
-                        break;
-                    }
-                }
-            }
-            if (TRG(0) & PAD_TRG4) {
-                for (auto& effect : effects_bomb) {
-                    if (!effect.exist) {
-                        effect.exist = true;
-                        effect.pos = { 700.0f, 200.0f };
-                        break;
-                    }
-                }
-            }
+            //if (TRG(0) & PAD_TRG1) {
+            //    for (auto& effect : effects_fire) {
+            //        if (!effect.exist) {
+            //            effect.exist = true;
+            //            effect.pos = { 300.0f, 200.0f };
+            //            break;
+            //        }
+            //    }
+            //}
+            //if (TRG(0) & PAD_TRG4) {
+            //    for (auto& effect : effects_bomb) {
+            //        if (!effect.exist) {
+            //            effect.exist = true;
+            //            effect.pos = { 700.0f, 200.0f };
+            //            break;
+            //        }
+            //    }
+            //}
             timer++;
 
             break;

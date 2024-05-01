@@ -123,6 +123,15 @@
     <ClInclude Include="SourceCode\result.h">
       <Filter>Headers</Filter>
     </ClInclude>
+    <ClInclude Include="SourceCode\focus.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceCode\tutorial.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceCode\TutorialBG.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="GameLib\primitive.hlsli">
@@ -247,6 +256,15 @@
       <Filter>Sources</Filter>
     </ClCompile>
     <ClCompile Include="SourceCode\result.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceCode\focus.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceCode\tutorial.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceCode\TutorialBG.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
   </ItemGroup>
