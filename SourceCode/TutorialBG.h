@@ -7,6 +7,7 @@
 class TutorialBG
 {
 public:
+    //enum class出ないものはint型としても使いたいのでenum classを使わない
     enum ExplosionPoint
     {
         CENTER,
@@ -39,11 +40,18 @@ public:
         Bomb01,
         Explosion
     };
+
+    enum class MoveType
+    {
+        StartToInGame,
+        InGameToEnd
+    };
 public:
     //------< 定数 >------------------------------------------------------------
+    static const int STAGE_NUM = 4;         // ステージ数
     static const int CHIP_NUM_X = 14;       // マップの横方向のチップ数
     static const int CHIP_NUM_Y = 12;       // マップの縦方向のチップ数
-    static const int CHIP_SIZE = 64;       // %演算子を使用するためint型を使用する
+    static const int CHIP_SIZE = 64;        // %演算子を使用するためint型を使用する
     DirectX::XMFLOAT2 chip_size_xmfloat2 = { CHIP_SIZE * 0.5 ,CHIP_SIZE * 0.5 };
     static const int EXPLOSION_CHIP_NUM = 5;
     static const int BOMB_NUM = 3;
@@ -74,17 +82,21 @@ private:
     //------< 変数 >------------------------------------------------------------
     struct TerrainData
     {
-        int status;             //状態
-        int explosionTimer;     //爆破時間
-        bool isAlredyChanged;   //すでに情報が変更されているか
-        bool isChained;         //爆破が連鎖によって引き起こされたか否か
-        bool isPutOn;           //そのブロックがバクダンをおける状態か否か
-        int DelayTimer;         //爆発の連鎖をずらす時間
-        int terrain_endurance;  //マップタイルの耐久値
-        int terrain_enduranceC; //マップタイルの耐久値のチェック用
+        DirectX::XMFLOAT2 startPos;    //画面下の位置
+        DirectX::XMFLOAT2 inGamePos;   //画面中央の位置
+        DirectX::XMFLOAT2 endPos;      //画面上の位置
+        DirectX::XMFLOAT2 pos;         //現在の位置
+        int status;                    //状態
+        int explosionTimer;            //爆破時間
+        bool isAlredyChanged;          //すでに情報が変更されているか
+        bool isChained;                //爆破が連鎖によって引き起こされたか否か
+        bool isPutOn;                  //そのブロックがバクダンをおける状態か否か
+        int DelayTimer;                //爆発の連鎖をずらす時間
+        int terrain_endurance;         //マップタイルの耐久値
+        int terrain_enduranceC;        //マップタイルの耐久値のチェック用
     };
     //1マスが持つ情報
-    TerrainData terrainData[TutorialBG::CHIP_NUM_Y][TutorialBG::CHIP_NUM_X];
+    TerrainData terrainData[TutorialBG::STAGE_NUM][TutorialBG::CHIP_NUM_Y][TutorialBG::CHIP_NUM_X];
 
     //エフェクトの情報
     struct TerrainEffect
@@ -98,9 +110,9 @@ private:
         float texSizeX;
         float playSpeed;
     };
-    TerrainEffect TerrainExplosion[TutorialBG::CHIP_NUM_Y][TutorialBG::CHIP_NUM_X];
+    TerrainEffect TerrainExplosion[TutorialBG::STAGE_NUM][TutorialBG::CHIP_NUM_Y][TutorialBG::CHIP_NUM_X];
 
-    TerrainEffect TerrainBomb[TutorialBG::CHIP_NUM_Y][TutorialBG::CHIP_NUM_X];
+    TerrainEffect TerrainBomb[TutorialBG::STAGE_NUM][TutorialBG::CHIP_NUM_Y][TutorialBG::CHIP_NUM_X];
 
 
 public:
@@ -129,7 +141,14 @@ public:
     void dropBomb();
 
     //そのブロックにバクダンが設置可能か
-    bool isPutOn();
+    void SetIsPutOn();
+
+    bool IsPutOn(int y, int x);
+
+    bool SearchAdjacentTerrain(int status);
+
+    //ステージを移動
+    void moveStage(int stageNum, MoveType moveType);
 
     //エフェクトを更新
     void updateEffect(TerrainEffect& effect);
@@ -165,6 +184,9 @@ public:
     //terrainの初期化
     void InitTerrain(TerrainStatus terrainStatus, DirectX::XMINT2 terrainPos);
     void InitTerrain(TerrainStatus terrainStatus, int x, int y);
+
+    //terrainのpositionの設定
+    void SetTerrainPos(DirectX::XMINT2 terrainPos, int stageNum);
 
     bool finish_game;
 
@@ -204,4 +226,8 @@ private:
 
     VECTOR2 circlePos;
     float circleAngle;
+
+    bool moveTrg;
+
+    int nowStage = 0;
 };
