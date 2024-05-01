@@ -26,8 +26,6 @@ public:
     VECTOR2 pos;
     DirectX::XMINT2 Cpos;
     int animeNum = 0;
-
-private:
     int tx, ty;
 };
 

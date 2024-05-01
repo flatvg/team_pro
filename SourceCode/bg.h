@@ -27,6 +27,14 @@ enum PatternStatus
     IsBomb
 };
 
+enum TexNo
+{
+    Tile01,
+    Tile02,
+    Bomb01,
+    Explosion
+};
+
 class BG
 {
 public:
@@ -75,17 +83,22 @@ private:
     //1マスが持つ情報
     TerrainData terrainData[BG::CHIP_NUM_Y][BG::CHIP_NUM_X];
 
+    //エフェクトの情報
     struct TerrainEffect
     {
         DirectX::XMFLOAT2 pos;
         bool exist;
         int animeMax;
         int animeNum;
-        int timer;
+        float timer;
         int tx,ty;
         float texSizeX;
+        float playSpeed;
     };
+    TerrainEffect TerrainExplosion[BG::CHIP_NUM_Y][BG::CHIP_NUM_X];
+
     TerrainEffect TerrainBomb[BG::CHIP_NUM_Y][BG::CHIP_NUM_X];
+
 
 public:
     BG();
@@ -111,6 +124,9 @@ public:
 
     //爆弾をドロップ
     void dropBomb();
+
+    //エフェクトを更新
+    void updateEffect(TerrainEffect &effect);
 
     //爆発箇所計算
     DirectX::XMINT2 CalcExplosionPoint(DirectX::XMINT2 BaseExplosionPoint, ExplosionPoint point);
@@ -150,8 +166,8 @@ private:
 
     int stageNum;
     int timer;                      //全体の時間
-    int explosionTime = 60;         //爆発が残留する時間
-    int delayTime = 15;             //爆発の連鎖する間隔
+    int explosionTime = 50;         //爆発が残留する時間
+    int delayTime = 20;             //爆発の連鎖する間隔
     int operatbleCursorTime = 5;    //誤操作を防ぐための操作不能時間
     DirectX::XMFLOAT2  cursorPos;   //カーソルの位置
     bool drag_con = false;

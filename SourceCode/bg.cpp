@@ -313,7 +313,9 @@ BG::~BG()
 void BG::init(int stagenum)
 {
     static GameLib::Sprite* effect_explosion = nullptr;
+    static GameLib::Sprite* effect_bomb      = nullptr;
     effect_explosion = sprite_load(EXPLOSION);
+    effect_bomb      = sprite_load(BOMB01);
 
     //地形データterrain_backをbomb地形データterrainに代入する
     for (int x = 0; x < CHIP_NUM_X; x++)
@@ -333,23 +335,32 @@ void BG::init(int stagenum)
             }
 
             //エフェクトの情報を初期化
+            TerrainExplosion[y][x].pos = DirectX::XMFLOAT2(x * CHIP_SIZE_F, y * CHIP_SIZE_F);
+            TerrainExplosion[y][x].timer = 0;
+            TerrainExplosion[y][x].animeMax = 7;
+            TerrainExplosion[y][x].animeNum = 0;
+            TerrainExplosion[y][x].exist = false;
+            TerrainExplosion[y][x].playSpeed = 1.0f;
+            effect_explosion->getSize(TerrainExplosion[y][x].tx, TerrainExplosion[y][x].ty);
+            TerrainExplosion[y][x].texSizeX = TerrainExplosion[y][x].tx / TerrainExplosion[y][x].animeMax;
+
             TerrainBomb[y][x].pos = DirectX::XMFLOAT2(x * CHIP_SIZE_F, y * CHIP_SIZE_F);
             TerrainBomb[y][x].timer = 0;
-            TerrainBomb[y][x].animeMax = 7;
+            TerrainBomb[y][x].animeMax = 4;
             TerrainBomb[y][x].animeNum = 0;
-            TerrainBomb[y][x].exist = false;
-            effect_explosion->getSize(TerrainBomb[y][x].tx, TerrainBomb[y][x].ty);
-            TerrainBomb[y][x].texSizeX = TerrainBomb[y][x].tx / TerrainBomb[y][x].animeMax;
+            TerrainBomb[y][x].exist = true;
+            TerrainBomb[y][x].playSpeed = 0.4f;
+            effect_bomb->getSize(TerrainBomb[y][x].tx, TerrainBomb[y][x].ty);
+            TerrainBomb[y][x].texSizeX = static_cast<float>(TerrainBomb[y][x].tx - 122.0f) / TerrainBomb[y][x].animeMax;
         }
     }
-
-
+    delete effect_bomb;
     delete effect_explosion;
 
-    texture::load(0, L"./Data/Images/test_tile.png", 256U);    //背景
-    texture::load(1, L"./Data/Images/test_tile02.png", 256U);    //背景
-    texture::load(2, BOMB01, 256U);       //爆弾
-    texture::load(3, EXPLOSION, 256U);    //爆発
+    texture::load(Tile01, TILE01, 256U);    //背景
+    texture::load(Tile02, TILE02, 256U);    //背景
+    texture::load(Bomb01, BOMB01, 256U);       //爆弾
+    texture::load(Explosion, EXPLOSION, 256U);    //爆発
 
     //バクダンの種類を初期化
     for (int i = 0; i < BOMB_TYPE_MAX; i++)
@@ -542,22 +553,9 @@ void BG::update()
     {
         for (int y = 0; y < CHIP_NUM_Y; y++)
         {
-            if (TerrainBomb[y][x].exist)
-            {
-                TerrainBomb[y][x].timer++;
-
-                if (TerrainBomb[y][x].timer > (TerrainBomb[y][x].tx / TerrainBomb[y][x].texSizeX))
-                {
-                    TerrainBomb[y][x].timer = 0;
-                    TerrainBomb[y][x].animeNum++;
-                    if (TerrainBomb[y][x].animeNum > TerrainBomb[y][x].animeMax)
-                    {
-                        TerrainBomb[y][x].timer = 0;
-                        TerrainBomb[y][x].animeNum = 0;
-                        TerrainBomb[y][x].exist = false;
-                    }
-                }
-            }
+            updateEffect(TerrainExplosion[y][x]);
+            TerrainBomb[y][x].exist = true;
+            updateEffect(TerrainBomb[y][x]);
         }
     }
 
@@ -572,14 +570,14 @@ void BG::update()
 void BG::drawTerrain()
 {
     //マップ
-    texture::begin(0);
+    texture::begin(Tile01);
     for (int x = 0; x < CHIP_NUM_X; x++)
     {
         for (int y = 0; y < CHIP_NUM_Y; y++)
         {
             float a = terrain_back[0][y][x];
             texture::draw(
-                0,
+                TexNo::Tile01,
                 Mapterrain_correction.x + (x * CHIP_SIZE_F), Mapterrain_correction.y + (y * CHIP_SIZE_F),
                 1.0, 1.0,
                 CHIP_SIZE_F * a, 0,
@@ -587,10 +585,10 @@ void BG::drawTerrain()
             );
         }
     }
-    texture::end(0);
+    texture::end(Tile01);
 
     //バクダン
-    texture::begin(1);
+    texture::begin(Tile02);
     for (int x = 0; x < CHIP_NUM_X; x++)
     {
         for (int y = 0; y < CHIP_NUM_Y; y++)
@@ -598,48 +596,48 @@ void BG::drawTerrain()
             if (terrainData[y][x].status == TerrainStatus::Bomb)
             {
                 //バクダンの描画
-                texture::draw(
-                    1,
-                    Mapterrain_correction.x + (x * CHIP_SIZE_F), Mapterrain_correction.y + (y * CHIP_SIZE_F),
-                    1.0f, 1.0f,
-                    0, 0,
-                    CHIP_SIZE_F, CHIP_SIZE_F,
-                    0, 0,
-                    0,
-                    RED
-                );
+                //texture::draw(
+                //    TexNo::Tile02,
+                //    Mapterrain_correction.x + (x * CHIP_SIZE_F), Mapterrain_correction.y + (y * CHIP_SIZE_F),
+                //    1.0f, 1.0f,
+                //    0, 0,
+                //    CHIP_SIZE_F, CHIP_SIZE_F,
+                //    0, 0,
+                //    0,
+                //    RED
+                //);
             }
             if(terrainData[y][x].status == TerrainStatus::InExplosion)
             {
                 if (terrainData[y][x].DelayTimer < 0)
                 {
-                    TerrainBomb[y][x].exist = true;
+                    TerrainExplosion[y][x].exist = true;
                     //連鎖するための時間のずらしが完了したので爆発を描画
-                    texture::draw(
-                        1,
-                        Mapterrain_correction.x + (x * CHIP_SIZE_F), Mapterrain_correction.y + (y * CHIP_SIZE_F),
-                        1.0f, 1.0f,
-                        0, 0,
-                        CHIP_SIZE_F, CHIP_SIZE_F,
-                        0, 0,
-                        0,
-                        BLUE
-                    );
+                    //texture::draw(
+                    //    TexNo::Tile02,
+                    //    Mapterrain_correction.x + (x * CHIP_SIZE_F), Mapterrain_correction.y + (y * CHIP_SIZE_F),
+                    //    1.0f, 1.0f,
+                    //    0, 0,
+                    //    CHIP_SIZE_F, CHIP_SIZE_F,
+                    //    0, 0,
+                    //    0,
+                    //    BLUE
+                    //);
                     terrainData[y][x].explosionTimer--;
                 }
                 else if(!terrainData[y][x].isChained)
                 {
                     //爆発の連鎖が始まったが、まだ爆発していないバクダンの描画
-                    texture::draw(
-                        1,
-                        Mapterrain_correction.x + (x * CHIP_SIZE_F), Mapterrain_correction.y + (y * CHIP_SIZE_F),
-                        1.0f, 1.0f,
-                        0, 0,
-                        CHIP_SIZE_F, CHIP_SIZE_F,
-                        0, 0,
-                        0,
-                        RED
-                    );
+                    //texture::draw(
+                    //    TexNo::Tile02,
+                    //    Mapterrain_correction.x + (x * CHIP_SIZE_F), Mapterrain_correction.y + (y * CHIP_SIZE_F),
+                    //    1.0f, 1.0f,
+                    //    0, 0,
+                    //    CHIP_SIZE_F, CHIP_SIZE_F,
+                    //    0, 0,
+                    //    0,
+                    //    RED
+                    //);
                 }
                 if (terrainData[y][x].isAlredyChanged)
                 {
@@ -652,16 +650,16 @@ void BG::drawTerrain()
                 if (burningFuse.Cpos.x == x && burningFuse.Cpos.y == y)
                 {
                     //導火線の描画
-                    texture::draw(
-                        1,
-                        Mapterrain_correction.x + (x * CHIP_SIZE_F), Mapterrain_correction.y + (y * CHIP_SIZE_F),
-                        1.0f, 1.0f,
-                        0, 0,
-                        CHIP_SIZE_F, CHIP_SIZE_F,
-                        0, 0,
-                        0,
-                        GREEN
-                    );
+                    //texture::draw(
+                    //    TexNo::Tile02,
+                    //    Mapterrain_correction.x + (x * CHIP_SIZE_F), Mapterrain_correction.y + (y * CHIP_SIZE_F),
+                    //    1.0f, 1.0f,
+                    //    0, 0,
+                    //    CHIP_SIZE_F, CHIP_SIZE_F,
+                    //    0, 0,
+                    //    0,
+                    //    GREEN
+                    //);
                 }
                 else
                 {
@@ -674,7 +672,7 @@ void BG::drawTerrain()
                 //爆発が終了したのでterrainの状態を初期化する
                 InitTerrain(TerrainStatus::Normal, x, y);
 
-                TerrainBomb[y][x].exist = false;
+                TerrainExplosion[y][x].exist = false;
             }
         }
     }
@@ -690,7 +688,7 @@ void BG::drawTerrain()
                 if (pt_bomb == PatternStatus::IsBomb)
                 {
                     texture::draw(
-                        1,
+                        TexNo::Tile02,
                         bomb_changepos[bomb_array].x + (x * CHIP_SIZE_F), bomb_changepos[bomb_array].y + (y * CHIP_SIZE_F),
                         1.0f, 1.0f,
                         0, 0,
@@ -704,9 +702,9 @@ void BG::drawTerrain()
         }
     }
 
-    texture::end(1);
+    texture::end(Tile02);
 
-    texture::begin(2);
+    texture::begin(Bomb01);
 
     for (int bomb_array = 0; bomb_array < 3; bomb_array++)
     {
@@ -718,7 +716,7 @@ void BG::drawTerrain()
                 if (pt_bomb == 1)
                 {
                     texture::draw(
-                        2,
+                        TexNo::Bomb01,
                         bomb_changepos[bomb_array].x + (x * CHIP_SIZE_F), bomb_changepos[bomb_array].y + (y * CHIP_SIZE_F),
                         1.0f, 1.0f,
                         0.0f, 0.0f,
@@ -732,23 +730,61 @@ void BG::drawTerrain()
         }
     }
 
-    texture::end(2);
-    debug::setString("act:%d", act);
-    debug::setString("score:%d", score);
-
-    texture::begin(3);
     for (int x = 0; x < CHIP_NUM_X; x++)
     {
         for (int y = 0; y < CHIP_NUM_Y; y++)
         {
-            if (TerrainBomb[y][x].exist)
+            if ((terrainData[y][x].status == TerrainStatus::Bomb) || (terrainData[y][x].status == TerrainStatus::InExplosion && !terrainData[y][x].isChained) && terrainData[y][x].DelayTimer >= 25)
             {
                 texture::draw(
-                    3,
+                    TexNo::Bomb01,
                     Mapterrain_correction.x + TerrainBomb[y][x].pos.x + CHIP_SIZE_F / 2, Mapterrain_correction.y + TerrainBomb[y][x].pos.y + CHIP_SIZE_F / 2,
+                    1.0f, 1.0f,
+                    0.0f, 0.0f,
+                    CHIP_SIZE_F, CHIP_SIZE_F,
+                    CHIP_SIZE_F * 0.5f, CHIP_SIZE_F * 0.5f,
+                    0,
+                    1, 1, 1, 1
+                );
+            }
+            if (terrainData[y][x].status == TerrainStatus::InExplosion && !terrainData[y][x].isChained)
+            {
+                if (!terrainData[y][x].isChained && terrainData[y][x].DelayTimer < 25)
+                {
+                    //爆発の連鎖が始まったが、まだ爆発していないバクダンの描画
+                    texture::draw(
+                        TexNo::Bomb01,
+                        Mapterrain_correction.x + TerrainBomb[y][x].pos.x + CHIP_SIZE_F / 2, Mapterrain_correction.y + TerrainBomb[y][x].pos.y + CHIP_SIZE_F / 2,
+                        1.0f, 1.0f,
+                        TerrainBomb[y][x].texSizeX * TerrainBomb[y][x].animeNum, 0.0f,
+                        TerrainBomb[y][x].texSizeX, TerrainBomb[y][x].ty / 10,
+                        CHIP_SIZE_F * 0.5f, CHIP_SIZE_F * 0.5f,
+                        0,
+                        1, 1, 1, 1
+                    );
+                }
+            }
+        }
+    }
+
+    texture::end(Bomb01);
+
+    debug::setString("act:%d", act);
+    debug::setString("score:%d", score);
+
+    texture::begin(Explosion);
+    for (int x = 0; x < CHIP_NUM_X; x++)
+    {
+        for (int y = 0; y < CHIP_NUM_Y; y++)
+        {
+            if (TerrainExplosion[y][x].exist)
+            {
+                texture::draw(
+                    TexNo::Explosion,
+                    Mapterrain_correction.x + TerrainExplosion[y][x].pos.x + CHIP_SIZE_F / 2, Mapterrain_correction.y + TerrainExplosion[y][x].pos.y + CHIP_SIZE_F / 2,
                     0.8f, 0.8f,
-                    TerrainBomb[y][x].texSizeX * TerrainBomb[y][x].animeNum, 0.0f,
-                    TerrainBomb[y][x].texSizeX, TerrainBomb[y][x].ty,
+                    TerrainExplosion[y][x].texSizeX * TerrainExplosion[y][x].animeNum, 0.0f,
+                    TerrainExplosion[y][x].texSizeX, TerrainExplosion[y][x].ty,
                     120.0f / 2, 120.0f / 2,
                     0,
                     1, 1, 1, 1
@@ -756,7 +792,7 @@ void BG::drawTerrain()
             }
         }
     }
-    texture::end(3);
+    texture::end(Explosion);
 
     bool isBurningFuse = false;
     for (int x = 0; x < CHIP_NUM_X; x++)
@@ -771,7 +807,7 @@ void BG::drawTerrain()
     burningFuse.exist = isBurningFuse ? true : false;
 
     static GameLib::Sprite* fire_image = nullptr;
-    fire_image = sprite_load(L"./Data/Images/fire03.png");
+    fire_image = sprite_load(FIRE03);
 
     if (burningFuse.exist)
     {
@@ -914,6 +950,29 @@ void BG::SetTerrainData(DirectX::XMINT2 terrainPos, int delayIndex)
     {
         terrainData[terrainPos.x][terrainPos.y].DelayTimer = delayIndex * delayTime;
         terrainData[terrainPos.x][terrainPos.y].isAlredyChanged = true;
+    }
+}
+
+//--------------------------------
+//  エフェクトを更新
+//--------------------------------
+void BG::updateEffect(TerrainEffect &effect)
+{
+    if (effect.exist)
+    {
+        effect.timer += effect.playSpeed;
+
+        if (effect.timer > (effect.tx / effect.texSizeX))
+        {
+            effect.timer = 0;
+            effect.animeNum++;
+            if (effect.animeNum > effect.animeMax)
+            {
+                effect.timer = 0;
+                effect.animeNum = 0;
+                effect.exist = false;
+            }
+        }
     }
 }
 
