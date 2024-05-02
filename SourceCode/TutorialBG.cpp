@@ -1104,9 +1104,19 @@ void TutorialBG::InitTerrain(TerrainStatus terrainStatus, int x, int y)
 
 void TutorialBG::SetTerrainPos(DirectX::XMINT2 terrainPos, int stageNum)
 {
-    DirectX::XMINT2 statPos;
-    DirectX::XMINT2 inGamePos;
-    DirectX::XMINT2 endPos;
+    DirectX::XMFLOAT2 startPos;
+    DirectX::XMFLOAT2 inGamePos;
+    DirectX::XMFLOAT2 endPos;
+
+    inGamePos = XMFLOAT2(
+        Mapterrain_correction.x + (terrainPos.x * CHIP_SIZE_F),
+        Mapterrain_correction.y + (terrainPos.y * CHIP_SIZE_F));
+    startPos = XMFLOAT2(
+        inGamePos.x,
+        inGamePos.y + static_cast<float>(window::getHeight()));
+    endPos = XMFLOAT2(
+        startPos.x,
+        startPos.y - static_cast<float>(window::getHeight()));
 
     terrainData[nowStage][terrainPos.y][terrainPos.x].startPos = DirectX::XMFLOAT2(
         Mapterrain_correction.x + (terrainPos.x * CHIP_SIZE_F),
