@@ -621,7 +621,7 @@ void TutorialBG::drawTerrain()
             float a = terrain_back_T[0][y][x];
             texture::draw(
                 TexNo::Tile01,
-                terrainData[nowStage][y][x].pos.x, terrainData[nowStage][y][x].pos.y,
+                terrainData[nowStage][y][x].currentPos.x, terrainData[nowStage][y][x].currentPos.y,
                 1.0, 1.0,
                 CHIP_SIZE_F * a, 0,
                 CHIP_SIZE_F * (a + 1), CHIP_SIZE_F
@@ -640,7 +640,7 @@ void TutorialBG::drawTerrain()
             {
                 texture::draw(
                     TexNo::Tile02,
-                    terrainData[nowStage][y][x].pos.x, terrainData[nowStage][y][x].pos.y,
+                    terrainData[nowStage][y][x].currentPos.x, terrainData[nowStage][y][x].currentPos.y,
                     1.0f, 1.0f,
                     0, 0,
                     CHIP_SIZE_F, CHIP_SIZE_F,
@@ -795,7 +795,7 @@ void TutorialBG::drawTerrain()
                 texture::draw(
                     TexNo::Bomb01,
                     /*Mapterrain_correction.x + TerrainBomb[y][x].pos.x + CHIP_SIZE_F / 2, Mapterrain_correction.y + TerrainBomb[y][x].pos.y + CHIP_SIZE_F / 2,*/
-                    terrainData[nowStage][y][x].pos.x, terrainData[nowStage][y][x].pos.y,
+                    terrainData[nowStage][y][x].currentPos.x, terrainData[nowStage][y][x].currentPos.y,
                     1.0f, 1.0f,
                     0.0f, 0.0f,
                     CHIP_SIZE_F, CHIP_SIZE_F,
@@ -812,7 +812,7 @@ void TutorialBG::drawTerrain()
                     texture::draw(
                         TexNo::Bomb01,
                         /*Mapterrain_correction.x + TerrainBomb[y][x].pos.x + CHIP_SIZE_F / 2, Mapterrain_correction.y + TerrainBomb[y][x].pos.y + CHIP_SIZE_F / 2,*/
-                        terrainData[nowStage][y][x].pos.x, terrainData[nowStage][y][x].pos.y,
+                        terrainData[nowStage][y][x].currentPos.x, terrainData[nowStage][y][x].currentPos.y,
                         1.0f, 1.0f,
                         TerrainBomb[nowStage][y][x].texSizeX * TerrainBomb[nowStage][y][x].animeNum, 0.0f,
                         TerrainBomb[nowStage][y][x].texSizeX, TerrainBomb[nowStage][y][x].ty / 10,
@@ -840,7 +840,7 @@ void TutorialBG::drawTerrain()
                 texture::draw(
                     TexNo::Explosion,
                     /*Mapterrain_correction.x + TerrainExplosion[y][x].pos.x + CHIP_SIZE_F / 2, Mapterrain_correction.y + TerrainExplosion[y][x].pos.y + CHIP_SIZE_F / 2,*/
-                    terrainData[nowStage][y][x].pos.x, terrainData[nowStage][y][x].pos.y,
+                    terrainData[nowStage][y][x].currentPos.x, terrainData[nowStage][y][x].currentPos.y,
                     0.8f, 0.8f,
                     TerrainExplosion[nowStage][y][x].texSizeX * TerrainExplosion[nowStage][y][x].animeNum, 0.0f,
                     TerrainExplosion[nowStage][y][x].texSizeX, TerrainExplosion[nowStage][y][x].ty,
@@ -1030,9 +1030,9 @@ void TutorialBG::moveStage(int stageNum, MoveType moveType)
         {
             for (int y = 0; y < CHIP_NUM_Y; y++)
             {
-                XMVECTOR NowPos = XMVectorSet(terrainData[stageNum][y][x].pos.x, terrainData[stageNum][y][x].pos.y, 0, 0);
+                XMVECTOR NowPos = XMVectorSet(terrainData[stageNum][y][x].currentPos.x, terrainData[stageNum][y][x].currentPos.y, 0, 0);
                 XMVECTOR EndPos = XMVectorSet(terrainData[stageNum][y][x].inGamePos.x, terrainData[stageNum][y][x].inGamePos.y, 0, 0);
-                XMStoreFloat2(&terrainData[stageNum][y][x].pos, XMVectorLerp(NowPos, EndPos, weight));
+                XMStoreFloat2(&terrainData[stageNum][y][x].currentPos, XMVectorLerp(NowPos, EndPos, weight));
             }
         }
         break;
@@ -1041,9 +1041,9 @@ void TutorialBG::moveStage(int stageNum, MoveType moveType)
         {
             for (int y = 0; y < CHIP_NUM_Y; y++)
             {
-                XMVECTOR NowPos = XMVectorSet(terrainData[stageNum][y][x].pos.x, terrainData[stageNum][y][x].pos.y, 0, 0);
+                XMVECTOR NowPos = XMVectorSet(terrainData[stageNum][y][x].currentPos.x, terrainData[stageNum][y][x].currentPos.y, 0, 0);
                 XMVECTOR EndPos = XMVectorSet(terrainData[stageNum][y][x].endPos.x, terrainData[stageNum][y][x].endPos.y, 0, 0);
-                XMStoreFloat2(&terrainData[stageNum][y][x].pos, XMVectorLerp(NowPos, EndPos, weight));
+                XMStoreFloat2(&terrainData[stageNum][y][x].currentPos, XMVectorLerp(NowPos, EndPos, weight));
             }
         }
         break;
@@ -1126,7 +1126,7 @@ void TutorialBG::SetTerrainPos(DirectX::XMINT2 terrainPos, int stageNum)
         terrainData[nowStage][terrainPos.y][terrainPos.x].startPos.x,
         terrainData[nowStage][terrainPos.y][terrainPos.x].startPos.y - static_cast<float>(window::getHeight())
     );
-    terrainData[nowStage][terrainPos.y][terrainPos.x].pos = terrainData[nowStage][terrainPos.y][terrainPos.x].startPos;
+    terrainData[nowStage][terrainPos.y][terrainPos.x].currentPos = terrainData[nowStage][terrainPos.y][terrainPos.x].startPos;
 }
 
 //--------------------------------

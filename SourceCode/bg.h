@@ -34,7 +34,8 @@ enum TexNo
     Tile01,
     Tile02,
     Bomb01,
-    Explosion
+    Explosion,
+    Reset
 };
 
 class BG
@@ -127,6 +128,9 @@ public:
     //爆弾をドロップ
     void dropBomb();
 
+    //バクダンをリセット
+    void resetButton();
+
     //エフェクトを更新
     void updateEffect(TerrainEffect &effect);
 
@@ -179,6 +183,10 @@ private:
     int score;
     int score_add;
     int score_counter;
+
+    DirectX::XMFLOAT2     reset_scale = { 0.45,0.45 };
+    DirectX::XMFLOAT2     reset_pos = { 90,650 };
+    DirectX::XMFLOAT2     reset_center = { 200, 100 };
 
     //ボム関連
     int bomb_typenum[BOMB_TYPE_MAX];

@@ -85,7 +85,7 @@ private:
         DirectX::XMFLOAT2 startPos;    //画面下の位置
         DirectX::XMFLOAT2 inGamePos;   //画面中央の位置
         DirectX::XMFLOAT2 endPos;      //画面上の位置
-        DirectX::XMFLOAT2 pos;         //現在の位置
+        DirectX::XMFLOAT2 currentPos;  //現在の位置
         int status;                    //状態
         int explosionTimer;            //爆破時間
         bool isAlredyChanged;          //すでに情報が変更されているか
