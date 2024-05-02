@@ -473,7 +473,7 @@ void TutorialBG::update()
     if (isInStage)
     {
         //爆弾設置
-        for (int i = 0; i < 2; ++i)//0週目で全部の爆弾読み込んで「隣が壁or爆弾」&「開いてるマスがないと置けない」ことを調べて配置可能なら1週目で配置
+        for (int i = 0; i < 1; ++i)//0週目で全部の爆弾読み込んで「隣が壁or爆弾」&「開いてるマスがないと置けない」ことを調べて配置可能なら1週目で配置
         {
             for (int x = 0; x < 3; ++x)
             {
@@ -1115,18 +1115,16 @@ void TutorialBG::SetTerrainPos(DirectX::XMINT2 terrainPos, int stageNum)
         inGamePos.x,
         inGamePos.y + static_cast<float>(window::getHeight()));
     endPos = XMFLOAT2(
-        startPos.x,
-        startPos.y - static_cast<float>(window::getHeight()));
+        inGamePos.x,
+        inGamePos.y - static_cast<float>(window::getHeight()));
 
-    terrainData[nowStage][terrainPos.y][terrainPos.x].startPos = DirectX::XMFLOAT2(
-        Mapterrain_correction.x + (terrainPos.x * CHIP_SIZE_F),
-        Mapterrain_correction.y + (terrainPos.y * CHIP_SIZE_F)
-    );
-    terrainData[nowStage][terrainPos.y][terrainPos.x].endPos = DirectX::XMFLOAT2(
-        terrainData[nowStage][terrainPos.y][terrainPos.x].startPos.x,
-        terrainData[nowStage][terrainPos.y][terrainPos.x].startPos.y - static_cast<float>(window::getHeight())
-    );
-    terrainData[nowStage][terrainPos.y][terrainPos.x].currentPos = terrainData[nowStage][terrainPos.y][terrainPos.x].startPos;
+    terrainData[stageNum][terrainPos.y][terrainPos.x].startPos = startPos;
+    terrainData[stageNum][terrainPos.y][terrainPos.x].inGamePos = inGamePos;
+    terrainData[stageNum][terrainPos.y][terrainPos.x].endPos = endPos;
+
+    //最初のステージは初期値をimGamePos(画面中央)、それ以外は初期値をstartPos(画面下)にする
+    DirectX::XMFLOAT2 defaultPos = stageNum == 0 ? inGamePos : startPos;
+    terrainData[stageNum][terrainPos.y][terrainPos.x].currentPos = inGamePos;
 }
 
 //--------------------------------
