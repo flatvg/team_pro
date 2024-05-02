@@ -48,7 +48,7 @@ public:
     };
 public:
     //------< 定数 >------------------------------------------------------------
-    static const int STAGE_NUM = 4;         // ステージ数
+    static const int STAGE_NUM = 2;         // ステージ数
     static const int CHIP_NUM_X = 14;       // マップの横方向のチップ数
     static const int CHIP_NUM_Y = 12;       // マップの縦方向のチップ数
     static const int CHIP_SIZE = 64;        // %演算子を使用するためint型を使用する
@@ -143,7 +143,7 @@ public:
     //そのブロックにバクダンが設置可能か
     void SetIsPutOn();
 
-    bool IsPutOn(int y, int x);
+    bool IsPutOn(int s, int y, int x);
 
     bool SearchAdjacentTerrain(int status);
 
@@ -162,28 +162,28 @@ public:
     DirectX::XMINT2 CalcBottomPoint(DirectX::XMINT2 BaseExplosionPoint);
 
     //爆発箇所を確定させる
-    int SetExplosionPoint(DirectX::XMINT2 explosionPoint, ExplosionPoint point, int delayIndex);
-    int SetCenterPoint(int center, DirectX::XMINT2 centerPos, int delayIndex);
-    int SetLeftPoint(int center, int left, DirectX::XMINT2 leftPos, DirectX::XMINT2 centerPos, int delayIndex);
-    int SetTopPoint(int center, int top, DirectX::XMINT2 topPos, DirectX::XMINT2 centerPos, int delayIndex);
-    int SetRightPoint(int center, int right, DirectX::XMINT2 rightPos, DirectX::XMINT2 centerPos, int delayIndex);
-    int SetBottomPoint(int center, int bottom, DirectX::XMINT2 bottomPos, DirectX::XMINT2 centerPos, int delayIndex);
+    int SetExplosionPoint(int stageNum, DirectX::XMINT2 explosionPoint, ExplosionPoint point, int delayIndex);
+    int SetCenterPoint(int stageNum, int center, DirectX::XMINT2 centerPos, int delayIndex);
+    int SetLeftPoint(int stageNum, int center, int left, DirectX::XMINT2 leftPos, DirectX::XMINT2 centerPos, int delayIndex);
+    int SetTopPoint(int stageNum, int center, int top, DirectX::XMINT2 topPos, DirectX::XMINT2 centerPos, int delayIndex);
+    int SetRightPoint(int stageNum, int center, int right, DirectX::XMINT2 rightPos, DirectX::XMINT2 centerPos, int delayIndex);
+    int SetBottomPoint(int stageNum, int center, int bottom, DirectX::XMINT2 bottomPos, DirectX::XMINT2 centerPos, int delayIndex);
 
     //bomb地形の設定
-    void SetTerrainData(DirectX::XMINT2 terrainPos, int delayIndex);
+    void SetTerrainData(int stageNum, DirectX::XMINT2 terrainPos, int delayIndex);
 
     //すでに指定した箇所が変更されているか
-    bool IsAlreadyChanged(DirectX::XMINT2 terrainPos);
+    bool IsAlreadyChanged(int stageNum, DirectX::XMINT2 terrainPos);
 
     //バクダンを設置
-    void SetBomb(DirectX::XMINT2 terrainPos, ExplosionPoint point, int delayIndex);
+    void SetBomb(int stageNum, DirectX::XMINT2 terrainPos, ExplosionPoint point, int delayIndex);
 
     //連鎖が終わる
-    void finishChain(DirectX::XMINT2 terrainPos);
+    void finishChain(int stageNum, DirectX::XMINT2 terrainPos);
 
     //terrainの初期化
-    void InitTerrain(TerrainStatus terrainStatus, DirectX::XMINT2 terrainPos);
-    void InitTerrain(TerrainStatus terrainStatus, int x, int y);
+    void InitTerrain(TerrainStatus terrainStatus, int stageNum, DirectX::XMINT2 terrainPos);
+    void InitTerrain(TerrainStatus terrainStatus, int s, int x, int y);
 
     //terrainのpositionの設定
     void SetTerrainPos(DirectX::XMINT2 terrainPos, int stageNum);
