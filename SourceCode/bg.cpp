@@ -446,25 +446,13 @@ void BG::update()
     DirectX::XMINT2 ExplodePos[EXPLOSION_CHIP_NUM] = {};
 
     //爆弾を置いた後のリセット
-    if (bomb_reset)
-    {
-        bomb_changepos[bomb_waitingarea] = bomb_defpos[bomb_waitingarea];//位置を初期位置に戻す
-
-        //爆弾の種類を変える
-        int  defnum = bomb_typenum[bomb_waitingarea];
-        bomb_typenum[bomb_waitingarea] = bomb_numchanger(bomb_typenum[bomb_waitingarea], defnum);
-        bomb_trun[bomb_waitingarea] = 0;//回転を初期角度に戻す
-        bomb_movingtype = false;
-        bomb_roopchecker = false;
-        bomb_reset = false;//リセットを解除してドラッグできるようにする
-    }
+    resetBombPostProcess();
 
     //爆弾をリセット
     resetButton();
 
     if (burningFuse.exist)
     {
-
         //爆弾をドラッグ
         dragBomb();
 
@@ -567,32 +555,19 @@ void BG::update()
             }
         }
     }
-        //揺れた画面を元に戻す
-        Mapterrain_correction = { 200.0f + 32.0f - 64.0f ,0.0f + 32.0f - 64.0f };
+    //揺れた画面を元に戻す
+    Mapterrain_correction = { 200.0f + 32.0f - 64.0f ,0.0f + 32.0f - 64.0f };
 
-        ////<HACK>
-        //for (int x = 0; x < CHIP_NUM_X; x++)
-        //{
-        //    for (int y = 0; y < CHIP_NUM_Y; y++)
-        //    {
-        //        if (terrainData[y][x].terrain_endurance <= 0)
-        //        {
-        //            terrainData[y][x].status = TerrainStatus::UnBreakble;
-        //            terrain_back[stageNum][y][x] = -1;
-        //        }
-        //    }
-        //}
-
-        if (!isUnBreakble && isX && !burningFuse.exist)
-        {
-            burningFuse.exist = true;
-            burningFuse.pos = VECTOR2(
-                Mapterrain_correction.x + Cpos.x * CHIP_SIZE_F - (CHIP_SIZE_F / 2),
-                Mapterrain_correction.y + Cpos.y * CHIP_SIZE_F - (CHIP_SIZE_F / 2)
-            );
-            burningFuse.Cpos = Cpos;
-            terrainData[Cpos.y][Cpos.x].status = TerrainStatus::BurningFuse;
-        }
+    if (!isUnBreakble && isX && !burningFuse.exist)
+    {
+        burningFuse.exist = true;
+        burningFuse.pos = VECTOR2(
+            Mapterrain_correction.x + Cpos.x * CHIP_SIZE_F - (CHIP_SIZE_F / 2),
+            Mapterrain_correction.y + Cpos.y * CHIP_SIZE_F - (CHIP_SIZE_F / 2)
+        );
+        burningFuse.Cpos = Cpos;
+        terrainData[Cpos.y][Cpos.x].status = TerrainStatus::BurningFuse;
+    }
 
     for (int x = 0; x < CHIP_NUM_X; x++)
     {
@@ -1011,6 +986,24 @@ void BG::resetButton()
         }
     }
 }
+
+//爆弾を置いた後のリセット
+void BG::resetBombPostProcess()
+{
+    if (bomb_reset)
+    {
+        bomb_changepos[bomb_waitingarea] = bomb_defpos[bomb_waitingarea];//位置を初期位置に戻す
+
+        //爆弾の種類を変える
+        int  defnum = bomb_typenum[bomb_waitingarea];
+        bomb_typenum[bomb_waitingarea] = bomb_numchanger(bomb_typenum[bomb_waitingarea], defnum);
+        bomb_trun[bomb_waitingarea] = 0;//回転を初期角度に戻す
+        bomb_movingtype = false;
+        bomb_roopchecker = false;
+        bomb_reset = false;//リセットを解除してドラッグできるようにする
+    }
+}
+
 //--------------------------------
 //  指定した箇所にすでに変更が加えられているか
 //--------------------------------

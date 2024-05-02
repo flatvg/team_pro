@@ -131,6 +131,9 @@ public:
     //バクダンをリセット
     void resetButton();
 
+    //爆弾を置いた後のリセット
+    void resetBombPostProcess();
+
     //エフェクトを更新
     void updateEffect(TerrainEffect &effect);
 
