@@ -3,6 +3,8 @@
 #include "../GameLib/vector.h"
 #include "Effect.h"
 #include "focus.h"
+#include "stageMover.h"
+#include "TextBox.h"
 
 class TutorialBG
 {
@@ -48,7 +50,7 @@ public:
     };
 public:
     //------< 定数 >------------------------------------------------------------
-    static const int STAGE_NUM = 2;         // ステージ数
+    static const int STAGE_NUM = 3;         // ステージ数
     static const int CHIP_NUM_X = 14;       // マップの横方向のチップ数
     static const int CHIP_NUM_Y = 12;       // マップの縦方向のチップ数
     static const int CHIP_SIZE = 64;        // %演算子を使用するためint型を使用する
@@ -64,6 +66,10 @@ public:
 
     //ステージの余白
     DirectX::XMFLOAT2 Mapterrain_correction{ 200.0f + 32.0f - 64.0f ,0.0f + 32.0f - 64.0f };
+
+    //テレインの中央に修正
+    DirectX::XMFLOAT2 TerrainCenter_correction{ CHIP_SIZE_F / 2,CHIP_SIZE_F / 2 };
+
     //バクダン初期位置
     DirectX::XMFLOAT2 bomb_defpos[BOMB_NUM] =
     {
@@ -131,6 +137,10 @@ public:
     // 描画
     void drawTerrain();
 
+    //チュートリアル
+    void Tutorial();
+    void Tutorial_0();
+
     //爆弾をドラッグ
     void dragBomb();
 
@@ -148,7 +158,11 @@ public:
     bool SearchAdjacentTerrain(int status);
 
     //ステージを移動
-    void moveStage(int stageNum, MoveType moveType);
+    bool moveStages(std::unique_ptr<StageMover> &stageMover);
+    bool moveStage(int stageNum, MoveType moveType);
+
+    //ステージの移動フラグを設定
+    void setMoveFlags();
 
     //エフェクトを更新
     void updateEffect(TerrainEffect& effect);
@@ -216,6 +230,13 @@ private:
     bool bomb_movingtype = false;
     bool bomb_roopchecker = false;
 
+    //右、左クリックなどをしているか否か
+    bool isClickL;
+    bool isClickR;
+    bool isZ;
+    bool isX;
+    bool isC;
+
     Effect burningFuse;
 
     float focusFactor;
@@ -227,7 +248,13 @@ private:
     VECTOR2 circlePos;
     float circleAngle;
 
-    bool moveTrg;
+    bool moveStageFlags[STAGE_NUM];
 
     int nowStage = 0;
+
+    std::unique_ptr<StageMover> stageMovers[STAGE_NUM];
+
+    std::unique_ptr<TextBox> textBoxes[1];
+
+    int tutorialNum;
 };

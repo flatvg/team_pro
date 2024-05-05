@@ -36,7 +36,7 @@ public:
 
     void render();
 
-    VECTOR2 SetFocusPos(VECTOR2 pos) { focusPos = pos; }
+    void SetFocusPos(const VECTOR2 &pos) { focusPos = pos; }
 
     float SetRadius(float radius) { focusRadius = radius; }
 

@@ -41,7 +41,7 @@ void Focus::render()
             window::getWidth(), window::getHeight(),
             0, 0,
             0,
-            0.08f, 0.08f, 0.08f, 1.9f * (1.0f - focusFactor));
+            0.0f, 0.0f, 0.0f, 1.9f * (1.0f - focusFactor));
         DepthStencil::instance().set(DepthStencil::MODE::NONE);
     }
 }
