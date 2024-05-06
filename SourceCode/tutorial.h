@@ -27,7 +27,6 @@ private:
     bool                isPaused;
     float A_timer;
     TutorialBG T_bg;
-    std::unique_ptr<Focus> focus;
 
     static Tutorial instance_;
 };

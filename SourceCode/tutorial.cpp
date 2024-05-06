@@ -19,8 +19,6 @@ void Tutorial::init()
     T_bg.init(stageNum);
     A_timer = 1;
     isPaused = false;
-
-    focus = std::make_unique<Focus>();
 }
 
 //--------------------------------
@@ -93,7 +91,7 @@ void Tutorial::update()
 void Tutorial::draw()
 {
     // ‰æ–ÊƒNƒŠƒA
-    GameLib::clear(VECTOR4(0, 0, 0, 1));
+    GameLib::clear(VECTOR4(0, 0.5f, 0.5f, 1));
 
     //map
     T_bg.drawTerrain();

@@ -27,7 +27,7 @@ void TextBox::Update()
     size = baseSize * scaleFactor;
     center = size * 0.5f;
     circlePos = position + center;
-    circlePos.y += cosf(circleAngle) * 7.5f;
+    circlePos.y += cosf(circleAngle) * AMPLITUDE_CORREC;
     circleAngle += DirectX::XMConvertToRadians(2);
 }
 
@@ -40,7 +40,7 @@ void TextBox::Render()
         0,
         color);
 
-    if (scaleFactor > SCALE_MIN)
+    if (scaleFactor > SCALE_MIN && isDrawClickHere)
     {
         primitive::circle(
             circlePos,

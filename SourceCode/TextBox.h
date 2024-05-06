@@ -9,8 +9,25 @@ private:
     static constexpr float SCALE_MAX = 1.0f;
     static constexpr float SCALE_MIN = 0.0f;
     static constexpr float FLUCTAUTE_FACTOR = 0.045f; //scaleÇ™ïœìÆÇ≥ÇπÇÈç€Ç…ópÇ¢ÇÈåWêî
+    static constexpr float AMPLITUDE_CORREC = 7.5f;
 
 public:
+    TextBox()
+    {
+        position = VECTOR2(0, 0);
+        baseSize = VECTOR2(100, 100);
+        color = VECTOR4(1, 1, 1, 1);
+        scaleFactor = 0.0f;
+        size = baseSize * scaleFactor;
+        center = size * 0.5f;
+        popUpFlag = false;
+        popOutFlag = false;
+        circlePos = position + center;
+        radius = 20.0f;
+        circleAngle = 0.0f;
+        isAlreadyPopUp = false;
+    }
+
     TextBox(VECTOR2 pos, VECTOR2 Bsize, VECTOR4 color)
         :position(pos),baseSize(Bsize),color(color)
     {
@@ -23,6 +40,7 @@ public:
         radius = 20.0f;
         circleAngle = 0.0f;
         isAlreadyPopUp = false;
+        isDrawClickHere = true;
     }
     ~TextBox() {}
 
@@ -31,9 +49,13 @@ public:
 
     void Render();
 
+    void SetPosition(VECTOR2 pos) { position = pos; }
+
     bool GetPopUpFlag() { return popUpFlag; }
 
     bool GetPopOutFlag() { return popOutFlag; }
+
+    void SetIsDrawClickHere(bool flag) { isDrawClickHere = flag; }
 
     void SetPopUpFlag(bool flag);
 
@@ -57,4 +79,5 @@ private:
     bool popUpFlag;
     bool popOutFlag;
     bool isAlreadyPopUp;
+    bool isDrawClickHere;
 };

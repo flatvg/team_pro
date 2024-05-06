@@ -140,6 +140,7 @@ public:
     //チュートリアル
     void Tutorial();
     void Tutorial_0();
+    void Tutorial_1();
 
     //爆弾をドラッグ
     void dragBomb();
@@ -149,6 +150,12 @@ public:
 
     //爆弾をドロップ
     void dropBomb();
+
+    //爆弾をリセット
+    void resetButton();
+
+    //爆弾を置いた後のリセット
+    void resetBombPostProcess();
 
     //そのブロックにバクダンが設置可能か
     void SetIsPutOn();
@@ -220,6 +227,10 @@ private:
     int score_add;
     int score_counter;
 
+    DirectX::XMFLOAT2     reset_scale = { 0.45,0.45 };
+    DirectX::XMFLOAT2     reset_pos = { 90,650 };
+    DirectX::XMFLOAT2     reset_center = { 200, 100 };
+
     //ボム関連
     int bomb_typenum[BOMB_TYPE_MAX];
     int bomb_trun[BOMB_ROTATE_MAX];
@@ -239,14 +250,7 @@ private:
 
     Effect burningFuse;
 
-    float focusFactor;
-    bool focusFlag;
-    bool unFocusFlag;
-
-    std::unique_ptr<Focus> focus;
-
-    VECTOR2 circlePos;
-    float circleAngle;
+    std::unique_ptr<Focus> focuses[2];
 
     bool moveStageFlags[STAGE_NUM];
 
@@ -254,7 +258,13 @@ private:
 
     std::unique_ptr<StageMover> stageMovers[STAGE_NUM];
 
-    std::unique_ptr<TextBox> textBoxes[1];
+    std::unique_ptr<TextBox> textBoxes[4];
 
     int tutorialNum;
+
+    bool isTutorialClear[STAGE_NUM];
+
+    bool isDrawStage[STAGE_NUM];
+
+    int stageAct[STAGE_NUM];
 };

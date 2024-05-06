@@ -14,16 +14,16 @@ int terrain_back_T[TutorialBG::STAGE_NUM][TutorialBG::CHIP_NUM_Y][TutorialBG::CH
     //stage0
     {
         {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
-        {-1,-1,-1,-1, 0, 1, 0, 1, 0, 1, 0, 1, 0,-1},
-        {-1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1,-1},
-        {-1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,-1},
-        {-1, 1, 1, 0, 1, 0, 1,-1, 1, 0,-1,-1,-1,-1},
-        {-1, 1, 0, 1, 0, 1, 0,-1, 0, 1,-1,-1,-1,-1},
-        {-1, 1, 1, 0, 1,-1,-1,-1, 1, 0,-1,-1,-1,-1},
-        {-1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,-1},
-        {-1, 1, 1,-1,-1,-1, 1, 0, 1, 0, 1, 0, 1,-1},
-        {-1, 1, 0,-1,-1,-1, 0, 1, 0, 1, 0, 1, 0,-1},
-        {-1, 1, 1,-1,-1,-1, 1, 0, 1, 0, 1, 0, 1,-1},
+        {-1,-1,-1,-1, 0, 1,-1,-1,-1,-1,-1,-1,-1,-1},
+        {-1, 1, 1, 1, 1, 0,-1,-1,-1,-1,-1,-1,-1,-1},
+        {-1, 1, 1, 1, 0, 1,-1,-1,-1,-1,-1,-1,-1,-1},
+        {-1, 1, 1, 1, 1, 1,-1,-1,-1,-1,-1,-1,-1,-1},
+        {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
+        {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
+        {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
+        {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
+        {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
+        {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
         {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
     },
     //stage1
@@ -333,9 +333,9 @@ TutorialBG::~TutorialBG()
 void TutorialBG::init(int stagenum)
 {
     static GameLib::Sprite* effect_explosion = nullptr;
-    static GameLib::Sprite* effect_bomb = nullptr;
+    static GameLib::Sprite* effect_bomb      = nullptr;
     effect_explosion = sprite_load(EXPLOSION);
-    effect_bomb = sprite_load(BOMB01);
+    effect_bomb      = sprite_load(BOMB01);
 
     //地形データterrain_backをbomb地形データterrainに代入する
     for (int s = 0; s < STAGE_NUM; s++)
@@ -354,7 +354,7 @@ void TutorialBG::init(int stagenum)
                 terrainData[s][y][x].terrain_endurance = 10000;
                 if (terrain_back_T[s][y][x] == 2)
                 {
-                    terrainData[s][y][x].terrain_endurance = 3;//3回爆破すると置けなくなる
+                    terrainData[s][y][x].terrain_endurance = 1;//1回爆破すると置けなくなる
                 }
 
                 //エフェクトの情報を初期化
@@ -379,13 +379,16 @@ void TutorialBG::init(int stagenum)
         }
         moveStageFlags[s] = false;
         stageMovers[s] = std::make_unique<StageMover>(s, s + 1);
+        isTutorialClear[s] = false;
+        stageAct[s] = 0;
+        isDrawStage[s] = true;
     }
     delete effect_bomb;
     delete effect_explosion;
 
-    texture::load(Tile01, TILE01, 512U);    //背景
-    texture::load(Tile02, TILE02, 512U);    //背景
-    texture::load(Bomb01, BOMB01, 512U);       //爆弾
+    texture::load(Tile01, TILE01, 512U);          //背景
+    texture::load(Tile02, TILE02, 512U);          //背景
+    texture::load(Bomb01, BOMB01, 512U);          //爆弾
     texture::load(Explosion, EXPLOSION, 512U);    //爆発
 
     //バクダンの種類を初期化
@@ -407,16 +410,16 @@ void TutorialBG::init(int stagenum)
     //タイマー初期化
     timer = 0;
 
-    focusFactor = 1.0f;
-    focusFlag = false;
-    unFocusFlag = false;
+    for (auto& focus : focuses)
+    {
+        Focus::instanceNum++;
+        focus = std::make_unique<Focus>(VECTOR2(0, 0), 300.0f);
+    }
 
-    focus = std::make_unique<Focus>(VECTOR2(500.0f, 300.0f), 300.0f);
-
-    circlePos = { 1000,300 };
-    circleAngle = 0.0f;
-
-    textBoxes[0] = std::make_unique<TextBox>(VECTOR2(500, 200), VECTOR2(250, 100), VECTOR4(BLUE));
+    textBoxes[0] = std::make_unique<TextBox>(VECTOR2(200, 400), VECTOR2(250, 100), VECTOR4(BLUE));
+    textBoxes[1] = std::make_unique<TextBox>(VECTOR2(200, 400), VECTOR2(250, 100), VECTOR4(WHITE));
+    textBoxes[2] = std::make_unique<TextBox>(VECTOR2(300, 400), VECTOR2(350, 100), VECTOR4(GREEN));
+    textBoxes[3] = std::make_unique<TextBox>(VECTOR2(300, 400), VECTOR2(350, 100), VECTOR4(RED));
 
     tutorialNum = 0;
 }
@@ -435,8 +438,6 @@ void TutorialBG::deinit()
 //--------------------------------
 void TutorialBG::update()
 {
-    //現在のステージ
-
     //カーソルの位置を取得、制限
     cursorPos = { static_cast<float>(GameLib::input::getCursorPosX()), static_cast<float>(GameLib::input::getCursorPosY()) };
     if (cursorPos.x < 0)cursorPos.x = 0;
@@ -452,9 +453,9 @@ void TutorialBG::update()
 
     //カーソルがbomb背景内に存在しているか
     bool isInStage = cursorPos.x > Mapterrain_correction.x
-        && cursorPos.x < (Mapterrain_correction.x + CHIP_SIZE * TutorialBG::CHIP_NUM_X)
-        && cursorPos.y >  Mapterrain_correction.y
-        && cursorPos.y < (Mapterrain_correction.y + CHIP_SIZE * TutorialBG::CHIP_NUM_Y);
+                  && cursorPos.x < (Mapterrain_correction.x + CHIP_SIZE * TutorialBG::CHIP_NUM_X)
+                  && cursorPos.y >  Mapterrain_correction.y
+                  && cursorPos.y < (Mapterrain_correction.y + CHIP_SIZE * TutorialBG::CHIP_NUM_Y);
 
     //右、左クリックなどをしているか否か
     isClickL = timer > operatbleCursorTime && GameLib::input::STATE(0) & GameLib::input::PAD_LC;
@@ -479,122 +480,132 @@ void TutorialBG::update()
     //爆発させる箇所
     DirectX::XMINT2 ExplodePos[EXPLOSION_CHIP_NUM] = {};
 
-    //爆弾をドラッグ
-    dragBomb();
+    //爆弾を置いた後のリセット
+    resetBombPostProcess();
 
-    //爆弾を回転
-    rotateBomb();
+    //爆弾をリセット
+    resetButton();
 
-    //爆弾をドロップ
-    dropBomb();
-
-    //カーソルがステージ内の時
-    if (isInStage)
+    if (burningFuse.exist)
     {
-        //爆弾設置
-        for (int i = 0; i < 2; ++i)//0週目で全部の爆弾読み込んで「隣が壁or爆弾」&「開いてるマスがないと置けない」ことを調べて配置可能なら1週目で配置
+        //爆弾をドラッグ
+        dragBomb();
+
+        //爆弾を回転
+        rotateBomb();
+
+        //爆弾をドロップ
+        dropBomb();
+
+        //カーソルがステージ内の時
+        if (isInStage)
         {
-            for (int x = 0; x < 3; ++x)
+            //爆弾設置
+            for (int i = 0; i < 2; ++i)//0週目で全部の爆弾読み込んで「隣が壁or爆弾」&「開いてるマスがないと置けない」ことを調べて配置可能なら1週目で配置
             {
-                for (int y = 0; y < 3; ++y)
+                for (int x = 0; x < 3; ++x)
                 {
-                    //爆弾の種類取得
-                    int pt_bomb = bomb_pattern_T[bomb_typenum[bomb_waitingarea]][bomb_trun[bomb_waitingarea]][y][x];
-
-                    //爆弾1ブロック中心座標(スクリーン座標＋配列[y][x]目のブロック)
-                    DirectX::XMFLOAT2 bomb_pos_b = { bomb_changepos[bomb_waitingarea].x + CHIP_SIZE * x,bomb_changepos[bomb_waitingarea].y + CHIP_SIZE * y };
-                    //マップチップの配列の場所
-                    DirectX::XMINT2 Cpos = { static_cast<int>((bomb_pos_b.x - Mapterrain_correction.x) / CHIP_SIZE_F) , static_cast<int>((bomb_pos_b.y - Mapterrain_correction.y) / CHIP_SIZE_F) };
-
-                    if (pt_bomb == PatternStatus::IsBomb)
+                    for (int y = 0; y < 3; ++y)
                     {
-                        if (
-                            //隣が壁だったら
-                            terrainData[nowStage][Cpos.y - 1][Cpos.x].status == TerrainStatus::UnBreakble ||//上
-                            terrainData[nowStage][Cpos.y + 1][Cpos.x].status == TerrainStatus::UnBreakble ||//下
-                            terrainData[nowStage][Cpos.y][Cpos.x + 1].status == TerrainStatus::UnBreakble ||//右
-                            terrainData[nowStage][Cpos.y][Cpos.x - 1].status == TerrainStatus::UnBreakble ||//左
-                            //隣が爆弾だったら
-                            terrainData[nowStage][Cpos.y - 1][Cpos.x].status == TerrainStatus::Bomb ||//上
-                            terrainData[nowStage][Cpos.y + 1][Cpos.x].status == TerrainStatus::Bomb ||//下
-                            terrainData[nowStage][Cpos.y][Cpos.x + 1].status == TerrainStatus::Bomb ||//右
-                            terrainData[nowStage][Cpos.y][Cpos.x - 1].status == TerrainStatus::Bomb   //左
-                            )
+                        //爆弾の種類取得
+                        int pt_bomb = bomb_pattern_T[bomb_typenum[bomb_waitingarea]][bomb_trun[bomb_waitingarea]][y][x];
+
+                        //爆弾1ブロック中心座標(スクリーン座標＋配列[y][x]目のブロック)
+                        DirectX::XMFLOAT2 bomb_pos_b = { bomb_changepos[bomb_waitingarea].x + CHIP_SIZE * x,bomb_changepos[bomb_waitingarea].y + CHIP_SIZE * y };
+                        //マップチップの配列の場所
+                        DirectX::XMINT2 Cpos = { static_cast<int>((bomb_pos_b.x - Mapterrain_correction.x) / CHIP_SIZE_F) , static_cast<int>((bomb_pos_b.y - Mapterrain_correction.y) / CHIP_SIZE_F) };
+
+                        if (pt_bomb == PatternStatus::IsBomb)
                         {
-                            bomb_roopchecker = true;
-                        }
-                        if (bomb_roopchecker)
-                        {
-                            if (terrainData[nowStage][Cpos.y][Cpos.x].status != TerrainStatus::Normal && terrainData[nowStage][Cpos.y][Cpos.x].status != TerrainStatus::BurningFuse)bomb_release = true;
-                            if (bomb_release)break;
-                            if (i == 1 && GameLib::input::TRG_RELEASE(0) & GameLib::input::PAD_LC && (terrainData[nowStage][Cpos.y][Cpos.x].status == TerrainStatus::Normal || terrainData[nowStage][Cpos.y][Cpos.x].status == TerrainStatus::BurningFuse))
+                            if (
+                                //隣が壁だったら
+                                terrainData[nowStage][Cpos.y - 1][Cpos.x].status == TerrainStatus::UnBreakble ||//上
+                                terrainData[nowStage][Cpos.y + 1][Cpos.x].status == TerrainStatus::UnBreakble ||//下
+                                terrainData[nowStage][Cpos.y][Cpos.x + 1].status == TerrainStatus::UnBreakble ||//右
+                                terrainData[nowStage][Cpos.y][Cpos.x - 1].status == TerrainStatus::UnBreakble ||//左
+                                //隣が爆弾だったら
+                                terrainData[nowStage][Cpos.y - 1][Cpos.x].status == TerrainStatus::Bomb ||//上
+                                terrainData[nowStage][Cpos.y + 1][Cpos.x].status == TerrainStatus::Bomb ||//下
+                                terrainData[nowStage][Cpos.y][Cpos.x + 1].status == TerrainStatus::Bomb ||//右
+                                terrainData[nowStage][Cpos.y][Cpos.x - 1].status == TerrainStatus::Bomb   //左
+                                )
                             {
-                                //爆弾設置
-                                if (terrainData[nowStage][Cpos.y][Cpos.x].status == TerrainStatus::BurningFuse && !isChangeedFuelToBomb)
+                                bomb_roopchecker = true;
+                            }
+                            if (bomb_roopchecker)
+                            {
+                                if (terrainData[nowStage][Cpos.y][Cpos.x].status != TerrainStatus::Normal && terrainData[nowStage][Cpos.y][Cpos.x].status != TerrainStatus::BurningFuse)bomb_release = true;
+                                if (bomb_release)break;
+                                if (i == 1 && GameLib::input::TRG_RELEASE(0) & GameLib::input::PAD_LC && (terrainData[nowStage][Cpos.y][Cpos.x].status == TerrainStatus::Normal || terrainData[nowStage][Cpos.y][Cpos.x].status == TerrainStatus::BurningFuse))
                                 {
-                                    isChangeedFuelToBomb = true;
-                                    ExplodePos[ExplosionPoint::CENTER] = CalcExplosionPoint(Cpos, ExplosionPoint::CENTER);
-                                    ExplodePos[ExplosionPoint::LEFT] = CalcExplosionPoint(Cpos, ExplosionPoint::LEFT);
-                                    ExplodePos[ExplosionPoint::TOP] = CalcExplosionPoint(Cpos, ExplosionPoint::TOP);
-                                    ExplodePos[ExplosionPoint::RIGHT] = CalcExplosionPoint(Cpos, ExplosionPoint::RIGHT);
-                                    ExplodePos[ExplosionPoint::BOTTOM] = CalcExplosionPoint(Cpos, ExplosionPoint::BOTTOM);
+                                    //爆弾設置
+                                    if (terrainData[nowStage][Cpos.y][Cpos.x].status == TerrainStatus::BurningFuse && !isChangeedFuelToBomb)
+                                    {
+                                        isChangeedFuelToBomb = true;
+                                        ExplodePos[ExplosionPoint::CENTER] = CalcExplosionPoint(Cpos, ExplosionPoint::CENTER);
+                                        ExplodePos[ExplosionPoint::LEFT] = CalcExplosionPoint(Cpos, ExplosionPoint::LEFT);
+                                        ExplodePos[ExplosionPoint::TOP] = CalcExplosionPoint(Cpos, ExplosionPoint::TOP);
+                                        ExplodePos[ExplosionPoint::RIGHT] = CalcExplosionPoint(Cpos, ExplosionPoint::RIGHT);
+                                        ExplodePos[ExplosionPoint::BOTTOM] = CalcExplosionPoint(Cpos, ExplosionPoint::BOTTOM);
+                                    }
+                                    terrainData[nowStage][Cpos.y][Cpos.x].status = TerrainStatus::Bomb;
+                                    stageAct[nowStage]++;
+                                    act++;
+                                    //爆弾リセット
+                                    bomb_reset = true;
                                 }
-                                terrainData[nowStage][Cpos.y][Cpos.x].status = TerrainStatus::Bomb;
-                                act++;
-                                //爆弾リセット
-                                bomb_reset = true;
                             }
                         }
                     }
                 }
             }
-        }
-        bomb_roopchecker = false;
-        bomb_release = false;
+            bomb_roopchecker = false;
+            bomb_release = false;
 
-        //爆破
-        if (isChangeedFuelToBomb)
-        {
-            for (int s = 0; s < STAGE_NUM; s++)
+            //爆破
+            if (isChangeedFuelToBomb)
             {
-                for (int x = 0; x < CHIP_NUM_X; x++)
+                for (int s = 0; s < STAGE_NUM; s++)
                 {
-                    for (int y = 0; y < CHIP_NUM_Y; y++)
+                    for (int x = 0; x < CHIP_NUM_X; x++)
                     {
-                        terrainData[s][y][x].terrain_endurance = terrainData[s][y][x].terrain_endurance;
+                        for (int y = 0; y < CHIP_NUM_Y; y++)
+                        {
+                            terrainData[s][y][x].terrain_endurance = terrainData[s][y][x].terrain_endurance;
+                        }
                     }
                 }
+                SetBomb(nowStage, ExplodePos[ExplosionPoint::CENTER], ExplosionPoint::CENTER, delayIndex);
+                SetBomb(nowStage, ExplodePos[ExplosionPoint::LEFT], ExplosionPoint::LEFT, delayIndex);
+                SetBomb(nowStage, ExplodePos[ExplosionPoint::TOP], ExplosionPoint::TOP, delayIndex);
+                SetBomb(nowStage, ExplodePos[ExplosionPoint::RIGHT], ExplosionPoint::RIGHT, delayIndex);
+                SetBomb(nowStage, ExplodePos[ExplosionPoint::BOTTOM], ExplosionPoint::BOTTOM, delayIndex);
+                //スコア
+                score += score_add * (score_counter * 1.05) * 0.01;
+                //画面が揺れる
+                Mapterrain_correction = { Mapterrain_correction.x + rand() % 4 - 2,Mapterrain_correction.y + rand() % 4 - 2 };
+
+                isChangeedFuelToBomb = false;
             }
-            SetBomb(nowStage, ExplodePos[ExplosionPoint::CENTER], ExplosionPoint::CENTER, delayIndex);
-            SetBomb(nowStage, ExplodePos[ExplosionPoint::LEFT], ExplosionPoint::LEFT, delayIndex);
-            SetBomb(nowStage, ExplodePos[ExplosionPoint::TOP], ExplosionPoint::TOP, delayIndex);
-            SetBomb(nowStage, ExplodePos[ExplosionPoint::RIGHT], ExplosionPoint::RIGHT, delayIndex);
-            SetBomb(nowStage, ExplodePos[ExplosionPoint::BOTTOM], ExplosionPoint::BOTTOM, delayIndex);
-            //スコア
-            score += score_add * (score_counter * 1.05) * 0.01;
-            //画面が揺れる
-            Mapterrain_correction = { Mapterrain_correction.x + rand() % 4 - 2,Mapterrain_correction.y + rand() % 4 - 2 };
+            else
+            {
+                score_add = 0;
+                score_counter = 0;
+            }
+        }
+    }
+    //揺れた画面を元に戻す
+    Mapterrain_correction = { 200.0f + 32.0f - 64.0f ,0.0f + 32.0f - 64.0f };
 
-            isChangeedFuelToBomb = false;
-        }
-        else
-        {
-            score_add = 0;
-            score_counter = 0;
-            //揺れた画面を元に戻す
-            Mapterrain_correction = { 200.0f + 32.0f - 64.0f ,0.0f + 32.0f - 64.0f };
-        }
-
-        if (!isUnBreakble && isX && !burningFuse.exist)
-        {
-            burningFuse.exist = true;
-            burningFuse.pos = VECTOR2(
-                Mapterrain_correction.x + Cpos.x * CHIP_SIZE_F - (CHIP_SIZE_F / 2),
-                Mapterrain_correction.y + Cpos.y * CHIP_SIZE_F - (CHIP_SIZE_F / 2)
-            );
-            burningFuse.Cpos = Cpos;
-            terrainData[nowStage][Cpos.y][Cpos.x].status = TerrainStatus::BurningFuse;
-        }
+    if (!isUnBreakble && isX && !burningFuse.exist)
+    {
+        burningFuse.exist = true;
+        burningFuse.pos = VECTOR2(
+            Mapterrain_correction.x + Cpos.x * CHIP_SIZE_F - (CHIP_SIZE_F / 2),
+            Mapterrain_correction.y + Cpos.y * CHIP_SIZE_F - (CHIP_SIZE_F / 2)
+        );
+        burningFuse.Cpos = Cpos;
+        terrainData[nowStage][Cpos.y][Cpos.x].status = TerrainStatus::BurningFuse;
     }
 
     for (int s = 0; s < STAGE_NUM; s++)
@@ -629,13 +640,15 @@ void TutorialBG::update()
 
     Tutorial();
 
-    //textBoxes[0].get()->SetPopUpFlag(isClickR);
-    //textBoxes[0].get()->SetPopOutFlag(isClickL);
+    for (auto& textBox : textBoxes)
+    {
+        textBox->Update();
+    }
 
-    //textBoxes[0].get()->Update();
-
-    //focus->SetFocusPos(textBoxes[0]->getPosition());
-    //focus->update();
+    for (auto& focus : focuses)
+    {
+        focus->update();
+    }
 
     timer++;
 }
@@ -645,15 +658,19 @@ void TutorialBG::update()
 //--------------------------------
 void TutorialBG::drawTerrain()
 {
+    GameLib::
+
     //マップ
     texture::begin(Tile01);
     for (int s = 0; s < STAGE_NUM; s++)
     {
+        if (!isDrawStage[s])break;
         for (int x = 0; x < CHIP_NUM_X; x++)
         {
             for (int y = 0; y < CHIP_NUM_Y; y++)
             {
-                float a = terrain_back_T[0][y][x];
+                //CHANGED:float a = terrain_back_T[0][y][x];
+                float a = terrain_back_T[s][y][x];
                 texture::draw(
                     TexNo::Tile01,
                     terrainData[s][y][x].currentPos.x, terrainData[s][y][x].currentPos.y,
@@ -670,6 +687,7 @@ void TutorialBG::drawTerrain()
     texture::begin(Tile02);
     for (int s = 0; s < STAGE_NUM; s++)
     {
+        if (!isDrawStage[s])break;
         for (int x = 0; x < CHIP_NUM_X; x++)
         {
             for (int y = 0; y < CHIP_NUM_Y; y++)
@@ -827,6 +845,7 @@ void TutorialBG::drawTerrain()
 
     for (int s = 0; s < STAGE_NUM; s++)
     {
+        if (!isDrawStage[s])break;
         for (int x = 0; x < CHIP_NUM_X; x++)
         {
             for (int y = 0; y < CHIP_NUM_Y; y++)
@@ -873,6 +892,7 @@ void TutorialBG::drawTerrain()
     texture::begin(Explosion);
     for (int s = 0; s < STAGE_NUM; s++)
     {
+        if (!isDrawStage[s])break;
         for (int x = 0; x < CHIP_NUM_X; x++)
         {
             for (int y = 0; y < CHIP_NUM_Y; y++)
@@ -898,6 +918,7 @@ void TutorialBG::drawTerrain()
     bool isBurningFuse = false;
     for (int s = 0; s < STAGE_NUM; s++)
     {
+        if (!isDrawStage[s])break;
         for (int x = 0; x < CHIP_NUM_X; x++)
         {
             for (int y = 0; y < CHIP_NUM_Y; y++)
@@ -920,9 +941,15 @@ void TutorialBG::drawTerrain()
 
     delete fire_image;
 
-    focus->render();
+    for (auto& focus : focuses)
+    {
+        focus->render();
+    }
 
-    textBoxes[0].get()->Render();
+    for (auto& textBox : textBoxes)
+    {
+        textBox->Render();
+    }
 }
 
 
@@ -934,24 +961,83 @@ void TutorialBG::Tutorial()
     case 0:
         Tutorial_0();
         break;
+    case 1:
+        Tutorial_1();
+        break;
     }
 }
 
 void TutorialBG::Tutorial_0()
 {
-    stageMovers[0].get()->SetMoveFlag(isC);
+    bool isActionTerrain = false;
+    bool isSetFuse = false;
+    for (int x = 0; x < CHIP_NUM_X && !isSetFuse && !isActionTerrain; x++)
+    {
+        for (int y = 0; y < CHIP_NUM_Y && !isSetFuse && !isActionTerrain; y++)
+        {
+            if (terrainData[nowStage][y][x].status == TerrainStatus::BurningFuse)
+            {
+                isSetFuse = true;
+            }
+            if (terrainData[nowStage][y][x].status == TerrainStatus::Bomb
+                || terrainData[nowStage][y][x].status == TerrainStatus::InExplosion
+                || terrainData[nowStage][y][x].status == TerrainStatus::BurningFuse)
+            {
+                isActionTerrain = true;
+            }
+        }
+    }
+    if (stageAct[nowStage] > 1 && !isActionTerrain)
+    {
+        isTutorialClear[nowStage] = true;
+    }
+
+    //stageMover
+    {
+        stageMovers[0]->SetMoveFlag(isTutorialClear[nowStage]);
+    }
+
+    //textBox
+    {
+        textBoxes[1]->SetIsDrawClickHere(false);
+        textBoxes[2]->SetIsDrawClickHere(false);
+        textBoxes[3]->SetIsDrawClickHere(false);
+        textBoxes[0]->SetPosition(VECTOR2(200, 600));
+
+        textBoxes[0]->SetPopUpFlag(timer > 10);
+        textBoxes[0]->SetPopOutFlag(isClickL && timer > 50);
+
+        textBoxes[1]->SetPopUpFlag(textBoxes[0]->GetPopOutFlag());
+        textBoxes[1]->SetPopOutFlag(isSetFuse);
+
+        textBoxes[2]->SetPopUpFlag(textBoxes[1]->GetPopOutFlag());
+        textBoxes[2]->SetPopOutFlag(isClickL);
+
+        textBoxes[3]->SetPopUpFlag(textBoxes[2]->GetPopOutFlag() && !focuses[0]->IsDraw());
+        textBoxes[3]->SetPopOutFlag(!isActionTerrain);
+    }
+
+    //focus
+    {
+        focuses[0]->SetFocusPos(VECTOR2(400, 175));
+        focuses[0]->SetRadius(250.0f);
+        focuses[1]->SetFocusPos(VECTOR2(1150, 360));
+        focuses[1]->SetFocusSize(VECTOR2(1.1f, 1.9f));
+
+        focuses[0]->SetFocusFlag(textBoxes[1]->GetPopUpFlag());
+        focuses[0]->SetUnFocusFlag(textBoxes[1]->GetPopOutFlag());
+
+        focuses[1]->SetFocusFlag(textBoxes[2]->GetPopUpFlag() && !focuses[0]->IsDraw());
+        focuses[1]->SetUnFocusFlag(drag_con);   //ボムを持っている時
+    }
+}
+
+void TutorialBG::Tutorial_1()
+{
+    //もう描画する必要がないので描画しないようにする
     stageMovers[1].get()->SetMoveFlag(isX);
 
-    textBoxes[0].get()->SetPopUpFlag(timer > 100);
-    textBoxes[0].get()->SetPopOutFlag(isClickL);
 
-    textBoxes[0].get()->Update();
-
-    focus->SetFocusFlag(textBoxes[0].get()->GetPopUpFlag());
-    focus->SetUnFocusFlag(textBoxes[0].get()->GetPopOutFlag());
-
-    focus->SetFocusPos(textBoxes[0]->getPosition());
-    focus->update();
 }
 
 //爆弾をドラッグ
@@ -1100,8 +1186,11 @@ bool TutorialBG::moveStages(std::unique_ptr<StageMover> &stageMover)
 
         if (!isFinishMove[0] && !isFinishMove[1])
         {
-            stageMover->FinishMove();
             nowStage++;
+            tutorialNum++;
+            isDrawStage[nowStage - 1];
+            stageMover->FinishMove();
+            for (auto& textBox : textBoxes)textBox->SetIsDrawClickHere(true);
         }
 
         return true;

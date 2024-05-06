@@ -9,6 +9,7 @@ public:
     {
         focusFactor = 1.0f;
         timer = 0;
+        myInstance = instanceNum;
     }
 
     Focus(VECTOR2 pos, float radius ,bool OnFlag, bool OffFlag)
@@ -19,6 +20,7 @@ public:
     {
         focusFactor = 1.0f;
         timer = 0;
+        myInstance = instanceNum;
     }
 
     Focus(VECTOR2 pos, float radius)
@@ -27,18 +29,23 @@ public:
     {
         focusFactor = 1.0f;
         timer = 0;
+        myInstance = instanceNum;
     }
 
     ~Focus() {}
 
 public:
+    static int instanceNum;
+
     void update();
 
     void render();
 
     void SetFocusPos(const VECTOR2 &pos) { focusPos = pos; }
 
-    float SetRadius(float radius) { focusRadius = radius; }
+    void SetFocusSize(const VECTOR2& size) { focusSize = size; }
+
+    void SetRadius(float radius) { focusRadius = radius; }
 
     void SetFocusFlag(bool flag) { if (flag)focusOnFlag = true; }
 
@@ -48,8 +55,13 @@ public:
 
     VECTOR2 GetPos() const { return focusPos; }
 
+    bool IsDraw() { return isDraw; }
+
+    void Reset();
+
 private:
     VECTOR2 focusPos;
+    VECTOR2 focusSize = { 1.0f,1.0f };
     float focusRadius;
 
     float focusFactorMax = 1.0f;
@@ -60,6 +72,10 @@ private:
     float UnFocusFactor = 0.025f;
     bool focusOnFlag = false;
     bool unFocusFlag = false;
+
+    bool isDraw = true;
+
+    int myInstance;
 
     int timer;
 };

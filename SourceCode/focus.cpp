@@ -3,6 +3,8 @@
 
 using namespace GameLib;
 
+int Focus::instanceNum = -1;
+
 void Focus::update()
 {
     if (focusOnFlag)
@@ -19,7 +21,11 @@ void Focus::update()
         {
             focusFactor += UnFocusFactor;
         }
-        else unFocusFlag = false;
+        else
+        {
+            unFocusFlag = false;
+            isDraw = false;
+        }
     }
 
     timer++;
@@ -27,14 +33,16 @@ void Focus::update()
 
 void Focus::render()
 {
-    if (timer > 40)//åÎëÄçÏëjé~
+    if (isDraw)
     {
         DepthStencil::instance().set(DepthStencil::MODE::MASK);
         primitive::circle(
             focusPos,
             focusRadius * focusFactor,
-            VECTOR2(1,1),
-            0);
+            focusSize,
+            0
+        );
+
         DepthStencil::instance().set(DepthStencil::MODE::EXCLUSIVE);
         primitive::rect(
             0, 0,
@@ -42,6 +50,14 @@ void Focus::render()
             0, 0,
             0,
             0.0f, 0.0f, 0.0f, 1.9f * (1.0f - focusFactor));
+
+
         DepthStencil::instance().set(DepthStencil::MODE::NONE);
     }
+}
+
+void Focus::Reset()
+{
+    focusSize = VECTOR2(1.0f, 1.0f);
+    isDraw = true;
 }

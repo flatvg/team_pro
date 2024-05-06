@@ -21,8 +21,8 @@ static float(*const ToDegree)(float) = DirectX::XMConvertToDegrees;  // ラジアン
 #define RED   1,0,0,1
 #define GREEN 0,1,0,1
 #define BLUE  0,0,1,1
-#define WHITE 0,0,0,1
-#define BLACK 1,1,1,1
+#define WHITE 1,1,1,1
+#define BLACK 0,0,0,1
 
 //画像パス
 #define BACK L"./Data/Images/back.png"
