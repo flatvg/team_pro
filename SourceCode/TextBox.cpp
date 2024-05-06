@@ -31,23 +31,53 @@ void TextBox::Update()
     circleAngle += DirectX::XMConvertToRadians(2);
 }
 
-void TextBox::Render()
+void TextBox::Render(int boxTexNo, int clickTexNo)
 {
-    primitive::rect(
+    texture::begin(boxTexNo);
+
+    texture::draw(
+        boxTexNo,
         position,
+        VECTOR2(1,1),
+        VECTOR2(0, 0),
         size,
         center,
         0,
-        color);
+        VECTOR4(1,1,1,1)
+    );
+
+    texture::end(boxTexNo);
+
+    //primitive::rect(
+    //    position,
+    //    size,
+    //    center,
+    //    0,
+    //    color);
 
     if (scaleFactor > SCALE_MIN && isDrawClickHere)
     {
-        primitive::circle(
+        //primitive::circle(
+        //    circlePos,
+        //    radius,
+        //    VECTOR2(scaleFactor, scaleFactor),
+        //    0,
+        //    color);
+
+        texture::begin(clickTexNo);
+
+        texture::draw(
+            clickTexNo,
             circlePos,
-            radius,
-            VECTOR2(scaleFactor, scaleFactor),
+            VECTOR2(1, 1),
+            VECTOR2(0, 0),
+            size,
+            VECTOR2(0,0),
             0,
-            color);
+            VECTOR4(1, 1, 1, 1)
+        );
+
+        texture::end(clickTexNo);
     }
 }
 
@@ -66,4 +96,12 @@ void TextBox::SetPopOutFlag(bool flag)
     {
         popOutFlag = true;
     }
+}
+
+void TextBox::Reset()
+{
+    isDrawClickHere = true;
+    isAlreadyPopUp = false;
+    popUpFlag = false;
+    popOutFlag = false;
 }

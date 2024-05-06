@@ -40,7 +40,8 @@ public:
         Tile01,
         Tile02,
         Bomb01,
-        Explosion
+        Explosion,
+        Reset
     };
 
     enum class MoveType
@@ -267,4 +268,6 @@ private:
     bool isDrawStage[STAGE_NUM];
 
     int stageAct[STAGE_NUM];
+
+    bool isReset;
 };

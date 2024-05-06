@@ -47,7 +47,9 @@ public:
 public:
     void Update();
 
-    void Render();
+    void Render(int boxTexNo, int clickTexNo);
+
+    void IsNotDrawClickHere() { isDrawClickHere = false; }
 
     void SetPosition(VECTOR2 pos) { position = pos; }
 
@@ -55,11 +57,11 @@ public:
 
     bool GetPopOutFlag() { return popOutFlag; }
 
-    void SetIsDrawClickHere(bool flag) { isDrawClickHere = flag; }
-
     void SetPopUpFlag(bool flag);
 
     void SetPopOutFlag(bool flag);
+
+    void Reset();
 
     const VECTOR2& getPosition() const { return position; }
 
