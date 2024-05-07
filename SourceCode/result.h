@@ -32,8 +32,6 @@ public:
     void update();
     void draw();
 private:
-    BG bg;
-
     static Result instance_;
 };
 

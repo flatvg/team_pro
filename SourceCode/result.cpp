@@ -1,6 +1,7 @@
 #include "result.h"
 #include "all.h"
 #include "title.h"
+#include "select.h"
 #include "collision.h"
 #include "sprite_data.h"
 
@@ -80,17 +81,14 @@ void Result::update()
                 mouseY >= 500.0f - 100.0f && mouseY <= 500.0f + 100.0f) {
 
                 // セレクト画面に戻る処理を実行
-                //changeScene(Title::instance());
+                changeScene(Select::instance());
                 return;
             }
         }
-
-
         break;
     }
 
     timer++;
-    draw();
 }
 
 void Result::draw()

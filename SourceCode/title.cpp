@@ -136,7 +136,7 @@ void Title::update()
                 }
                 else if(isTutorial)
                 {
-                    changeScene(Result::instance());
+                    changeScene(Tutorial::instance());
                 }
             }
         }

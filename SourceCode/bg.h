@@ -35,7 +35,8 @@ enum TexNo
     Tile02,
     Bomb01,
     Explosion,
-    Reset
+    Reset,
+    BreakbleTile
 };
 
 class BG
@@ -175,7 +176,7 @@ private:
 
     int stageNum;
     int timer;                      //全体の時間
-    int explosionTime = 50;         //爆発が残留する時間
+    int explosionTime = 45;         //爆発が残留する時間
     int delayTime = 20;             //爆発の連鎖する間隔
     int operatbleCursorTime = 5;    //誤操作を防ぐための操作不能時間
     DirectX::XMFLOAT2  cursorPos;   //カーソルの位置

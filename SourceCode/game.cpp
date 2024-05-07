@@ -26,6 +26,15 @@ Game Game::instance_;
 Effect effects_fire[5];
 Effect effects_bomb[5];
 
+//timer&score
+static GameLib::Sprite* kanban = nullptr;
+
+// nextmino
+static GameLib::Sprite* box = nullptr;
+
+// ÉQÅ[ÉÄîwåi
+static GameLib::Sprite* back = nullptr;
+
 int stageNum;
 
 //--------------------------------
@@ -138,31 +147,22 @@ void Game::draw()
     // âÊñ ÉNÉäÉA
     GameLib::clear(VECTOR4(0, 0, 0, 1));
 
-    ////map
-    //GameLib::primitive::rect(
-    //    200.0f, 0.0f,
-    //    GameLib::window::getWidth() - 200.0f, GameLib::window::getHeight(),
-    //    0,
-    //    1, 0, 0, 1
-    //);
+    // ÉQÅ[ÉÄîwåi
+    float txsX1 = 850;
+    float txsY = 720;
+    back = sprite_load(L"./Data/Images/back.png");
+    sprite_render(back, 200.0f, 0.0f, txsX1 / 640, txsY / 480, 0, 0, 640, 480, ToRadian(0));
 
     //timer&score
-    GameLib::primitive::rect(
-        0.0f, 0.0f,
-        200.0f, GameLib::window::getHeight(),
-        0, 0,
-        0,
-        0, 1, 0, 1
-    );
+    float txsX2 = 200;
+    kanban = sprite_load(L"./Data/Images/kanban.png");
+    sprite_render(kanban, 0, 0, txsX2 / 310, txsY / 1551, 0, 0, 310, 1551, ToRadian(0));
 
     //nextmino
-    GameLib::primitive::rect(
-        GameLib::window::getWidth() - 34.0f - 200.0f, 0.0f,
-        GameLib::window::getWidth() - 34.0f - 200.0f, GameLib::window::getHeight(),
-        0, 0,
-        0,
-        0, 0, 1, 1
-    );
+    float txsX3 = 230;
+    box = sprite_load(L"./Data/Images/box.png");
+    sprite_render(box, GameLib::window::getWidth() - 34.0f - 200.0f, 0.0f,
+        txsX3 / 600, txsY / 800, 0, 0, 600, 800, ToRadian(0));
 
     //map
     bg.drawTerrain();
@@ -193,6 +193,10 @@ void Game::draw()
     // ÉfÉoÉbÉOï∂éöóÒï\é¶
     debug::setString("state:%d", state);
     debug::setString("timer:%d", timer);
+
+    delete kanban;
+    delete box;
+    delete back;
 }
 
 //******************************************************************************

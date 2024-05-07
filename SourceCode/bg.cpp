@@ -357,11 +357,12 @@ void BG::init(int stagenum)
     delete effect_bomb;
     delete effect_explosion;
 
-    texture::load(Tile01, TILE01, 256U);       //背景
-    texture::load(Tile02, TILE02, 256U);       //背景
-    texture::load(Bomb01, BOMB01, 256U);       //爆弾
-    texture::load(Explosion, EXPLOSION, 256U); //爆発
-    texture::load(Reset, RESET, 256U);         //リセット
+    texture::load(Tile01, TILE01, 256U);           //背景
+    texture::load(Tile02, TILE02, 256U);           //背景
+    texture::load(Bomb01, BOMB01, 256U);           //爆弾
+    texture::load(Explosion, EXPLOSION, 256U);     //爆発
+    texture::load(Reset, RESET, 256U);             //リセット
+    texture::load(BreakbleTile, BREAKETILE, 256U); //破壊可能ブロック
 
     //バクダンの種類を初期化
     for (int i = 0; i < BOMB_TYPE_MAX; i++)
@@ -579,7 +580,7 @@ void BG::update()
         }
     }
 
-    if (act > 40)finish_game = true;
+    if (act > 20)finish_game = true;
 
     focus->update();
 
@@ -599,28 +600,39 @@ void BG::drawTerrain()
         {
             float a = terrain_back[0][y][x];
             texture::draw(
-                0,
+                TexNo::Tile01,
                 Mapterrain_correction.x + (x * CHIP_SIZE_F), Mapterrain_correction.y + (y * CHIP_SIZE_F),
                 1.0, 1.0,
                 CHIP_SIZE_F * a, 0,
                 CHIP_SIZE_F * (a + 1), CHIP_SIZE_F
             );
+        }
+    }
+    texture::end(Tile01);
+
+    texture::begin(BreakbleTile);
+    for (int x = 0; x < CHIP_NUM_X; x++)
+    {
+        for (int y = 0; y < CHIP_NUM_Y; y++)
+        {
+            float a = terrain_back[0][y][x];
             if (a == 2)
             {
                 texture::draw(
-                    0,
+                    TexNo::BreakbleTile,
                     Mapterrain_correction.x + (x * CHIP_SIZE_F), Mapterrain_correction.y + (y * CHIP_SIZE_F),
                     1.0, 1.0,
                     CHIP_SIZE_F * 1, 0,
                     CHIP_SIZE_F * (1 + 1), CHIP_SIZE_F,
                     0, 0,
                     0,
-                    GREEN
+                    WHITE
                 );
             }
+
         }
     }
-    texture::end(Tile01);
+    texture::end(BreakbleTile);
 
     //バクダン
     texture::begin(Tile02);
@@ -805,7 +817,7 @@ void BG::drawTerrain()
             }
             if (terrainData[y][x].status == TerrainStatus::InExplosion && !terrainData[y][x].isChained)
             {
-                if (!terrainData[y][x].isChained && terrainData[y][x].DelayTimer < 25)
+                if (!terrainData[y][x].isChained && terrainData[y][x].DelayTimer < 20)
                 {
                     //爆発の連鎖が始まったが、まだ爆発していないバクダンの描画
                     texture::draw(
@@ -1081,7 +1093,7 @@ void BG::updateEffect(TerrainEffect &effect)
         {
             effect.timer = 0;
             effect.animeNum++;
-            if (effect.animeNum > effect.animeMax)
+            if (effect.animeNum >= effect.animeMax)
             {
                 effect.timer = 0;
                 effect.animeNum = 0;
