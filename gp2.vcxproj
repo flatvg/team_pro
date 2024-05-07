@@ -171,6 +171,7 @@
     <ClInclude Include="GameLib\vector.h" />
     <ClInclude Include="GameLib\view_settings.h" />
     <ClInclude Include="SourceCode\all.h" />
+    <ClInclude Include="SourceCode\audio.h" />
     <ClInclude Include="SourceCode\bg.h" />
     <ClInclude Include="SourceCode\bomb.h" />
     <ClInclude Include="SourceCode\collision.h" />

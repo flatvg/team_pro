@@ -88,8 +88,17 @@ void Game::update()
 
         // ポーズ処理
         if (TRG(0) & PAD_START)
+        {
             isPaused = !isPaused;       // 0コンのスタートボタンが押されたらポーズ状態が反転
+            music::pause();
+        }
+
         if (isPaused) return;           // この時点でポーズ中ならリターン
+
+        if (!isPaused)
+        {
+            music::resume(0);
+        }
 
         switch (state)
         {

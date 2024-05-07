@@ -1,26 +1,26 @@
 #include "all.h"
-
+#include "audio.h"
 using namespace GameLib;
 
 void audio_init()
 {
-	//music::load(TITLE_BGM, L"./Data/Musics/title.wav");
-	//music::load(GAME_BGM, L"./Data/Musics/game.wav");
-	//music::load(TUTORIAL_BGM, L"./Data/Musics/tutrial.wav");
+    // 音楽ファイル読み込み
+    music::load(0, L"./Data/Musics/game.wav");
+    music::load(1, L"./Data/Musics/title.wav");
 
-	//sound::load(SOUNDS, L"./Data/Sunds/sounds.xwb");
+    // 効果音読み込み
+    sound::load(0, L"./Data/Sounds/sounds1.xwb");
 
-	//music::setVolume(TITLE_BGM, 0.3f);
-	//music::setVolume(GAME_BGM, 0.3f);
-	//music::setVolume(TUTORIAL_BGM, 0.3f);
+    music::setVolume(TITLE_BGM, 0.3f);
+    music::setVolume(GAME_BGM, 0.3f);
 
-	//sound::setVolume(SOUNDS, JUMP, 0.15f);
-	//sound::setVolume(SOUNDS, BREAK, 0.15f);
-	//sound::setVolume(SOUNDS, SELECT, 0.5f);
-	//sound::setVolume(SOUNDS, START, 0.4f);
+    // 効果音ボリューム
+    //GameLib::sound::setVolume(XWB_SOUNDS1, XWB_SOUNDS1_EXPLOSION, 1.0f);
+    //GameLib::sound::setVolume(XWB_SOUNDS1, XWB_SOUNDS1_SELECT, 1.0f);
+
 }
 
 void audio_deinit()
 {
-	music::clear();
+    GameLib::music::clear();
 }

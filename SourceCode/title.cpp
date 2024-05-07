@@ -18,6 +18,7 @@
 #include "tutorial.h"
 #include "Effect.h"
 #include "collision.h"
+#include "audio.h"
 
 //------< using >---------------------------------------------------------------
 using namespace GameLib;
@@ -92,6 +93,10 @@ void Title::update()
 
         timer = 0;                                  // タイマーを初期化
         GameLib::setBlendMode(Blender::BS_ALPHA);   // 通常のアルファ処理
+
+        music::play(TITLE_BGM, true);
+        music::setVolume(TITLE_BGM, 0.2f);
+
         state++;                                    // 初期化処理の終了
 
         /*fallthrough*/                             // 意図的にbreak;を記述していない
@@ -138,6 +143,8 @@ void Title::update()
                 {
                     changeScene(Tutorial::instance());
                 }
+                music::stop();
+                music::play(GAME_BGM, true);
             }
         }
 
@@ -195,6 +202,11 @@ void Title::update()
 
         if(angleflag)
         angle -= XMConvertToRadians(2);
+
+        if (TRG(0) & PAD_LC)
+        {
+            sound::play(XWB_SOUNDS, BAKUHATU);
+        }
 
         break;
     }
