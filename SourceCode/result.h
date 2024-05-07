@@ -32,6 +32,8 @@ public:
     void update();
     void draw();
 private:
+    bool isPaused;
+
     static Result instance_;
 };
 

@@ -14,6 +14,7 @@
 #include "title.h"
 #include "select.h"
 #include "game.h"
+#include "audio.h"
 
 //==============================================================================
 //
@@ -31,6 +32,7 @@ Scene* Scene::execute()
     // 初期化処理
     init();
     nextScene = nullptr;
+    audio_init();
     // ゲームループ
     while (GameLib::gameLoop(false))    // falseをtrueにするとタイトルバーにフレームレート表示
     {
