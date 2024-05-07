@@ -26,6 +26,8 @@ public:
         radius = 20.0f;
         circleAngle = 0.0f;
         isAlreadyPopUp = false;
+        isStartTimer = false;
+        timer = 0;
     }
 
     TextBox(VECTOR2 pos, VECTOR2 Bsize, VECTOR4 color)
@@ -41,6 +43,8 @@ public:
         circleAngle = 0.0f;
         isAlreadyPopUp = false;
         isDrawClickHere = true;
+        isStartTimer = false;
+        timer = 0;
     }
     ~TextBox() {}
 
@@ -65,6 +69,8 @@ public:
 
     const VECTOR2& getPosition() const { return position; }
 
+    bool WaitTime(int time) { return timer > time; }
+
 private:
     GameLib::Sprite* textTexture = nullptr;
     GameLib::Sprite* clickTexture = nullptr;
@@ -82,4 +88,7 @@ private:
     bool popOutFlag;
     bool isAlreadyPopUp;
     bool isDrawClickHere;
+    bool isStartTimer;
+
+    int timer;
 };

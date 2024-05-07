@@ -6,6 +6,7 @@ void TextBox::Update()
 {
     if (popUpFlag)
     {
+        isStartTimer = true;
         scaleFactor += FLUCTAUTE_FACTOR;
     }
     if (scaleFactor > SCALE_MAX && popUpFlag)
@@ -29,6 +30,8 @@ void TextBox::Update()
     circlePos = position + center;
     circlePos.y += cosf(circleAngle) * AMPLITUDE_CORREC;
     circleAngle += DirectX::XMConvertToRadians(2);
+
+    if(isStartTimer)timer++;
 }
 
 void TextBox::Render(int boxTexNo, int clickTexNo)
@@ -104,4 +107,6 @@ void TextBox::Reset()
     isAlreadyPopUp = false;
     popUpFlag = false;
     popOutFlag = false;
+    isStartTimer = false;
+    timer = 0;
 }

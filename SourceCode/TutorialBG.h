@@ -142,6 +142,7 @@ public:
     void Tutorial();
     void Tutorial_0();
     void Tutorial_1();
+    void Tutorial_2();
 
     //爆弾をドラッグ
     void dragBomb();
@@ -259,7 +260,7 @@ private:
 
     std::unique_ptr<StageMover> stageMovers[STAGE_NUM];
 
-    std::unique_ptr<TextBox> textBoxes[4];
+    std::unique_ptr<TextBox> textBoxes[7];
 
     int tutorialNum;
 
@@ -270,4 +271,7 @@ private:
     int stageAct[STAGE_NUM];
 
     bool isReset;
+
+    //線形保管の重み
+    float weight = 0.041f;
 };

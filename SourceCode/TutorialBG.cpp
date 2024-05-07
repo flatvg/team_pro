@@ -417,14 +417,17 @@ void TutorialBG::init(int stagenum)
         focus = std::make_unique<Focus>(VECTOR2(0, 0), 300.0f);
     }
 
-    textBoxes[0] = std::make_unique<TextBox>(VECTOR2(200, 400), VECTOR2(250, 100), VECTOR4(BLUE));
-    textBoxes[1] = std::make_unique<TextBox>(VECTOR2(200, 400), VECTOR2(250, 100), VECTOR4(WHITE));
-    textBoxes[2] = std::make_unique<TextBox>(VECTOR2(300, 400), VECTOR2(350, 100), VECTOR4(GREEN));
-    textBoxes[3] = std::make_unique<TextBox>(VECTOR2(300, 400), VECTOR2(350, 100), VECTOR4(RED));
+    for (auto& textBox : textBoxes)
+    {
+        textBox = std::make_unique<TextBox>(VECTOR2(200, 400), VECTOR2(250, 100), VECTOR4(WHITE));
+    }
 
     tutorialNum = 0;
 
     isReset = false;
+
+    //線形保管の重み
+    weight = 0.041f;
 }
 
 //--------------------------------
@@ -489,7 +492,7 @@ void TutorialBG::update()
     //爆弾をリセット
     resetButton();
 
-    if (burningFuse.exist)
+    if (burningFuse.exist || (tutorialNum == 1 && textBoxes[1]->GetPopOutFlag()))
     {
         //爆弾をドラッグ
         dragBomb();
@@ -1000,6 +1003,9 @@ void TutorialBG::Tutorial()
     case 1:
         Tutorial_1();
         break;
+    case 2:
+        Tutorial_2();
+        break;
     }
 }
 
@@ -1035,22 +1041,25 @@ void TutorialBG::Tutorial_0()
 
     //textBox
     {
-        textBoxes[1]->IsNotDrawClickHere();
-        textBoxes[2]->IsNotDrawClickHere();
+        textBoxes[4]->IsNotDrawClickHere();
         textBoxes[3]->IsNotDrawClickHere();
-        textBoxes[0]->SetPosition(VECTOR2(200, 600));
+        textBoxes[2]->IsNotDrawClickHere();
+        textBoxes[0]->SetPosition(VECTOR2(200, 400));
 
         textBoxes[0]->SetPopUpFlag(timer > 10);
-        textBoxes[0]->SetPopOutFlag(isClickL && timer > 50);
+        textBoxes[0]->SetPopOutFlag(isClickL && textBoxes[0]->WaitTime(30));
 
         textBoxes[1]->SetPopUpFlag(textBoxes[0]->GetPopOutFlag());
-        textBoxes[1]->SetPopOutFlag(isSetFuse);
+        textBoxes[1]->SetPopOutFlag(isClickL && textBoxes[1]->WaitTime(30));
 
         textBoxes[2]->SetPopUpFlag(textBoxes[1]->GetPopOutFlag());
-        textBoxes[2]->SetPopOutFlag(drag_con);
+        textBoxes[2]->SetPopOutFlag(isSetFuse);
 
-        textBoxes[3]->SetPopUpFlag(textBoxes[2]->GetPopOutFlag() && !focuses[0]->IsDraw());
-        textBoxes[3]->SetPopOutFlag(isTutorialClear[nowStage]);
+        textBoxes[3]->SetPopUpFlag(textBoxes[2]->GetPopOutFlag());
+        textBoxes[3]->SetPopOutFlag(drag_con);
+
+        textBoxes[4]->SetPopUpFlag(textBoxes[3]->GetPopOutFlag() && !focuses[0]->IsDraw());
+        textBoxes[4]->SetPopOutFlag(isTutorialClear[nowStage]);
     }
 
     //focus
@@ -1060,10 +1069,10 @@ void TutorialBG::Tutorial_0()
         focuses[1]->SetFocusPos(VECTOR2(1150, 360));
         focuses[1]->SetFocusSize(VECTOR2(1.1f, 1.9f));
 
-        focuses[0]->SetFocusFlag(textBoxes[1]->GetPopUpFlag());
-        focuses[0]->SetUnFocusFlag(textBoxes[1]->GetPopOutFlag());
+        focuses[0]->SetFocusFlag(textBoxes[2]->GetPopUpFlag());
+        focuses[0]->SetUnFocusFlag(textBoxes[2]->GetPopOutFlag());
 
-        focuses[1]->SetFocusFlag(textBoxes[2]->GetPopUpFlag() && !focuses[0]->IsDraw());
+        focuses[1]->SetFocusFlag(textBoxes[3]->GetPopUpFlag() && !focuses[0]->IsDraw());
         focuses[1]->SetUnFocusFlag(drag_con);   //ボムを持っている時
     }
 }
@@ -1100,7 +1109,7 @@ void TutorialBG::Tutorial_1()
 
     //stageMover
     {
-        stageMovers[1]->SetMoveFlag(isC);
+        stageMovers[1]->SetMoveFlag(textBoxes[3]->GetPopOutFlag());
     }
 
     //textBox
@@ -1125,9 +1134,73 @@ void TutorialBG::Tutorial_1()
     {
         focuses[0]->SetFocusPos(VECTOR2(400, 175));
         focuses[0]->SetRadius(250.0f);
+        focuses[1]->SetFocusPos(VECTOR2(1150, 360));
+        focuses[1]->SetFocusSize(VECTOR2(1.1f, 1.9f));
 
         focuses[0]->SetFocusFlag(true);
         focuses[0]->SetUnFocusFlag(textBoxes[1]->GetPopOutFlag());
+
+        focuses[1]->SetFocusFlag(!focuses[0]->IsDraw());
+        focuses[1]->SetUnFocusFlag(drag_con);   //ボムを持っている時
+    }
+}
+
+void TutorialBG::Tutorial_2()
+{
+    bool isActionTerrain = false;
+    bool isSetFuse = false;
+    bool isNotBrakbleTerrain = true;
+    for (int x = 0; x < CHIP_NUM_X; x++)
+    {
+        for (int y = 0; y < CHIP_NUM_Y; y++)
+        {
+            if (terrainData[nowStage][y][x].status == TerrainStatus::BurningFuse)
+            {
+                isSetFuse = true;
+            }
+            if (terrainData[nowStage][y][x].status == TerrainStatus::Bomb
+                || terrainData[nowStage][y][x].status == TerrainStatus::InExplosion
+                || terrainData[nowStage][y][x].status == TerrainStatus::BurningFuse)
+            {
+                isActionTerrain = true;
+            }
+            if ((terrain_back_T[nowStage][y][x] == 2))
+            {
+                isNotBrakbleTerrain = false;
+            }
+        }
+    }
+
+    //stageMover
+    {
+        //stageMovers[2]->SetMoveFlag(isC);
+    }
+
+    //textBox
+    {
+        textBoxes[1]->IsNotDrawClickHere();
+        textBoxes[2]->IsNotDrawClickHere();
+
+        textBoxes[0]->SetPopUpFlag(true);
+        textBoxes[0]->SetPopOutFlag(isClickL);
+
+        //textBoxes[1]->SetPopUpFlag(textBoxes[0]->GetPopOutFlag());
+        //textBoxes[1]->SetPopOutFlag(isSetFuse);
+
+        //textBoxes[2]->SetPopUpFlag(textBoxes[1]->GetPopOutFlag());
+        //textBoxes[2]->SetPopOutFlag(drag_con);
+
+        //textBoxes[3]->SetPopUpFlag(isNotBrakbleTerrain);
+        //textBoxes[3]->SetPopOutFlag(isClickL);
+    }
+
+    //focus
+    {
+    //    focuses[0]->SetFocusPos(VECTOR2(400, 175));
+    //    focuses[0]->SetRadius(250.0f);
+
+        //focuses[0]->SetFocusFlag(true);
+        //focuses[0]->SetUnFocusFlag(textBoxes[1]->GetPopOutFlag());
     }
 }
 
@@ -1352,9 +1425,6 @@ bool TutorialBG::moveStages(std::unique_ptr<StageMover> &stageMover)
 }
 bool TutorialBG::moveStage(int stageNum, MoveType moveType)
 {
-    //線形保管の重み
-    float weight = 0.041f;
-
     switch (moveType)
     {
     case MoveType::StartToInGame:
@@ -1372,17 +1442,22 @@ bool TutorialBG::moveStage(int stageNum, MoveType moveType)
                     XMVECTOR LengthSq = XMVector2Length(XMVectorSubtract(EndPos, CurrentPos));
                     float lengthSq;
                     XMStoreFloat(&lengthSq, LengthSq);
-                    if (lengthSq < 1.0f)
+                    if (lengthSq < 10.0f)
                     {
-                        //この関数を終わらせる
-                        for (int x = 0; x < CHIP_NUM_X; x++)
+                        weight = 0.082f;
+                        if (lengthSq < 2.0f)
                         {
-                            for (int y = 0; y < CHIP_NUM_Y; y++)
+                            //この関数を終わらせる
+                            for (int x = 0; x < CHIP_NUM_X; x++)
                             {
-                                terrainData[stageNum][y][x].currentPos = terrainData[stageNum][y][x].inGamePos;
+                                for (int y = 0; y < CHIP_NUM_Y; y++)
+                                {
+                                    weight = 0.041f;
+                                    terrainData[stageNum][y][x].currentPos = terrainData[stageNum][y][x].inGamePos;
+                                }
                             }
+                            return false;
                         }
-                        return false;
                     }
                 }
             }

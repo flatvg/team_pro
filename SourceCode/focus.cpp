@@ -58,6 +58,9 @@ void Focus::render()
 
 void Focus::Reset()
 {
+    focusPos = VECTOR2(-300.0f, -300.0f);
     focusSize = VECTOR2(1.0f, 1.0f);
+    focusOnFlag = false;
+    unFocusFlag = false;
     isDraw = true;
 }
