@@ -391,6 +391,7 @@ void TutorialBG::init(int stagenum)
     texture::load(Bomb01, BOMB01, 512U);          //爆弾
     texture::load(Explosion, EXPLOSION, 512U);    //爆発
     texture::load(Reset, RESET, 256U);            //リセット
+    texture::load(Shape, SHAPE, 512U);            //設置不可能マス
 
     //バクダンの種類を初期化
     for (int i = 0; i < BOMB_TYPE_MAX; i++)
@@ -428,6 +429,8 @@ void TutorialBG::init(int stagenum)
 
     //線形保管の重み
     weight = 0.041f;
+
+    isPutOnFuse = true;
 }
 
 //--------------------------------
@@ -491,6 +494,8 @@ void TutorialBG::update()
 
     //爆弾をリセット
     resetButton();
+
+    //IsPutOnFuse();
 
     if (burningFuse.exist || (tutorialNum == 1 && textBoxes[1]->GetPopOutFlag()))
     {
@@ -603,7 +608,7 @@ void TutorialBG::update()
     //揺れた画面を元に戻す
     Mapterrain_correction = { 200.0f + 32.0f - 64.0f ,0.0f + 32.0f - 64.0f };
 
-    if (!isUnBreakble && isX && !burningFuse.exist)
+    if (!isUnBreakble && isX && !burningFuse.exist && IsPutOnFuse())
     {
         burningFuse.exist = true;
         burningFuse.pos = VECTOR2(
@@ -711,16 +716,16 @@ void TutorialBG::drawTerrain()
                 //設置不可マスの描画
                 if (!terrainData[s][y][x].isPutOn && terrainData[s][y][x].status == TerrainStatus::Normal && drag_con)
                 {
-                    texture::draw(
-                        TexNo::Tile02,
-                        terrainData[s][y][x].currentPos.x, terrainData[s][y][x].currentPos.y,
-                        1.0f, 1.0f,
-                        0, 0,
-                        CHIP_SIZE_F, CHIP_SIZE_F,
-                        0, 0,
-                        0,
-                        1, 0, 1, 0.6f
-                    );
+                    //texture::draw(
+                    //    TexNo::Tile02,
+                    //    terrainData[s][y][x].currentPos.x, terrainData[s][y][x].currentPos.y,
+                    //    1.0f, 1.0f,
+                    //    0, 0,
+                    //    CHIP_SIZE_F, CHIP_SIZE_F,
+                    //    0, 0,
+                    //    0,
+                    //    1, 0, 1, 0.6f
+                    //);
                 }
                 if (terrainData[s][y][x].status == TerrainStatus::Bomb)
                 {
@@ -923,6 +928,48 @@ void TutorialBG::drawTerrain()
     }
 
     texture::end(Bomb01);
+
+    texture::begin(Shape);
+
+    //設置不可マスの描画
+    for (int s = 0; s < STAGE_NUM; s++)
+    {
+        if (!isDrawStage[s])break;
+        for (int x = 0; x < CHIP_NUM_X; x++)
+        {
+            for (int y = 0; y < CHIP_NUM_Y; y++)
+            {
+                if (!terrainData[s][y][x].isPutOn && terrainData[s][y][x].status == TerrainStatus::Normal && drag_con)
+                {
+                    texture::draw(
+                        TexNo::Shape,
+                        terrainData[s][y][x].currentPos.x, terrainData[s][y][x].currentPos.y,
+                        4.0f, 4.0f,
+                        48.0f, 16.0f,
+                        16.0f, 16.0f,
+                        0, 0,
+                        0,
+                        1, 1, 1, 0.75f
+                    );
+                }
+                if (!terrainData[s][y][x].isPutOn && terrainData[s][y][x].status == TerrainStatus::Bomb && drag_con)
+                {
+                    texture::draw(
+                        TexNo::Shape,
+                        terrainData[s][y][x].currentPos.x, terrainData[s][y][x].currentPos.y,
+                        4.0f, 4.0f,
+                        16.0f, 16.0f,
+                        16.0f, 16.0f,
+                        0, 0,
+                        0,
+                        1, 1, 1, 0.75f
+                    );
+                }
+            }
+        }
+    }
+
+    texture::end(Shape);
 
     debug::setString("act:%d", act);
     debug::setString("score:%d", score);
@@ -1598,6 +1645,27 @@ void TutorialBG::SetTerrainPos(DirectX::XMINT2 terrainPos, int stageNum)
     //最初のステージは初期値をimGamePos(画面中央)、それ以外は初期値をstartPosにする
     DirectX::XMFLOAT2 defaultPos = stageNum == 0 ? inGamePos : startPos;
     terrainData[stageNum][terrainPos.y][terrainPos.x].currentPos = defaultPos;
+}
+
+//--------------------------------
+//  導火線を置けるか
+//--------------------------------
+bool TutorialBG::IsPutOnFuse()
+{
+    for (int x = 0; x < CHIP_NUM_X; x++)
+    {
+        for (int y = 0; y < CHIP_NUM_Y; y++)
+        {
+            if (terrainData[nowStage][y][x].status == TerrainStatus::InExplosion)
+            {
+                isPutOnFuse = false;
+                return false;
+            }
+        }
+    }
+
+    isPutOnFuse = true;
+    return true;
 }
 
 //--------------------------------

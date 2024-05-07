@@ -2,9 +2,13 @@
 #include "select.h"
 #include "game.h"
 
+using namespace DirectX;
 using namespace GameLib;
 
 Select Select::instance_;
+
+Sprite* back_img = nullptr;
+Sprite* stage1_img = nullptr;
 
 void Select::init()
 {
@@ -13,19 +17,20 @@ void Select::init()
     timer = 0;
 
     int index = 0;
+
     for (auto& stage : stages)
     {
         stage = setRectData(
-            DirectX::XMFLOAT2(index++ * 400.0f, 0.0f),
-            DirectX::XMFLOAT2(300.0f, 600.0f),
-            DirectX::XMFLOAT4(0, 1, 0, 1)
+            VECTOR2(50.0f + index++ * 425.0f, 250.0f),
+            VECTOR2(1589.0f, 893.0f),
+            VECTOR4(1, 1, 1, 1),
+            VECTOR2(0.2f,0.2f)
         );
     }
 }
 
 void Select::deinit()
 {
-
 }
 
 void Select::update()
@@ -54,25 +59,45 @@ void Select::draw()
     // 画面クリア
     GameLib::clear(VECTOR4(0, 0, 0, 1));
 
+    back_img = sprite_load(BACK);
+    sprite_render(back_img, 0.0f, 0.0f, 2.0f, 1.5f, 0, 0, 640, 480, ToRadian(0));
+
+    stage1_img = sprite_load(STAGE1);
+    int i = 0;
     for (auto& stage : stages)
     {
-        renderRect(stage.rect, stage.color);
+        //renderRect(stage.rect, stage.color);
+
+        sprite_render(
+            stage1_img,
+            stage.position.x, stage.position.y,
+            stage.scale.x, stage.scale.y,
+            0, 0,
+            stage.size.x, stage.size.y,
+            ToRadian(0)
+        );
+
     }
+
+    delete stage1_img;
+    delete back_img;
 }
 
-RectData Select::setRectData(DirectX::XMFLOAT2 pos, DirectX::XMFLOAT2 size, DirectX::XMFLOAT4 color)
+RectData Select::setRectData(VECTOR2 pos, VECTOR2 size, VECTOR4 color, VECTOR2 scale)
 {
     RectData rectData;
 
     rectData.position = pos;
     rectData.size = size;
     rectData.color = color;
-    rectData.rect = makeRect(rectData.position, rectData.size);
+    rectData.center = VECTOR2(pos.x + size.x * 0.5f, pos.y + size.y * 0.5f);
+    rectData.scale = scale;
+    rectData.rect = makeRect(rectData.position, VECTOR2(rectData.size.x * rectData.scale.x, rectData.size.y * rectData.scale.y));
 
     return rectData;
 }
 
-bool Select::isClickRect(DirectX::XMFLOAT2 cursorPos, RectData rectData)
+bool Select::isClickRect(VECTOR2 cursorPos, RectData rectData)
 {
     //カーソルが四角形の内部にあるか確認
     GameLib::fRECT rect = rectData.rect;
@@ -88,7 +113,7 @@ bool Select::isClickRect(DirectX::XMFLOAT2 cursorPos, RectData rectData)
     return true;
 }
 
-void Select::renderRect(GameLib::fRECT rect, DirectX::XMFLOAT4 color)
+void Select::renderRect(GameLib::fRECT rect, VECTOR4 color)
 {
     GameLib::primitive::rect(
         rect.left, rect.top,

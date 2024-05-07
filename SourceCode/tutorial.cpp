@@ -93,6 +93,11 @@ void Tutorial::draw()
     // 画面クリア
     GameLib::clear(VECTOR4(0, 0.5f, 0.5f, 1));
 
+    Sprite* back_img = nullptr;
+
+    back_img = sprite_load(BACK);
+    sprite_render(back_img, 0.0f, 0.0f, 2.0f, 1.5f, 0, 0, 640, 480, ToRadian(0));
+
     //map
     T_bg.drawTerrain();
 
@@ -106,5 +111,7 @@ void Tutorial::draw()
 
     // デバッグ文字列表示
     debug::setString("timer:%d", timer);
+
+    delete back_img;
 }
 

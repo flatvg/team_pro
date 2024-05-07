@@ -3,9 +3,11 @@
 
 struct RectData
 {
-    DirectX::XMFLOAT2 position;
-    DirectX::XMFLOAT2 size;
-    DirectX::XMFLOAT4 color;
+    VECTOR2 position;
+    VECTOR2 scale;
+    VECTOR2 size;
+    VECTOR2 center;
+    VECTOR4 color;
     GameLib::fRECT rect;
 };
 
@@ -22,16 +24,16 @@ public:
     void update()override;
     void draw()override;
 
-    bool isClickRect(DirectX::XMFLOAT2 cursorPos, RectData rectData);
+    bool isClickRect(VECTOR2 cursorPos, RectData rectData);
 
-    void renderRect(GameLib::fRECT rect, DirectX::XMFLOAT4 color);
+    void renderRect(GameLib::fRECT rect, VECTOR4 color);
 
-    RectData setRectData(DirectX::XMFLOAT2 pos, DirectX::XMFLOAT2 size, DirectX::XMFLOAT4 color);
+    RectData setRectData(VECTOR2 pos, VECTOR2 size, VECTOR4 color, VECTOR2 scale);
 
 private:
     static constexpr int STAGE_MAX = 3;
 
-    DirectX::XMFLOAT2  cursorPos;   //カーソルの位置
+    VECTOR2  cursorPos;   //カーソルの位置
 
     RectData stages[STAGE_MAX];
 

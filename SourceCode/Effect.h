@@ -21,6 +21,7 @@ public:
     // エフェクト生成
     static void addEffect(Effect* effects, size_t size, const VECTOR2& pos);
 
+    bool isLoop = true;
     bool exist = false;
     int timer;
     VECTOR2 pos;

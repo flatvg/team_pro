@@ -69,26 +69,30 @@ void Effect::effectBakuhatu(GameLib::Sprite* sprite, int anime)
 
 void Effect::effectBakuhatu(GameLib::Sprite* sprite, int anime, DirectX::XMFLOAT2 size)
 {
-    timer++;
+    if (exist)
+    {
+        timer++;
 
-    if (timer > 5) {
-        timer = 0;
-        animeNum++;
-        if (animeNum > anime - 1) {
-            animeNum = 0;
+        if (timer > 5) {
+            timer = 0;
+            animeNum++;
+            if (animeNum > anime - 1) {
+                animeNum = 0;
+                if (!isLoop)exist = false;
+            }
         }
-    }
 
-    sprite->getSize(tx, ty);
-    float texSizeX = tx / anime;
-    GameLib::sprite_render(
-        sprite,
-        pos.x, pos.y,
-        size.x, size.y,
-        texSizeX * animeNum, 0.0f,
-        texSizeX, ty,
-        0.0f, 0.0f,
-        ToRadian(0));
+        sprite->getSize(tx, ty);
+        float texSizeX = tx / anime;
+        GameLib::sprite_render(
+            sprite,
+            pos.x, pos.y,
+            size.x, size.y,
+            texSizeX * animeNum, 0.0f,
+            texSizeX, ty,
+            0.0f, 0.0f,
+            ToRadian(0));
+    }
 }
 
 void Effect::addEffect(Effect* effects, size_t size, const VECTOR2& pos)

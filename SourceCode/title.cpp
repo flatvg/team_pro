@@ -33,6 +33,8 @@ Effect effects_bombs[5];
 
 static GameLib::Sprite* title;
 
+Effect effect_click;
+
 void Title::draw_init_status()
 {
     //title
@@ -203,8 +205,13 @@ void Title::update()
         if(angleflag)
         angle -= XMConvertToRadians(2);
 
-        if (TRG(0) & PAD_LC)
-        {
+        if (TRG(0) & PAD_LC) {
+
+            // マウスのクリック位置を取得
+            float mouseX = static_cast<float>(GameLib::input::getCursorPosX());
+            float mouseY = static_cast<float>(GameLib::input::getCursorPosY());
+
+            Effect::addEffect(&effect_click, 100, { mouseX - 62,mouseY - 62 });
             sound::play(XWB_SOUNDS, BAKUHATU);
         }
 
@@ -282,18 +289,16 @@ void Title::draw()
         VECTOR4(0, 1, 0, 1)
     );
 
-    //static GameLib::Sprite* fire_image = nullptr;
-    static GameLib::Sprite* bomb_image = nullptr;
-    //fire_image = sprite_load(FIRE03);
-    bomb_image = sprite_load(BOMB01);
-    for (auto& effect : effects_bombs) {
-        if (effect.exist) {
-            effect.effectBomb(bomb_image, 3, DirectX::XMFLOAT2(2.5f,2.5f));
-        }
+    static GameLib::Sprite* Click = nullptr;
+    effect_click.isLoop = false;
+    Click = sprite_load(CLICKEXPLODE);
+
+    if (effect_click.exist)
+    {
+        effect_click.effectBakuhatu(Click, 6);
     }
-    //delete fire_image;
-    delete bomb_image;
-    delete title;
+
+    delete Click;
 }
 
 //******************************************************************************

@@ -41,7 +41,8 @@ public:
         Tile02,
         Bomb01,
         Explosion,
-        Reset
+        Reset,
+        Shape
     };
 
     enum class MoveType
@@ -211,6 +212,8 @@ public:
     //terrainÇÃpositionÇÃê›íË
     void SetTerrainPos(DirectX::XMINT2 terrainPos, int stageNum);
 
+    bool IsPutOnFuse();
+
     bool finish_game;
 
 private:
@@ -267,6 +270,8 @@ private:
     bool isTutorialClear[STAGE_NUM];
 
     bool isDrawStage[STAGE_NUM];
+
+    bool isPutOnFuse;
 
     int stageAct[STAGE_NUM];
 
