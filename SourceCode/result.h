@@ -26,6 +26,7 @@ public:
 public:
     static Result* instance() { return &instance_; }
 
+    Result();
     void init();
     void deinit();
     void update();

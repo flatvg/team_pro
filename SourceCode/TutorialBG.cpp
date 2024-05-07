@@ -1030,13 +1030,12 @@ void TutorialBG::Tutorial_0()
 
     //stageMover
     {
-        //stageMovers[0]->SetMoveFlag(isTutorialClear[nowStage]);
-        stageMovers[0]->SetMoveFlag(isC);
+        stageMovers[0]->SetMoveFlag(isTutorialClear[nowStage]);
     }
 
     //textBox
     {
- /*       textBoxes[1]->IsNotDrawClickHere();
+        textBoxes[1]->IsNotDrawClickHere();
         textBoxes[2]->IsNotDrawClickHere();
         textBoxes[3]->IsNotDrawClickHere();
         textBoxes[0]->SetPosition(VECTOR2(200, 600));
@@ -1051,7 +1050,7 @@ void TutorialBG::Tutorial_0()
         textBoxes[2]->SetPopOutFlag(drag_con);
 
         textBoxes[3]->SetPopUpFlag(textBoxes[2]->GetPopOutFlag() && !focuses[0]->IsDraw());
-        textBoxes[3]->SetPopOutFlag(isTutorialClear[nowStage]);*/
+        textBoxes[3]->SetPopOutFlag(isTutorialClear[nowStage]);
     }
 
     //focus

@@ -13,6 +13,7 @@
 #include "scene.h"
 #include "title.h"
 #include "select.h"
+#include "result.h"
 #include "game.h"
 #include "tutorial.h"
 #include "Effect.h"
@@ -135,7 +136,7 @@ void Title::update()
                 }
                 else if(isTutorial)
                 {
-                    changeScene(Tutorial::instance());
+                    changeScene(Result::instance());
                 }
             }
         }
