@@ -10,6 +10,9 @@ using namespace GameLib;
 //------< 変数 >----------------------------------------------------------------
 Result Result::instance_;
 static GameLib::Sprite* title;
+int act_ext;
+int score_ext;
+bool winlose;
 
 Result::Result()
 {
@@ -19,11 +22,13 @@ Result::Result()
 void Result::init()
 {
     Scene::init();	    // 基底クラスのinitを呼ぶ
+    texture::load(20, L"./Data/Images/num.png", 256U); //爆発
 }
 
 void Result::deinit()
 {
     // 各マネージャの解放
+    texture::releaseAll();
 }
 
 void Result::update()
@@ -65,17 +70,17 @@ void Result::update()
 
     case 1:
         //////// 通常時の処理 ////////
+        title_scale = { 1.0f, 1.0f };
+        select_scale = { 1.0f, 1.0f };
 
-        // マウスを左クリックするとタイトル画面に戻る
-        if (TRG(0) & PAD_LC) {
-
-            // マウスのクリック位置を取得
-            float mouseX = static_cast<float>(GameLib::input::getCursorPosX());
-            float mouseY = static_cast<float>(GameLib::input::getCursorPosY());
-
-            // クリックした座標が特定の円形の内側にあるかチェック
-            if (mouseX >= 200.0f - 100.0f && mouseX <= 200.0f + 100.0f &&
-                mouseY >= 500.0f - 100.0f && mouseY <= 500.0f + 100.0f) {
+        float mouseX = static_cast<float>(GameLib::input::getCursorPosX());
+        float mouseY = static_cast<float>(GameLib::input::getCursorPosY());
+        // クリックした座標が特定の円形の内側にあるかチェック
+        if (mouseX >= 200.0f - 100.0f && mouseX <= 200.0f + 100.0f &&
+            mouseY >= 500.0f - 100.0f && mouseY <= 500.0f + 100.0f) {
+            title_scale = { 1.5f,1.5f };
+            // マウスを左クリックするとタイトル画面に戻る
+            if (TRG(0) & PAD_LC) {
 
                 // タイトル画面に戻る処理を実行
                 changeScene(Title::instance());
@@ -83,19 +88,16 @@ void Result::update()
             }
         }
 
-        // マウスを左クリックするとセレクト画面に戻る
-        if (TRG(0) & PAD_LC) {
+        // クリックした座標が特定の円形の内側にあるかチェック
+        if (mouseX >= 1000.0f - 100.0f && mouseX <= 1000.0f + 100.0f &&
+            mouseY >= 500.0f - 100.0f && mouseY <= 500.0f + 100.0f) {
 
-            // マウスのクリック位置を取得
-            float mouseX = static_cast<float>(GameLib::input::getCursorPosX());
-            float mouseY = static_cast<float>(GameLib::input::getCursorPosY());
-
-            // クリックした座標が特定の円形の内側にあるかチェック
-            if (mouseX >= 1000.0f - 100.0f && mouseX <= 1000.0f + 100.0f &&
-                mouseY >= 500.0f - 100.0f && mouseY <= 500.0f + 100.0f) {
+            select_scale = { 1.5f,1.5f };
+            // マウスを左クリックするとセレクト画面に戻る
+            if (TRG(0) & PAD_LC) {
 
                 // セレクト画面に戻る処理を実行
-                changeScene(Select::instance());
+                changeScene(Title::instance());
                 return;
             }
         }
@@ -114,15 +116,50 @@ void Result::draw()
     sprite_render(title, 0.0f, 0.0f, 2.0f, 1.5f, 0, 0, 640, 480, ToRadian(0));
 
     // タイトル画面へ
-    GameLib::primitive::circle(200, 500, 100, 1, 1, ToRadian(0), 1, 0, 0);
+    GameLib::primitive::circle(200, 500, 100, static_cast<float>(title_scale.x), static_cast<float>(title_scale.y), ToRadian(0), 1, 0, 0);
     GameLib::text_out(4, "TITLE", 100, 480, 2, 2, 1, 1, 0);
 
     // セレクト画面へ
-    GameLib::primitive::circle(1000, 500, 100, 1, 1, ToRadian(0), 0, 0, 1);
+    GameLib::primitive::circle(1000, 500, 100, static_cast<float>(select_scale.x), static_cast<float>(select_scale.y), ToRadian(0), 0, 0, 1);
     GameLib::text_out(4, "SERECT", 880, 480, 2, 2, 1, 1, 0);
 
     // 仮のスコア
-    GameLib::primitive::rect(420, 180, 400, 200, 0, 0, ToRadian(0), 1, 1, 1, 1);
-
+    //GameLib::primitive::rect(420, 180, 400, 200, 0, 0, ToRadian(0), 1, 1, 1, 1);
+    GameLib::text_out(4, "SCORE:", 320, 480, 2, 2, 1, 1, 0);
+    GameLib::text_out(4, "ACT:", 400, 580, 2, 2, 1, 1, 0);
+    texture::begin(20);
+    for (int i = 0; i < 5; ++i)
+    {
+        int n = 10;
+        int score_re;
+        int act_re;
+        for (int m = 0; m < i; ++m)
+        {
+            n *= 10;
+        }
+        score_re = (score_ext % n) / (n / 10);
+        if (score_re == 0)score_re = 10;
+        texture::draw(
+            20,
+            800 - (50 * i), 440,
+            0.5f, 0.5f,
+            50 * ((score_re - 1) * 2), 0,
+            50 * 2, 1000,
+            0, 0,
+            0,
+            1, 1, 1, 1);
+        act_re = (act_ext % n) / (n / 10);
+        if (act_re == 0)act_re = 10;
+        texture::draw(
+            20,
+            800 - (50 * i), 540,
+            0.5f, 0.5f,
+            50 * ((act_re - 1) * 2), 0,
+            50 * 2, 1000,
+            0, 0,
+            0,
+            1, 1, 1, 1);
+    }
+    texture::end(20);
     delete title;
 }

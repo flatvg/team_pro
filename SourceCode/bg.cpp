@@ -18,23 +18,63 @@
 //------< using >---------------------------------------------------------------
 using namespace GameLib;
 
+extern int act_ext;
+extern int score_ext;
+extern bool winlose;
+
 //------< データ >---------------------------------------------------------------
-int terrain_back[4][BG::CHIP_NUM_Y][BG::CHIP_NUM_X] =// 地形データ[ステージ数][X][Y]
+int terrain_back[3][BG::CHIP_NUM_Y][BG::CHIP_NUM_X] =// 地形データ[ステージ数][X][Y]
 {
     //stage0
     {
-        {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
-        {-1,-1,-1,-1, 0, 1, 0, 1, 0, 1, 0, 1, 0,-1},
-        {-1, 1, 2, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1,-1},
-        {-1, 1, 2, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,-1},
-        {-1, 2, 2, 0, 1, 0, 1,-1, 1, 0,-1,-1,-1,-1},
-        {-1, 1, 0, 1, 0, 1, 0,-1, 0, 1,-1,-1,-1,-1},
-        {-1, 1, 1, 0, 1,-1,-1,-1, 1, 0,-1,-1,-1,-1},
-        {-1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,-1},
-        {-1, 1, 1,-1,-1,-1, 1, 0, 1, 0, 1, 0, 1,-1},
-        {-1, 1, 0,-1,-1,-1, 0, 1, 0, 1, 0, 1, 0,-1},
-        {-1, 1, 1,-1,-1,-1, 1, 0, 1, 0, 1, 0, 1,-1},
-        {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
+        {-1, -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1, -1},
+
+        {-1, -1,-1,-1, 0, 1, 0, 1, 0, 1, 0, 1, 0, -1},
+        {-1, -1, 2, 2, 1, 0, 1, 0, 1, 0, 1, 0, 1, -1},
+        {-1, -1, 2, 2, 0, 1, 0, 1, 0, 1, 0, 1, 0, -1},
+        {-1,  2, 2, 2, 1, 0, 1,-1, 1, 0,-1,-1,-1, -1},
+        {-1,  2, 2, 2, 0, 1, 0,-1, 0, 1,-1,-1,-1, -1},
+        {-1,  0, 1, 0, 1, 0, 0,-1, 1, 0,-1,-1,-1, -1},
+        {-1,  1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 2, -1},
+        {-1,  0, 1, 2,-1,-1, 1, 0, 1, 0, 1, 2, 2, -1},
+        {-1,  1, 0, 2,-1,-1, 0, 1, 0, 1, 0, 1, 2, -1},
+        {-1,  0, 1, 2,-1,-1, 1, 0, 1, 0, 1, 2, 2, -1},
+
+        {-1, -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1, -1},
+    },
+    //stage1
+    {
+        {-1, -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1, -1},
+
+        {-1,  2, 2, 2, 2, 2, 0, 1, 0,-1,-1, 2, 2, -1},
+        {-1,  2, 2, 2, 2, 2, 1, 0, 1,-1,-1, 2, 2, -1},
+        {-1,  1, 0, 1,-1,-1,-1, 1, 0, 1, 0, 2, 2, -1},
+        {-1,  0, 1, 0,-1,-1,-1, 0, 1, 0, 1, 2, 1, -1},
+        {-1,  1, 0, 1,-1,-1,-1, 1, 0, 1, 0, 2, 0, -1},
+        {-1,  0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, -1},
+        {-1,  1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, -1},
+        {-1,  0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, -1},
+        {-1,  1, 0, 1, 0, 1,-1,-1, 2, 1, 2, 1, 2, -1},
+        {-1,  0, 1, 0, 1, 0,-1,-1,-1, 0,-1, 0,-1, -1},
+
+        {-1, -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1, -1},
+    },
+    //stage2
+    {
+        {-1, -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1, -1},
+
+        {-1,  1, 0, 1, 0, 1,-1,-1, 2, 2, 0, 1, 2, -1},
+        {-1,  0, 1, 0, 1, 0,-1,-1, 2, 2, 1, 0, 2, -1},
+        {-1,  1, 0, 1, 0, 1, 0,-1,-1, 1, 0, 1, 0, -1},
+        {-1,  0, 1, 0, 1, 0, 1, 0,-1,-1, 1, 0, 1, -1},
+        {-1,  1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, -1},
+        {-1,  0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, -1},
+        {-1,  1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, -1},
+        {-1,  2, 2, 2, 2, 0, 1, 0, 2, 2, 2,-1, 1, -1},
+        {-1,  2, 2, 2, 2, 1, 0, 1, 2, 2, 2,-1, 0, -1},
+        {-1, -1,-1,-1,-1,-1, 1, 0, 2, 2, 2,-1,-1, -1},
+
+        {-1, -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1, -1},
     },
 };
 
@@ -312,6 +352,8 @@ BG::~BG()
 //--------------------------------
 void BG::init(int stagenum)
 {
+    stageNum = stagenum;
+
     static GameLib::Sprite* effect_explosion = nullptr;
     static GameLib::Sprite* effect_bomb      = nullptr;
     effect_explosion = sprite_load(EXPLOSION);
@@ -323,13 +365,14 @@ void BG::init(int stagenum)
         for (int y = 0; y < CHIP_NUM_Y; y++)
         {
             //地形データterrain_backをbomb地形データterrainに代入する
+            terrainData[y][x].terrain_back_change = terrain_back[stageNum][y][x];
             terrainData[y][x].status = terrain_back[stagenum][y][x];
 
             //bomb地形の情報を初期化
             InitTerrain(TerrainStatus::Normal, x, y);
 
             terrainData[y][x].terrain_endurance = 10000;
-            if (terrain_back[stagenum][y][x] == 2)
+            if (terrainData[y][x].terrain_back_change == 2)
             {
                 terrainData[y][x].terrain_endurance = 1;//1回爆破すると置けなくなる
             }
@@ -379,6 +422,7 @@ void BG::init(int stagenum)
     bomb_roopchecker = false;
     score = 0;
     finish_game = false;
+    winlose = false;
 
     //タイマー初期化
     timer = 0;
@@ -580,9 +624,19 @@ void BG::update()
         }
     }
 
-    if (act > 20)finish_game = true;
-
+    if (act > 200)//act200越えたらオーバー
+    {
+        winlose = false;
+        finish_game = true;
+    }
+    if (score > 10000)//score10000越えたらクリア
+    {
+        winlose = true;
+        finish_game = true;
+    }
     focus->update();
+    act_ext = act;
+    score_ext = score;
 
     timer++;
 }
@@ -598,7 +652,7 @@ void BG::drawTerrain()
     {
         for (int y = 0; y < CHIP_NUM_Y; y++)
         {
-            float a = terrain_back[0][y][x];
+            float a = terrainData[y][x].terrain_back_change;
             texture::draw(
                 TexNo::Tile01,
                 Mapterrain_correction.x + (x * CHIP_SIZE_F), Mapterrain_correction.y + (y * CHIP_SIZE_F),
@@ -615,7 +669,7 @@ void BG::drawTerrain()
     {
         for (int y = 0; y < CHIP_NUM_Y; y++)
         {
-            float a = terrain_back[0][y][x];
+            float a = terrainData[y][x].terrain_back_change;
             if (a == 2)
             {
                 texture::draw(
@@ -722,7 +776,7 @@ void BG::drawTerrain()
                 if (terrainData[y][x].terrain_endurance <= 0)
                 {
                     terrainData[y][x].status = TerrainStatus::UnBreakble;
-                    terrain_back[stageNum][y][x] = -1;
+                    terrainData[y][x].terrain_back_change = -1;
                 }
 
                 TerrainExplosion[y][x].exist = false;

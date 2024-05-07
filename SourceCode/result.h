@@ -32,7 +32,11 @@ public:
     void update();
     void draw();
 private:
+    int score;
+    int act;
     bool isPaused;
+    DirectX::XMFLOAT2 title_scale;
+    DirectX::XMFLOAT2 select_scale;
 
     static Result instance_;
 };

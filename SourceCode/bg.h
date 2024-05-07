@@ -83,6 +83,7 @@ private:
         int DelayTimer;         //爆発の連鎖をずらす時間
         int terrain_endurance;  //マップタイルの耐久値
         int terrain_enduranceC; //マップタイルの耐久値のチェック用
+        int terrain_back_change;//変更可能地形データ
     };
     //1マスが持つ情報
     TerrainData terrainData[BG::CHIP_NUM_Y][BG::CHIP_NUM_X];
