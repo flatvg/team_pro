@@ -37,6 +37,7 @@ enum TexNo
     Explosion,
     Reset,
     BreakbleTile,
+    Shape,
     Number = 20,
 };
 
@@ -81,6 +82,7 @@ private:
         int explosionTimer;     //爆破時間
         bool isAlredyChanged;   //すでに情報が変更されているか
         bool isChained;         //爆破が連鎖によって引き起こされたか否か
+        bool isPutOn;           //そのブロックがバクダンをおける状態か否か
         int DelayTimer;         //爆発の連鎖をずらす時間
         int terrain_endurance;  //マップタイルの耐久値
         int terrain_enduranceC; //マップタイルの耐久値のチェック用
@@ -136,6 +138,13 @@ public:
 
     //爆弾を置いた後のリセット
     void resetBombPostProcess();
+
+    //そのブロックにバクダンが設置可能か
+    void SetIsPutOn();
+
+    bool IsPutOn(int y, int x);
+
+    bool SearchAdjacentTerrain(int status);
 
     //エフェクトを更新
     void updateEffect(TerrainEffect &effect);

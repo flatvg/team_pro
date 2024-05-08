@@ -408,6 +408,7 @@ void BG::init(int stagenum)
     texture::load(Explosion, EXPLOSION, 256U);     //爆発
     texture::load(Reset, RESET, 256U);             //リセット
     texture::load(BreakbleTile, BREAKETILE, 256U); //破壊可能ブロック
+    texture::load(Shape, SHAPE, 256U);             //設置不可能マス
     texture::load(Number, NUMBER, 256U); //番号
 
     //バクダンの種類を初期化
@@ -628,6 +629,8 @@ void BG::update()
         }
     }
 
+    SetIsPutOn();
+
     if (act > 200)//act200越えたらオーバー
     {
         winlose = false;
@@ -638,7 +641,6 @@ void BG::update()
         winlose = true;
         finish_game = true;
     }
-    focus->update();
     act_ext = act;
     score_ext = score;
 
@@ -978,7 +980,43 @@ void BG::drawTerrain()
 
     delete fire_image;
 
-    focus->render();
+    texture::begin(Shape);
+
+    //設置不可マスの描画
+    for (int x = 0; x < CHIP_NUM_X; x++)
+    {
+        for (int y = 0; y < CHIP_NUM_Y; y++)
+        {
+            if (!terrainData[y][x].isPutOn && (drag_con) && (terrainData[y][x].status == TerrainStatus::Normal || terrainData[y][x].status == TerrainStatus::BurningFuse))
+            {
+                texture::draw(
+                    TexNo::Shape,
+                    Mapterrain_correction.x + (x * CHIP_SIZE_F), Mapterrain_correction.y + (y * CHIP_SIZE_F),
+                    4.0f, 4.0f,
+                    48.0f, 16.0f,
+                    16.0f, 16.0f,
+                    0, 0,
+                    0,
+                    1, 1, 1, 0.6f
+                );
+            }
+            if (!terrainData[y][x].isPutOn && terrainData[y][x].status == TerrainStatus::Bomb && (drag_con))
+            {
+                texture::draw(
+                    TexNo::Shape,
+                    Mapterrain_correction.x + (x * CHIP_SIZE_F), Mapterrain_correction.y + (y * CHIP_SIZE_F),
+                    4.0f, 4.0f,
+                    16.0f, 16.0f,
+                    16.0f, 16.0f,
+                    0, 0,
+                    0,
+                    1, 1, 1, 0.6f
+                );
+            }
+        }
+    }
+
+    texture::end(Shape);
 }
 
 //爆弾をドラッグ
@@ -1109,6 +1147,64 @@ void BG::resetBombPostProcess()
         bomb_reset = false;//リセットを解除してドラッグできるようにする
     }
 }
+
+//爆弾を置いた後のリセット
+void BG::SetIsPutOn()
+{
+    for (int x = 0; x < CHIP_NUM_X; x++)
+    {
+        for (int y = 0; y < CHIP_NUM_Y; y++)
+        {
+            //外周は爆弾マスを置けない
+            if (x == 0 || y == 0)
+            {
+                terrainData[y][x].isPutOn = false;
+                continue;
+            }
+
+            //導火線マスか普通のマス以外は置けない
+            if (terrainData[y][x].status != TerrainStatus::BurningFuse &&
+                terrainData[y][x].status != TerrainStatus::Normal)
+            {
+                terrainData[y][x].isPutOn = false;
+                continue;
+            }
+
+            //壁、または爆弾マスに隣接していないと置けない
+            if (!IsPutOn(y, x))
+            {
+                terrainData[y][x].isPutOn = false;
+                continue;
+            }
+
+            terrainData[y][x].isPutOn = true;
+        }
+    }
+}
+
+bool BG::IsPutOn(int y, int x)
+{
+    int adjacentTerrainStatus[] = {
+        0,                             //CENTER
+        terrainData[y][x - 1].status,  //LEFT
+        terrainData[y - 1][x].status,  //TOP
+        terrainData[y][x + 1].status,  //RIGHT
+        terrainData[y + 1][x].status,  //BOTTOM
+    };
+
+    if (SearchAdjacentTerrain(adjacentTerrainStatus[LEFT]) ||
+        SearchAdjacentTerrain(adjacentTerrainStatus[TOP]) ||
+        SearchAdjacentTerrain(adjacentTerrainStatus[RIGHT]) ||
+        SearchAdjacentTerrain(adjacentTerrainStatus[BOTTOM])) return true;
+
+    return false;
+}
+
+bool BG::SearchAdjacentTerrain(int status)
+{
+    return (status == TerrainStatus::UnBreakble || status == TerrainStatus::Bomb) ? true : false;
+}
+
 
 //--------------------------------
 //  指定した箇所にすでに変更が加えられているか
