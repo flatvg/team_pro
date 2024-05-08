@@ -9,6 +9,7 @@ void Focus::update()
 {
     if (focusOnFlag)
     {
+        isDraw = true;
         if (focusFactor > focusFactorMin)
         {
             focusFactor += focusOnFactor;

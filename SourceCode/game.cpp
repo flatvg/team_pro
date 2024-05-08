@@ -44,7 +44,6 @@ void Game::init()
 {
     Scene::init();	    // 基底クラスのinitを呼ぶ
 
-    stageNum = 0;
     bg.init(stageNum);  //BGで地形データ読み込み
     A_timer = 1;
     isPaused = false;   // ポーズフラグの初期化

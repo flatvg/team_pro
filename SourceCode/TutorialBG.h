@@ -256,7 +256,7 @@ private:
 
     Effect burningFuse;
 
-    std::unique_ptr<Focus> focuses[2];
+    std::unique_ptr<Focus> focuses[4];
 
     bool moveStageFlags[STAGE_NUM];
 
@@ -264,7 +264,7 @@ private:
 
     std::unique_ptr<StageMover> stageMovers[STAGE_NUM];
 
-    std::unique_ptr<TextBox> textBoxes[7];
+    std::unique_ptr<TextBox> textBoxes[8];
 
     int tutorialNum;
 
@@ -280,4 +280,6 @@ private:
 
     //ê¸å`ï€ä«ÇÃèdÇ›
     float weight = 0.041f;
+
+    bool isShowUnPutBle;
 };

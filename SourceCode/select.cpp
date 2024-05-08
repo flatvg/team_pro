@@ -7,6 +7,8 @@ using namespace GameLib;
 
 Select Select::instance_;
 
+extern int stageNum;
+
 Sprite* back_img = nullptr;
 Sprite* stage1_img = nullptr;
 
@@ -40,15 +42,16 @@ void Select::update()
     //カーソルの位置を取得
     cursorPos = { static_cast<float>(GameLib::input::getCursorPosX()), static_cast<float>(GameLib::input::getCursorPosY()) };
 
-    int stageNum = 0;
+    int stageNumber = 0;
     for (auto& stage : stages)
     {
         if (isClickRect(cursorPos, stage))
         {
+            stageNum = stageNumber;
             Game::instance()->SetStageNum(stageNum);
             changeScene(Game::instance());  // ゲームシーンに切り替え
         }
-        stageNum++;
+        stageNumber++;
     }
 
     timer++;

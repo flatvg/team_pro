@@ -8,6 +8,8 @@
 
 //TODO:ボムを描画
 
+int score_vault;
+
 //------< インクルード >--------------------------------------------------------
 #include "all.h"
 #include "common.h"
@@ -353,8 +355,8 @@ void BG::init(int stagenum)
 {
     stageNum = stagenum;
 
-    static GameLib::Sprite* effect_explosion = nullptr;
-    static GameLib::Sprite* effect_bomb      = nullptr;
+    GameLib::Sprite* effect_explosion = nullptr;
+    GameLib::Sprite* effect_bomb      = nullptr;
     effect_explosion = sprite_load(EXPLOSION);
     effect_bomb      = sprite_load(BOMB01);
 
@@ -396,6 +398,7 @@ void BG::init(int stagenum)
             TerrainBomb[y][x].texSizeX = static_cast<float>(TerrainBomb[y][x].tx - 122.0f) / TerrainBomb[y][x].animeMax;
         }
     }
+
     delete effect_bomb;
     delete effect_explosion;
 
@@ -427,6 +430,7 @@ void BG::init(int stagenum)
     //タイマー初期化
     timer = 0;
 
+    score_vault = 0;
     focusFactor = 1.0f;
     focusFlag = false;
     unFocusFlag = false;
@@ -692,6 +696,8 @@ void BG::drawTerrain()
     GameLib::text_out(4, "SCORE:", 0, 50, 1.5f, 1.5f, 1, 0, 0);
     GameLib::text_out(4, "ACT:", 0, 200, 1.5f, 1.5f, 1, 0, 0);
     texture::begin(Number);
+    score_vault += score / 60;
+    if (score_vault >= score)score_vault = score;
     for (int i = 0; i < 5; ++i)
     {
         int n = 10;
@@ -701,7 +707,7 @@ void BG::drawTerrain()
         {
             n *= 10;
         }
-        score_re = (score_ext % n) / (n / 10);
+        score_re = (score_vault % n) / (n / 10);
         if (score_re == 0)score_re = 10;
         texture::draw(
             Number,

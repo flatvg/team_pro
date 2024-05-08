@@ -7,17 +7,9 @@ class Focus
 public:
     Focus()
     {
-        focusFactor = 1.0f;
-        timer = 0;
-        myInstance = instanceNum;
-    }
-
-    Focus(VECTOR2 pos, float radius ,bool OnFlag, bool OffFlag)
-        :focusPos(pos),
-        focusRadius(radius),
-        focusOnFlag(OnFlag),
-        unFocusFlag(OffFlag)
-    {
+        isDraw = false;
+        focusOnFlag = false;
+        unFocusFlag = false;
         focusFactor = 1.0f;
         timer = 0;
         myInstance = instanceNum;
@@ -27,6 +19,9 @@ public:
         :focusPos(pos),
         focusRadius(radius)
     {
+        isDraw = false;
+        focusOnFlag = false;
+        unFocusFlag = false;
         focusFactor = 1.0f;
         timer = 0;
         myInstance = instanceNum;

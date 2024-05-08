@@ -47,13 +47,13 @@ int terrain_back_T[TutorialBG::STAGE_NUM][TutorialBG::CHIP_NUM_Y][TutorialBG::CH
     {-1,-1,-1,-1, 0, 1, 0, 1, 0, 1, 0, 1, 0,-1},
     {-1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1,-1},
     {-1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,-1},
-    {-1, 1, 1, 0, 1, 0, 1,-1, 1, 0,-1,-1,-1,-1},
-    {-1, 1, 0, 1, 0, 1, 0,-1, 0, 1,-1,-1,-1,-1},
-    {-1, 1, 1, 0, 1,-1,-1,-1, 1, 0,-1,-1,-1,-1},
+    {-1, 1, 1, 0, 1, 0, 1,-1, 2, 2, 1, 0, 1,-1},
+    {-1, 1, 0, 1, 0, 1, 0,-1, 2, 2, 0, 1, 0,-1},
+    {-1, 1, 1, 0, 1, 0, 1,-1, 2, 2, 1, 0, 1,-1},
     {-1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,-1},
-    {-1, 1, 1,-1,-1,-1, 1, 0, 1, 0, 1, 0, 1,-1},
-    {-1, 1, 0,-1,-1,-1, 0, 1, 0, 1, 0, 1, 0,-1},
-    {-1, 1, 1,-1,-1,-1, 1, 0, 1, 0, 1, 0, 1,-1},
+    {-1, 1, 1,-1,-1, 0, 1, 0, 1, 0, 1, 0, 1,-1},
+    {-1, 1, 0,-1,-1, 1, 0, 1, 0, 1, 0, 1, 0,-1},
+    {-1, 1, 1,-1,-1, 0, 1, 0, 1, 0, 1, 0, 1,-1},
     {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
     },
     //stage3
@@ -74,16 +74,16 @@ int terrain_back_T[TutorialBG::STAGE_NUM][TutorialBG::CHIP_NUM_Y][TutorialBG::CH
     //stage4
     {   //設置不可マスの説明用
     {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
-    {-1,-1,-1,-1, 0, 1, 0, 1, 0, 1, 0, 1, 0,-1},
-    {-1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1,-1},
-    {-1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,-1},
-    {-1, 1, 1, 0, 1, 0, 1,-1, 1, 0,-1,-1,-1,-1},
-    {-1, 1, 0, 1, 0, 1, 0,-1, 0, 1,-1,-1,-1,-1},
-    {-1, 1, 1, 0, 1,-1,-1,-1, 1, 0,-1,-1,-1,-1},
-    {-1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,-1},
-    {-1, 1, 1,-1,-1,-1, 1, 0, 1, 0, 1, 0, 1,-1},
-    {-1, 1, 0,-1,-1,-1, 0, 1, 0, 1, 0, 1, 0,-1},
-    {-1, 1, 1,-1,-1,-1, 1, 0, 1, 0, 1, 0, 1,-1},
+    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
+    {-1,-1,-1,-1,-1,-1,-1,-1, 1, 0, 1, 0,-1,-1},
+    {-1,-1,-1,-1,-1,-1,-1,-1, 0, 1, 0, 1,-1,-1},
+    {-1,-1,-1,-1,-1,-1,-1,-1, 1, 0, 1, 0,-1,-1},
+    {-1,-1,-1,-1,-1,-1,-1,-1, 0, 1, 0, 1,-1,-1},
+    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
+    {-1,-1,-1,-1,-1,-1,-1,-1, 1, 0, 1, 0,-1,-1},
+    {-1,-1,-1,-1,-1,-1,-1,-1, 0, 1, 0, 1,-1,-1},
+    {-1,-1,-1,-1,-1,-1,-1,-1, 1, 0, 1, 0,-1,-1},
+    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
     {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
     },
 };
@@ -422,7 +422,7 @@ void TutorialBG::init(int stagenum)
     texture::load(Explosion, EXPLOSION, 1024U);    //爆発
     texture::load(Reset, RESET, 124U);            //リセット
     texture::load(Shape, SHAPE, 1024U);            //設置不可能マス
-    texture::load(TutorialText1,TUTORIALTEXT1,24U);
+    texture::load(TutorialText1,TEXT1,24U);
 
     //バクダンの種類を初期化
     for (int i = 0; i < BOMB_TYPE_MAX; i++)
@@ -462,6 +462,8 @@ void TutorialBG::init(int stagenum)
     weight = 0.041f;
 
     isPutOnFuse = true;
+
+    isShowUnPutBle = false;
 }
 
 //--------------------------------
@@ -669,10 +671,7 @@ void TutorialBG::update()
         //ステージムーバー更新処理
         stageMover->Update();
         //1つでもステージが動いている時、他のステージを動かさないようにする
-        if (!isMoveStage)
-        {
-            isMoveStage = moveStages(stageMover) ? true : false;
-        }
+        isMoveStage = moveStages(stageMover) ? true : false;
     }
 
     SetIsPutOn();
@@ -1026,7 +1025,7 @@ void TutorialBG::drawTerrain()
         {
             for (int y = 0; y < CHIP_NUM_Y; y++)
             {
-                if (!terrainData[s][y][x].isPutOn && drag_con && (terrainData[s][y][x].status == TerrainStatus::Normal || terrainData[s][y][x].status == TerrainStatus::BurningFuse))
+                if (!terrainData[s][y][x].isPutOn && (drag_con || isShowUnPutBle) && (terrainData[s][y][x].status == TerrainStatus::Normal || terrainData[s][y][x].status == TerrainStatus::BurningFuse))
                 {
                     texture::draw(
                         TexNo::Shape,
@@ -1039,7 +1038,7 @@ void TutorialBG::drawTerrain()
                         1, 1, 1, 0.75f
                     );
                 }
-                if (!terrainData[s][y][x].isPutOn && terrainData[s][y][x].status == TerrainStatus::Bomb && drag_con)
+                if (!terrainData[s][y][x].isPutOn && terrainData[s][y][x].status == TerrainStatus::Bomb && (drag_con || isShowUnPutBle))
                 {
                     texture::draw(
                         TexNo::Shape,
@@ -1118,13 +1117,13 @@ void TutorialBG::Tutorial_0()
         stageMovers[3]->SetSrcIndex(4);
         stageMovers[3]->SetDstIndex(-1);
 
-        stageMovers[3]->SetMoveFlag(textBoxes[2]->GetPopOutFlag());
+        stageMovers[3]->SetMoveFlag(textBoxes[3]->GetPopUpFlag());
 
         stageMovers[4]->SetInChangeStageIndex(false);
         stageMovers[4]->SetSrcIndex(-1);
         stageMovers[4]->SetDstIndex(4);
 
-        stageMovers[4]->SetMoveFlag(textBoxes[2]->GetPopUpFlag());
+        stageMovers[4]->SetMoveFlag(textBoxes[2]->GetPopOutFlag());
 
         stageMovers[0]->SetMoveFlag(isTutorialClear[nowStage]);
     }
@@ -1133,7 +1132,7 @@ void TutorialBG::Tutorial_0()
     {
         for (auto& textBox : textBoxes)
         {
-            textBox->SetTextTexture(TUTORIALTEXT1);
+            textBox->SetTextTexture(TEXT1);
             textBox->SetClickTexture(RESET);
         }
 
@@ -1146,21 +1145,36 @@ void TutorialBG::Tutorial_0()
         textBoxes[0]->SetPopUpFlag(timer > 10);
         textBoxes[0]->SetPopOutFlag(isClickL && textBoxes[0]->WaitTime(30));
 
-        //あなたの業務内容はまず火をともして爆弾を爆発させることです
+        //火をつけて爆弾の爆発を連鎖させ、ハイスコアを狙いましょう
         textBoxes[1]->SetPopUpFlag(textBoxes[0]->GetPopOutFlag());
         textBoxes[1]->SetPopOutFlag(isClickL && textBoxes[1]->WaitTime(30));
 
         //まず、火をつけたい場所にｘキーで火を付けましょう
         textBoxes[2]->SetPopUpFlag(textBoxes[1]->GetPopOutFlag());
-        textBoxes[2]->SetPopOutFlag(isSetFuse);
+        textBoxes[2]->SetPopOutFlag(isSetFuse && textBoxes[2]->WaitTime(45));
 
-        //次のすべきことは爆弾を設置することですが、いくつか注意すべきことがあります。
-        //爆弾を設置する場所に　×　があればその場所に爆弾を置くことができません。
-        //また、設置予定の場所が全て　△　ならばこの場合でも置くことができません。
+        //次に爆弾を設置しますが、いくつか注意すべきことがあります。
 
-        textBoxes[3]->SetPopUpFlag(textBoxes[2]->GetPopOutFlag());
+        if (textBoxes[5]->GetPopUpFlag())isShowUnPutBle = true;
+        textBoxes[5]->SetPopUpFlag(textBoxes[2]->GetPopOutFlag());
+        textBoxes[5]->SetPopOutFlag(isClickL && textBoxes[5]->WaitTime(45));
+
+        //爆弾を設置する場所に赤いバツ印があればその場所に爆弾を置くことができません
+
+        textBoxes[6]->SetPopUpFlag(textBoxes[5]->GetPopOutFlag());
+        textBoxes[6]->SetPopOutFlag(isClickL && textBoxes[6]->WaitTime(45));
+
+        //また、設置予定の場所が全て紫の三角形ならばこの場合でも置くことができません
+
+        textBoxes[7]->SetPopUpFlag(textBoxes[6]->GetPopOutFlag());
+        textBoxes[7]->SetPopOutFlag(isClickL && textBoxes[7]->WaitTime(45));
+
+        //火のマスに爆弾を置くことで爆弾を爆発できます
+        if (textBoxes[3]->GetPopUpFlag())isShowUnPutBle = false;
+        textBoxes[3]->SetPopUpFlag(textBoxes[7]->GetPopOutFlag());
         textBoxes[3]->SetPopOutFlag(drag_con);
 
+        //もし、火のマスに爆弾を置けない状況に陥ったら、リセットボタンを押しましょう
         textBoxes[4]->SetPopUpFlag(textBoxes[3]->GetPopOutFlag() && !focuses[0]->IsDraw());
         textBoxes[4]->SetPopOutFlag(isTutorialClear[nowStage]);
     }
@@ -1171,12 +1185,20 @@ void TutorialBG::Tutorial_0()
         focuses[0]->SetRadius(250.0f);
         focuses[1]->SetFocusPos(VECTOR2(1150, 360));
         focuses[1]->SetFocusSize(VECTOR2(1.1f, 1.9f));
+        focuses[2]->SetFocusPos(VECTOR2(800, 175));
+        focuses[3]->SetFocusPos(VECTOR2(800, 480));
 
         focuses[0]->SetFocusFlag(textBoxes[2]->GetPopUpFlag());
         focuses[0]->SetUnFocusFlag(textBoxes[2]->GetPopOutFlag());
 
         focuses[1]->SetFocusFlag(textBoxes[3]->GetPopUpFlag() && !focuses[0]->IsDraw());
         focuses[1]->SetUnFocusFlag(drag_con);   //ボムを持っている時
+
+        focuses[2]->SetFocusFlag(textBoxes[6]->GetPopUpFlag());
+        focuses[2]->SetUnFocusFlag(textBoxes[6]->GetPopOutFlag());
+
+        focuses[3]->SetFocusFlag(textBoxes[7]->GetPopUpFlag());
+        focuses[3]->SetUnFocusFlag(textBoxes[7]->GetPopOutFlag());
     }
 }
 
@@ -1219,23 +1241,34 @@ void TutorialBG::Tutorial_1()
     {
         for (auto& textBox : textBoxes)
         {
-            textBox->SetTextTexture(TUTORIALTEXT1);
+            textBox->SetTextTexture(TEXT1);
             textBox->SetClickTexture(RESET);
         }
+
+        textBoxes[4]->IsNotDrawClickHere();
 
         textBoxes[1]->IsNotDrawClickHere();
         textBoxes[2]->IsNotDrawClickHere();
 
+        //他のブロックと見た目が違うブロックがあります
+        //壊してみましょう
         textBoxes[0]->SetPopUpFlag(true);
         textBoxes[0]->SetPopOutFlag(isClickL);
 
+        //火を置きたい場所にカーソルを向けてＸ
         textBoxes[1]->SetPopUpFlag(textBoxes[0]->GetPopOutFlag());
         textBoxes[1]->SetPopOutFlag(isSetFuse);
 
+        //Ｄ＆Ｄで爆弾を設置
         textBoxes[2]->SetPopUpFlag(textBoxes[1]->GetPopOutFlag());
         textBoxes[2]->SetPopOutFlag(drag_con);
 
-        textBoxes[3]->SetPopUpFlag(isNotBrakbleTerrain);
+        //ヒビが入っているブロックを全て壊す
+        textBoxes[4]->SetPopUpFlag(textBoxes[1]->GetPopOutFlag());
+        textBoxes[4]->SetPopOutFlag(isNotBrakbleTerrain);
+
+        //このようにひびが入っているブロックは一度爆風を当てると壊れてしまいます
+        textBoxes[3]->SetPopUpFlag(textBoxes[4]->GetPopOutFlag() && textBoxes[4]->WaitTime(40));
         textBoxes[3]->SetPopOutFlag(isClickL);
     }
 
@@ -1246,10 +1279,10 @@ void TutorialBG::Tutorial_1()
         focuses[1]->SetFocusPos(VECTOR2(1150, 360));
         focuses[1]->SetFocusSize(VECTOR2(1.1f, 1.9f));
 
-        focuses[0]->SetFocusFlag(true);
+        focuses[0]->SetFocusFlag(textBoxes[0]->GetPopUpFlag());
         focuses[0]->SetUnFocusFlag(textBoxes[1]->GetPopOutFlag());
 
-        focuses[1]->SetFocusFlag(!focuses[0]->IsDraw());
+        focuses[1]->SetFocusFlag(!focuses[0]->IsDraw() && textBoxes[2]->GetPopUpFlag());
         focuses[1]->SetUnFocusFlag(drag_con);   //ボムを持っている時
     }
 }
@@ -1530,10 +1563,10 @@ bool TutorialBG::moveStages(std::unique_ptr<StageMover> &stageMover)
                 nowStage++;
                 tutorialNum++;
                 isDrawStage[nowStage - 1];
-                stageMover->FinishMove();
                 for (auto& textBox : textBoxes)textBox->Reset();;
                 for (auto& focus : focuses)focus->Reset();
             }
+            stageMover->FinishMove();
         }
 
         return true;
@@ -1583,6 +1616,7 @@ bool TutorialBG::moveStage(int stageNum, MoveType moveType)
                 }
             }
         }
+        else return false;
         break;
     case MoveType::InGameToEnd:
         if (stageNum >= 0)
@@ -1617,6 +1651,7 @@ bool TutorialBG::moveStage(int stageNum, MoveType moveType)
                 }
             }
         }
+        else return false;
         break;
     }
 

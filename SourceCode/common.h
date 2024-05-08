@@ -36,7 +36,7 @@ static float(*const ToDegree)(float) = DirectX::XMConvertToDegrees;  // ƒ‰ƒWƒAƒ“
 #define STAGE1        L"./Data/Images/stage1.png"
 #define SHAPE         L"./Data/Images/shape.png"
 #define CLICKEXPLODE  L"./Data/Images/click.png"
-#define TUTORIALTEXT1 L"./Data/Images/tutorialText.png"
+#define TEXT1 L"./Data/Images/Text0.png"
 #define NUMBER        L"./Data/Images/num.png"
 
 #endif // !INCLUDED_COMMON
