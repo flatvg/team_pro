@@ -28,6 +28,8 @@ public:
         isAlreadyPopUp = false;
         isStartTimer = false;
         timer = 0;
+        textTextureFileName = nullptr;
+        clickTextureFileName = nullptr;
     }
 
     TextBox(VECTOR2 pos, VECTOR2 Bsize, VECTOR4 color)
@@ -45,13 +47,15 @@ public:
         isDrawClickHere = true;
         isStartTimer = false;
         timer = 0;
+        textTextureFileName = nullptr;
+        clickTextureFileName = nullptr;
     }
     ~TextBox() {}
 
 public:
     void Update();
 
-    void Render(int boxTexNo, int clickTexNo);
+    void Render(/*int boxTexNo, int clickTexNo*/);
 
     void IsNotDrawClickHere() { isDrawClickHere = false; }
 
@@ -71,9 +75,16 @@ public:
 
     bool WaitTime(int time) { return timer > time; }
 
+    void SetTextTexture(const wchar_t* filename) { textTextureFileName = filename; }
+
+    void SetClickTexture(const wchar_t* filename) { clickTextureFileName = filename; }
+
 private:
     GameLib::Sprite* textTexture = nullptr;
     GameLib::Sprite* clickTexture = nullptr;
+
+    const wchar_t* textTextureFileName;
+    const wchar_t* clickTextureFileName;
 
     VECTOR2 position;
     VECTOR2 baseSize;

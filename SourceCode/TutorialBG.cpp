@@ -56,6 +56,36 @@ int terrain_back_T[TutorialBG::STAGE_NUM][TutorialBG::CHIP_NUM_Y][TutorialBG::CH
     {-1, 1, 1,-1,-1,-1, 1, 0, 1, 0, 1, 0, 1,-1},
     {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
     },
+    //stage3
+    {
+    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
+    {-1,-1,-1,-1, 0, 1, 0, 1, 0, 1, 0, 1, 0,-1},
+    {-1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1,-1},
+    {-1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,-1},
+    {-1, 1, 1, 0, 1, 0, 1,-1, 1, 0,-1,-1,-1,-1},
+    {-1, 1, 0, 1, 0, 1, 0,-1, 0, 1,-1,-1,-1,-1},
+    {-1, 1, 1, 0, 1,-1,-1,-1, 1, 0,-1,-1,-1,-1},
+    {-1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,-1},
+    {-1, 1, 1,-1,-1,-1, 1, 0, 1, 0, 1, 0, 1,-1},
+    {-1, 1, 0,-1,-1,-1, 0, 1, 0, 1, 0, 1, 0,-1},
+    {-1, 1, 1,-1,-1,-1, 1, 0, 1, 0, 1, 0, 1,-1},
+    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
+    },
+    //stage4
+    {   //設置不可マスの説明用
+    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
+    {-1,-1,-1,-1, 0, 1, 0, 1, 0, 1, 0, 1, 0,-1},
+    {-1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1,-1},
+    {-1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,-1},
+    {-1, 1, 1, 0, 1, 0, 1,-1, 1, 0,-1,-1,-1,-1},
+    {-1, 1, 0, 1, 0, 1, 0,-1, 0, 1,-1,-1,-1,-1},
+    {-1, 1, 1, 0, 1,-1,-1,-1, 1, 0,-1,-1,-1,-1},
+    {-1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,-1},
+    {-1, 1, 1,-1,-1,-1, 1, 0, 1, 0, 1, 0, 1,-1},
+    {-1, 1, 0,-1,-1,-1, 0, 1, 0, 1, 0, 1, 0,-1},
+    {-1, 1, 1,-1,-1,-1, 1, 0, 1, 0, 1, 0, 1,-1},
+    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
+    },
 };
 
 int bomb_pattern_T[8][4][3][3]//[爆弾の種類][回転の種類][y][x]
@@ -386,12 +416,13 @@ void TutorialBG::init(int stagenum)
     delete effect_bomb;
     delete effect_explosion;
 
-    texture::load(Tile01, TILE01, 512U);          //背景
-    texture::load(Tile02, TILE02, 512U);          //背景
-    texture::load(Bomb01, BOMB01, 512U);          //爆弾
-    texture::load(Explosion, EXPLOSION, 512U);    //爆発
-    texture::load(Reset, RESET, 256U);            //リセット
-    texture::load(Shape, SHAPE, 512U);            //設置不可能マス
+    texture::load(Tile01, TILE01, 1024U);          //背景
+    texture::load(Tile02, TILE02, 1024U);          //背景
+    texture::load(Bomb01, BOMB01, 1024U);          //爆弾
+    texture::load(Explosion, EXPLOSION, 1024U);    //爆発
+    texture::load(Reset, RESET, 124U);            //リセット
+    texture::load(Shape, SHAPE, 1024U);            //設置不可能マス
+    texture::load(TutorialText1,TUTORIALTEXT1,24U);
 
     //バクダンの種類を初期化
     for (int i = 0; i < BOMB_TYPE_MAX; i++)
@@ -420,7 +451,7 @@ void TutorialBG::init(int stagenum)
 
     for (auto& textBox : textBoxes)
     {
-        textBox = std::make_unique<TextBox>(VECTOR2(200, 400), VECTOR2(250, 100), VECTOR4(WHITE));
+        textBox = std::make_unique<TextBox>(VECTOR2(200, 400), VECTOR2(446, 65), VECTOR4(WHITE));
     }
 
     tutorialNum = 0;
@@ -929,48 +960,6 @@ void TutorialBG::drawTerrain()
 
     texture::end(Bomb01);
 
-    texture::begin(Shape);
-
-    //設置不可マスの描画
-    for (int s = 0; s < STAGE_NUM; s++)
-    {
-        if (!isDrawStage[s])break;
-        for (int x = 0; x < CHIP_NUM_X; x++)
-        {
-            for (int y = 0; y < CHIP_NUM_Y; y++)
-            {
-                if (!terrainData[s][y][x].isPutOn && terrainData[s][y][x].status == TerrainStatus::Normal && drag_con)
-                {
-                    texture::draw(
-                        TexNo::Shape,
-                        terrainData[s][y][x].currentPos.x, terrainData[s][y][x].currentPos.y,
-                        4.0f, 4.0f,
-                        48.0f, 16.0f,
-                        16.0f, 16.0f,
-                        0, 0,
-                        0,
-                        1, 1, 1, 0.75f
-                    );
-                }
-                if (!terrainData[s][y][x].isPutOn && terrainData[s][y][x].status == TerrainStatus::Bomb && drag_con)
-                {
-                    texture::draw(
-                        TexNo::Shape,
-                        terrainData[s][y][x].currentPos.x, terrainData[s][y][x].currentPos.y,
-                        4.0f, 4.0f,
-                        16.0f, 16.0f,
-                        16.0f, 16.0f,
-                        0, 0,
-                        0,
-                        1, 1, 1, 0.75f
-                    );
-                }
-            }
-        }
-    }
-
-    texture::end(Shape);
-
     debug::setString("act:%d", act);
     debug::setString("score:%d", score);
     debug::setString("stage:%d", nowStage);
@@ -1027,6 +1016,48 @@ void TutorialBG::drawTerrain()
 
     delete fire_image;
 
+    texture::begin(Shape);
+
+    //設置不可マスの描画
+    for (int s = 0; s < STAGE_NUM; s++)
+    {
+        if (!isDrawStage[s])break;
+        for (int x = 0; x < CHIP_NUM_X; x++)
+        {
+            for (int y = 0; y < CHIP_NUM_Y; y++)
+            {
+                if (!terrainData[s][y][x].isPutOn && drag_con && (terrainData[s][y][x].status == TerrainStatus::Normal || terrainData[s][y][x].status == TerrainStatus::BurningFuse))
+                {
+                    texture::draw(
+                        TexNo::Shape,
+                        terrainData[s][y][x].currentPos.x, terrainData[s][y][x].currentPos.y,
+                        4.0f, 4.0f,
+                        48.0f, 16.0f,
+                        16.0f, 16.0f,
+                        0, 0,
+                        0,
+                        1, 1, 1, 0.75f
+                    );
+                }
+                if (!terrainData[s][y][x].isPutOn && terrainData[s][y][x].status == TerrainStatus::Bomb && drag_con)
+                {
+                    texture::draw(
+                        TexNo::Shape,
+                        terrainData[s][y][x].currentPos.x, terrainData[s][y][x].currentPos.y,
+                        4.0f, 4.0f,
+                        16.0f, 16.0f,
+                        16.0f, 16.0f,
+                        0, 0,
+                        0,
+                        1, 1, 1, 0.75f
+                    );
+                }
+            }
+        }
+    }
+
+    texture::end(Shape);
+
     for (auto& focus : focuses)
     {
         focus->render();
@@ -1034,7 +1065,7 @@ void TutorialBG::drawTerrain()
 
     for (auto& textBox : textBoxes)
     {
-        textBox->Render(TexNo::Tile02, TexNo::Reset);
+        textBox->Render(/*TexNo::TutorialText1, TexNo::Reset*/);
     }
 }
 
@@ -1083,24 +1114,49 @@ void TutorialBG::Tutorial_0()
 
     //stageMover
     {
+        stageMovers[3]->SetInChangeStageIndex(false);
+        stageMovers[3]->SetSrcIndex(4);
+        stageMovers[3]->SetDstIndex(-1);
+
+        stageMovers[3]->SetMoveFlag(textBoxes[2]->GetPopOutFlag());
+
+        stageMovers[4]->SetInChangeStageIndex(false);
+        stageMovers[4]->SetSrcIndex(-1);
+        stageMovers[4]->SetDstIndex(4);
+
+        stageMovers[4]->SetMoveFlag(textBoxes[2]->GetPopUpFlag());
+
         stageMovers[0]->SetMoveFlag(isTutorialClear[nowStage]);
     }
 
     //textBox
     {
+        for (auto& textBox : textBoxes)
+        {
+            textBox->SetTextTexture(TUTORIALTEXT1);
+            textBox->SetClickTexture(RESET);
+        }
+
         textBoxes[4]->IsNotDrawClickHere();
         textBoxes[3]->IsNotDrawClickHere();
         textBoxes[2]->IsNotDrawClickHere();
         textBoxes[0]->SetPosition(VECTOR2(200, 400));
 
+        //チュートリアルへようこそ
         textBoxes[0]->SetPopUpFlag(timer > 10);
         textBoxes[0]->SetPopOutFlag(isClickL && textBoxes[0]->WaitTime(30));
 
+        //あなたの業務内容はまず火をともして爆弾を爆発させることです
         textBoxes[1]->SetPopUpFlag(textBoxes[0]->GetPopOutFlag());
         textBoxes[1]->SetPopOutFlag(isClickL && textBoxes[1]->WaitTime(30));
 
+        //まず、火をつけたい場所にｘキーで火を付けましょう
         textBoxes[2]->SetPopUpFlag(textBoxes[1]->GetPopOutFlag());
         textBoxes[2]->SetPopOutFlag(isSetFuse);
+
+        //次のすべきことは爆弾を設置することですが、いくつか注意すべきことがあります。
+        //爆弾を設置する場所に　×　があればその場所に爆弾を置くことができません。
+        //また、設置予定の場所が全て　△　ならばこの場合でも置くことができません。
 
         textBoxes[3]->SetPopUpFlag(textBoxes[2]->GetPopOutFlag());
         textBoxes[3]->SetPopOutFlag(drag_con);
@@ -1161,6 +1217,12 @@ void TutorialBG::Tutorial_1()
 
     //textBox
     {
+        for (auto& textBox : textBoxes)
+        {
+            textBox->SetTextTexture(TUTORIALTEXT1);
+            textBox->SetClickTexture(RESET);
+        }
+
         textBoxes[1]->IsNotDrawClickHere();
         textBoxes[2]->IsNotDrawClickHere();
 
@@ -1248,6 +1310,12 @@ void TutorialBG::Tutorial_2()
 
         //focuses[0]->SetFocusFlag(true);
         //focuses[0]->SetUnFocusFlag(textBoxes[1]->GetPopOutFlag());
+
+        for (auto& focus : focuses)
+        {
+            focus->isDraw = false;
+            //focus->Reset();
+        }
     }
 }
 
@@ -1457,12 +1525,15 @@ bool TutorialBG::moveStages(std::unique_ptr<StageMover> &stageMover)
 
         if (!isFinishMove[0] && !isFinishMove[1])
         {
-            nowStage++;
-            tutorialNum++;
-            isDrawStage[nowStage - 1];
-            stageMover->FinishMove();
-            for (auto& textBox : textBoxes)textBox->Reset();;
-            for (auto& focus : focuses)focus->Reset();
+            if (stageMover->IsChangeStageIndex())
+            {
+                nowStage++;
+                tutorialNum++;
+                isDrawStage[nowStage - 1];
+                stageMover->FinishMove();
+                for (auto& textBox : textBoxes)textBox->Reset();;
+                for (auto& focus : focuses)focus->Reset();
+            }
         }
 
         return true;
@@ -1475,35 +1546,38 @@ bool TutorialBG::moveStage(int stageNum, MoveType moveType)
     switch (moveType)
     {
     case MoveType::StartToInGame:
-        for (int x = 0; x < CHIP_NUM_X; x++)
+        if (stageNum >= 0)
         {
-            for (int y = 0; y < CHIP_NUM_Y; y++)
+            for (int x = 0; x < CHIP_NUM_X; x++)
             {
-                XMVECTOR CurrentPos = XMVectorSet(terrainData[stageNum][y][x].currentPos.x, terrainData[stageNum][y][x].currentPos.y, 0, 0);
-                XMVECTOR EndPos = XMVectorSet(terrainData[stageNum][y][x].inGamePos.x, terrainData[stageNum][y][x].inGamePos.y, 0, 0);
-                XMStoreFloat2(&terrainData[stageNum][y][x].currentPos, XMVectorLerp(CurrentPos, EndPos, weight));
-
-                //ステージの最後のマップチップの時のみ実行
-                if (y == CHIP_NUM_Y - 1 && x == CHIP_NUM_X - 1)
+                for (int y = 0; y < CHIP_NUM_Y; y++)
                 {
-                    XMVECTOR LengthSq = XMVector2Length(XMVectorSubtract(EndPos, CurrentPos));
-                    float lengthSq;
-                    XMStoreFloat(&lengthSq, LengthSq);
-                    if (lengthSq < 10.0f)
+                    XMVECTOR CurrentPos = XMVectorSet(terrainData[stageNum][y][x].currentPos.x, terrainData[stageNum][y][x].currentPos.y, 0, 0);
+                    XMVECTOR EndPos = XMVectorSet(terrainData[stageNum][y][x].inGamePos.x, terrainData[stageNum][y][x].inGamePos.y, 0, 0);
+                    XMStoreFloat2(&terrainData[stageNum][y][x].currentPos, XMVectorLerp(CurrentPos, EndPos, weight));
+
+                    //ステージの最後のマップチップの時のみ実行
+                    if (y == CHIP_NUM_Y - 1 && x == CHIP_NUM_X - 1)
                     {
-                        weight = 0.082f;
-                        if (lengthSq < 2.0f)
+                        XMVECTOR LengthSq = XMVector2Length(XMVectorSubtract(EndPos, CurrentPos));
+                        float lengthSq;
+                        XMStoreFloat(&lengthSq, LengthSq);
+                        if (lengthSq < 10.0f)
                         {
-                            //この関数を終わらせる
-                            for (int x = 0; x < CHIP_NUM_X; x++)
+                            weight = 0.082f;
+                            if (lengthSq < 2.0f)
                             {
-                                for (int y = 0; y < CHIP_NUM_Y; y++)
+                                //この関数を終わらせる
+                                for (int x = 0; x < CHIP_NUM_X; x++)
                                 {
-                                    weight = 0.041f;
-                                    terrainData[stageNum][y][x].currentPos = terrainData[stageNum][y][x].inGamePos;
+                                    for (int y = 0; y < CHIP_NUM_Y; y++)
+                                    {
+                                        weight = 0.041f;
+                                        terrainData[stageNum][y][x].currentPos = terrainData[stageNum][y][x].inGamePos;
+                                    }
                                 }
+                                return false;
                             }
-                            return false;
                         }
                     }
                 }
@@ -1511,31 +1585,34 @@ bool TutorialBG::moveStage(int stageNum, MoveType moveType)
         }
         break;
     case MoveType::InGameToEnd:
-        for (int x = 0; x < CHIP_NUM_X; x++)
+        if (stageNum >= 0)
         {
-            for (int y = 0; y < CHIP_NUM_Y; y++)
+            for (int x = 0; x < CHIP_NUM_X; x++)
             {
-                XMVECTOR CurrentPos = XMVectorSet(terrainData[stageNum][y][x].currentPos.x, terrainData[stageNum][y][x].currentPos.y, 0, 0);
-                XMVECTOR EndPos = XMVectorSet(terrainData[stageNum][y][x].endPos.x, terrainData[stageNum][y][x].endPos.y, 0, 0);
-                XMStoreFloat2(&terrainData[stageNum][y][x].currentPos, XMVectorLerp(CurrentPos, EndPos, weight));
-
-                //ステージの最後のマップチップの時のみ実行
-                if (y == CHIP_NUM_Y - 1 && x == CHIP_NUM_X - 1)
+                for (int y = 0; y < CHIP_NUM_Y; y++)
                 {
-                    XMVECTOR LengthSq = XMVector2Length(XMVectorSubtract(EndPos, CurrentPos));
-                    float lengthSq;
-                    XMStoreFloat(&lengthSq, LengthSq);
-                    if (lengthSq < 1.0f)
+                    XMVECTOR CurrentPos = XMVectorSet(terrainData[stageNum][y][x].currentPos.x, terrainData[stageNum][y][x].currentPos.y, 0, 0);
+                    XMVECTOR EndPos = XMVectorSet(terrainData[stageNum][y][x].endPos.x, terrainData[stageNum][y][x].endPos.y, 0, 0);
+                    XMStoreFloat2(&terrainData[stageNum][y][x].currentPos, XMVectorLerp(CurrentPos, EndPos, weight));
+
+                    //ステージの最後のマップチップの時のみ実行
+                    if (y == CHIP_NUM_Y - 1 && x == CHIP_NUM_X - 1)
                     {
-                        //この関数を終わらせる
-                        for (int x = 0; x < CHIP_NUM_X; x++)
+                        XMVECTOR LengthSq = XMVector2Length(XMVectorSubtract(EndPos, CurrentPos));
+                        float lengthSq;
+                        XMStoreFloat(&lengthSq, LengthSq);
+                        if (lengthSq < 1.0f)
                         {
-                            for (int y = 0; y < CHIP_NUM_Y; y++)
+                            //この関数を終わらせる
+                            for (int x = 0; x < CHIP_NUM_X; x++)
                             {
-                                terrainData[stageNum][y][x].currentPos = terrainData[stageNum][y][x].endPos;
+                                for (int y = 0; y < CHIP_NUM_Y; y++)
+                                {
+                                    terrainData[stageNum][y][x].currentPos = terrainData[stageNum][y][x].endPos;
+                                }
                             }
+                            return false;
                         }
-                        return false;
                     }
                 }
             }

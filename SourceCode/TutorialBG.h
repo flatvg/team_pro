@@ -42,7 +42,8 @@ public:
         Bomb01,
         Explosion,
         Reset,
-        Shape
+        Shape,
+        TutorialText1
     };
 
     enum class MoveType
@@ -52,7 +53,7 @@ public:
     };
 public:
     //------< 定数 >------------------------------------------------------------
-    static const int STAGE_NUM = 3;         // ステージ数
+    static const int STAGE_NUM = 5;         // ステージ数
     static const int CHIP_NUM_X = 14;       // マップの横方向のチップ数
     static const int CHIP_NUM_Y = 12;       // マップの縦方向のチップ数
     static const int CHIP_SIZE = 64;        // %演算子を使用するためint型を使用する

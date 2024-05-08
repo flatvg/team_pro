@@ -59,6 +59,9 @@ public:
 
     void Reset();
 
+
+    bool isDraw = true;
+
 private:
     VECTOR2 focusPos;
     VECTOR2 focusSize = { 1.0f,1.0f };
@@ -73,7 +76,6 @@ private:
     bool focusOnFlag = false;
     bool unFocusFlag = false;
 
-    bool isDraw = true;
 
     int myInstance;
 

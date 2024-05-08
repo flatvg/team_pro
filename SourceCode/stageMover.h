@@ -10,6 +10,7 @@ public:
         isMove = false;
         isFinish = false;
         moveFlag = false;
+        isChangeStageIndex = true;
     }
     ~StageMover() {}
 
@@ -17,6 +18,8 @@ public:
     void Update();
 
     bool IsMove() { return isMove; }
+
+    bool IsChangeStageIndex() { return isChangeStageIndex; }
 
     void FinishMove();
 
@@ -30,10 +33,13 @@ public:
 
     void SetDstIndex(int dstIndex) { dstStageIndex = dstIndex; }
 
+    void SetInChangeStageIndex(bool flag) { isChangeStageIndex = flag; }
+
 private:
     int srcStageIndex;
     int dstStageIndex;
     bool isMove;
     bool moveFlag;
     bool isFinish;
+    bool isChangeStageIndex;
 };

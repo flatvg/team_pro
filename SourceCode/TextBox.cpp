@@ -34,22 +34,39 @@ void TextBox::Update()
     if(isStartTimer)timer++;
 }
 
-void TextBox::Render(int boxTexNo, int clickTexNo)
+void TextBox::Render(/*int boxTexNo, int clickTexNo*/)
 {
-    texture::begin(boxTexNo);
+//    texture::begin(boxTexNo);
+//
+//    texture::draw(
+//        boxTexNo,
+//        position,
+//        VECTOR2(1,1),
+//        VECTOR2(0, 0),
+//        size,
+//        center,
+//        0,
+//        VECTOR4(1,1,1,1)
+//    );
+//
+//    texture::end(boxTexNo);
 
-    texture::draw(
-        boxTexNo,
-        position,
-        VECTOR2(1,1),
-        VECTOR2(0, 0),
-        size,
-        center,
-        0,
-        VECTOR4(1,1,1,1)
-    );
+    if (textTextureFileName)
+    {
+        textTexture = sprite_load(textTextureFileName);
 
-    texture::end(boxTexNo);
+        sprite_render(
+            textTexture,
+            position.x, position.y,
+            1.0f, 1.0f,
+            0.0f, 0.0f,
+            size.x, size.y,
+            center.x, center.y,
+            0,
+            1, 1, 1, 1);
+
+        delete textTexture;
+    }
 
     //primitive::rect(
     //    position,
@@ -67,20 +84,37 @@ void TextBox::Render(int boxTexNo, int clickTexNo)
         //    0,
         //    color);
 
-        texture::begin(clickTexNo);
+        //texture::begin(clickTexNo);
 
-        texture::draw(
-            clickTexNo,
-            circlePos,
-            VECTOR2(1, 1),
-            VECTOR2(0, 0),
-            size,
-            VECTOR2(0,0),
-            0,
-            VECTOR4(1, 1, 1, 1)
-        );
+        //texture::draw(
+        //    clickTexNo,
+        //    circlePos,
+        //    VECTOR2(1, 1),
+        //    VECTOR2(0, 0),
+        //    size,
+        //    VECTOR2(0,0),
+        //    0,
+        //    VECTOR4(1, 1, 1, 1)
+        //);
 
-        texture::end(clickTexNo);
+        //texture::end(clickTexNo);
+
+        if (clickTextureFileName)
+        {
+            clickTexture = sprite_load(clickTextureFileName);
+
+            sprite_render(
+                clickTexture,
+                circlePos.x, circlePos.y,
+                1.0f, 1.0f,
+                0.0f, 0.0f,
+                size.x, size.y,
+                center.x, center.y,
+                0,
+                1, 1, 1, 1);
+
+            delete clickTexture;
+        }
     }
 }
 
@@ -103,6 +137,18 @@ void TextBox::SetPopOutFlag(bool flag)
 
 void TextBox::Reset()
 {
+    if (textTexture)
+    {
+        textTexture = nullptr;
+        delete textTexture;
+    }
+    if (clickTexture)
+    {
+        clickTexture = nullptr;
+        delete clickTexture;
+    }
+    textTextureFileName = nullptr;
+    clickTextureFileName = nullptr;
     isDrawClickHere = true;
     isAlreadyPopUp = false;
     popUpFlag = false;
