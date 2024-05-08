@@ -36,7 +36,8 @@ enum TexNo
     Bomb01,
     Explosion,
     Reset,
-    BreakbleTile
+    BreakbleTile,
+    Number = 20,
 };
 
 class BG

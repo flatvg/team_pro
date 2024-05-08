@@ -405,6 +405,7 @@ void BG::init(int stagenum)
     texture::load(Explosion, EXPLOSION, 256U);     //爆発
     texture::load(Reset, RESET, 256U);             //リセット
     texture::load(BreakbleTile, BREAKETILE, 256U); //破壊可能ブロック
+    texture::load(Number, NUMBER, 256U); //番号
 
     //バクダンの種類を初期化
     for (int i = 0; i < BOMB_TYPE_MAX; i++)
@@ -687,6 +688,44 @@ void BG::drawTerrain()
     }
     texture::end(BreakbleTile);
 
+    //スコアなど
+    GameLib::text_out(4, "SCORE:", 0, 50, 1.5f, 1.5f, 1, 0, 0);
+    GameLib::text_out(4, "ACT:", 0, 200, 1.5f, 1.5f, 1, 0, 0);
+    texture::begin(Number);
+    for (int i = 0; i < 5; ++i)
+    {
+        int n = 10;
+        int score_re;
+        int act_re;
+        for (int m = 0; m < i; ++m)
+        {
+            n *= 10;
+        }
+        score_re = (score_ext % n) / (n / 10);
+        if (score_re == 0)score_re = 10;
+        texture::draw(
+            Number,
+            150 - (25 * i), 75,
+            0.25f, 0.25f,
+            50 * ((score_re - 1) * 2), 0,
+            50 * 2, 1000,
+            0, 0,
+            0,
+            1, 1, 1, 1);
+        act_re = (act_ext % n) / (n / 10);
+        if (act_re == 0)act_re = 10;
+        texture::draw(
+            Number,
+            150 - (25 * i), 230,
+            0.25f, 0.25f,
+            50 * ((act_re - 1) * 2), 0,
+            50 * 2, 1000,
+            0, 0,
+            0,
+            1, 1, 1, 1);
+    }
+    texture::end(Number);
+
     //バクダン
     texture::begin(Tile02);
     for (int x = 0; x < CHIP_NUM_X; x++)
@@ -887,11 +926,7 @@ void BG::drawTerrain()
             }
         }
     }
-
     texture::end(Bomb01);
-
-    debug::setString("act:%d", act);
-    debug::setString("score:%d", score);
 
     texture::begin(Explosion);
     for (int x = 0; x < CHIP_NUM_X; x++)
