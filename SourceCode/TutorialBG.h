@@ -42,8 +42,22 @@ public:
         Bomb01,
         Explosion,
         Reset,
+        BreakbleTile,
         Shape,
-        TutorialText1
+        Text0,
+        Text1,
+        Text2,
+        Text3,
+        Text4,
+        Text5,
+        Text6,
+        Text7,
+        Text8,
+        Text9,
+        Text10,
+        Text11,
+        Text12,
+        Text13
     };
 
     enum class MoveType
@@ -103,6 +117,8 @@ private:
         int DelayTimer;                //爆発の連鎖をずらす時間
         int terrain_endurance;         //マップタイルの耐久値
         int terrain_enduranceC;        //マップタイルの耐久値のチェック用
+        bool isTutorialBomb;
+        int terrain_back_change;//変更可能地形データ
     };
     //1マスが持つ情報
     TerrainData terrainData[TutorialBG::STAGE_NUM][TutorialBG::CHIP_NUM_Y][TutorialBG::CHIP_NUM_X];

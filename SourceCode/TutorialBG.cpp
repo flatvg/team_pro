@@ -30,10 +30,10 @@ int terrain_back_T[TutorialBG::STAGE_NUM][TutorialBG::CHIP_NUM_Y][TutorialBG::CH
     {
         {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
         {-1,-1,-1,-1, 0, 1, 1,-1,-1,-1,-1,-1,-1,-1},
-        {-1, 1, 1, 1, 1, 0, 0,-1,-1,-1,-1,-1,-1,-1},
-        {-1, 1, 1, 2, 0, 1, 1,-1,-1,-1,-1,-1,-1,-1},
-        {-1, 1, 1, 2, 2, 1, 0,-1,-1,-1,-1,-1,-1,-1},
-        {-1,-1, 0, 1, 0, 1, 0,-1,-1,-1,-1,-1,-1,-1},
+        {-1, 1, 0, 1, 0, 1, 0,-1,-1,-1,-1,-1,-1,-1},
+        {-1, 0, 1, 3, 2, 0, 1,-1,-1,-1,-1,-1,-1,-1},
+        {-1, 1, 0, 2, 3, 1, 0,-1,-1,-1,-1,-1,-1,-1},
+        {-1,-1, 1, 0, 1, 0, 1,-1,-1,-1,-1,-1,-1,-1},
         {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
         {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
         {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},
@@ -375,6 +375,7 @@ void TutorialBG::init(int stagenum)
             for (int y = 0; y < CHIP_NUM_Y; y++)
             {
                 //地形データterrain_backをbomb地形データterrainに代入する
+                terrainData[s][y][x].terrain_back_change = terrain_back_T[s][y][x];
                 terrainData[s][y][x].status = terrain_back_T[s][y][x];
 
                 //bomb地形の情報を初期化
@@ -382,7 +383,7 @@ void TutorialBG::init(int stagenum)
                 SetTerrainPos(XMINT2(x, y), s);
 
                 terrainData[s][y][x].terrain_endurance = 10000;
-                if (terrain_back_T[s][y][x] == 2)
+                if (terrainData[s][y][x].terrain_back_change == 2 || terrainData[s][y][x].terrain_back_change == 3)
                 {
                     terrainData[s][y][x].terrain_endurance = 1;//1回爆破すると置けなくなる
                 }
@@ -420,9 +421,23 @@ void TutorialBG::init(int stagenum)
     texture::load(Tile02, TILE02, 1024U);          //背景
     texture::load(Bomb01, BOMB01, 1024U);          //爆弾
     texture::load(Explosion, EXPLOSION, 1024U);    //爆発
-    texture::load(Reset, RESET, 124U);            //リセット
+    texture::load(Reset, RESET, 124U);             //リセット
+    texture::load(BreakbleTile, BREAKETILE, 1024U); //破壊可能ブロック
     texture::load(Shape, SHAPE, 1024U);            //設置不可能マス
-    texture::load(TutorialText1,TEXT1,24U);
+    texture::load(Text0, TEXT0,2U);
+    texture::load(Text1, TEXT1,2U);
+    texture::load(Text2, TEXT2,2U);
+    texture::load(Text3, TEXT3,2U);
+    texture::load(Text4, TEXT4,2U);
+    texture::load(Text5, TEXT5,2U);
+    texture::load(Text6, TEXT6,2U);
+    texture::load(Text7, TEXT7,2U);
+    texture::load(Text8, TEXT8,2U);
+    texture::load(Text9, TEXT9,2U);
+    texture::load(Text10,TEXT10,2U);
+    texture::load(Text11,TEXT11,2U);
+    texture::load(Text12,TEXT12,2U);
+    texture::load(Text13,TEXT13,2U);
 
     //バクダンの種類を初期化
     for (int i = 0; i < BOMB_TYPE_MAX; i++)
@@ -708,7 +723,7 @@ void TutorialBG::drawTerrain()
             for (int y = 0; y < CHIP_NUM_Y; y++)
             {
                 //CHANGED:float a = terrain_back_T[0][y][x];
-                float a = terrain_back_T[s][y][x];
+                float a = terrainData[s][y][x].terrain_back_change;
                 texture::draw(
                     TexNo::Tile01,
                     terrainData[s][y][x].currentPos.x, terrainData[s][y][x].currentPos.y,
@@ -733,6 +748,46 @@ void TutorialBG::drawTerrain()
         }
     }
     texture::end(Tile01);
+
+    texture::begin(BreakbleTile);
+    for (int s = 0; s < STAGE_NUM; s++)
+    {
+        if (!isDrawStage[s])break;
+        for (int x = 0; x < CHIP_NUM_X; x++)
+        {
+            for (int y = 0; y < CHIP_NUM_Y; y++)
+            {
+                float a = terrainData[s][y][x].terrain_back_change;
+                if (a == 2)
+                {
+                    texture::draw(
+                        TexNo::BreakbleTile,
+                        terrainData[s][y][x].currentPos.x, terrainData[s][y][x].currentPos.y,
+                        1.0, 1.0,
+                        CHIP_SIZE_F * 1, 0,
+                        CHIP_SIZE_F * (1 + 1), CHIP_SIZE_F,
+                        0, 0,
+                        0,
+                        WHITE
+                    );
+                }
+                if (a == 3)
+                {
+                    texture::draw(
+                        TexNo::BreakbleTile,
+                        terrainData[s][y][x].currentPos.x, terrainData[s][y][x].currentPos.y,
+                        1.0, 1.0,
+                        CHIP_SIZE_F * 0, 0,
+                        CHIP_SIZE_F * (0 + 1), CHIP_SIZE_F,
+                        0, 0,
+                        0,
+                        WHITE
+                    );
+                }
+            }
+        }
+    }
+    texture::end(BreakbleTile);
 
     //バクダン
     texture::begin(Tile02);
@@ -839,7 +894,7 @@ void TutorialBG::drawTerrain()
                     if (terrainData[s][y][x].terrain_endurance <= 0)
                     {
                         terrainData[s][y][x].status = TerrainStatus::UnBreakble;
-                        terrain_back_T[s][y][x] = -1;
+                        terrainData[s][y][x].terrain_back_change = -1;
                     }
 
                     TerrainExplosion[s][y][x].exist = false;
@@ -923,6 +978,19 @@ void TutorialBG::drawTerrain()
         {
             for (int y = 0; y < CHIP_NUM_Y; y++)
             {
+                if (terrainData[s][y][x].isTutorialBomb)
+                {
+                    texture::draw(
+                        TexNo::Bomb01,
+                        terrainData[s][y][x].currentPos.x + TerrainCenter_correction.x, terrainData[s][y][x].currentPos.y + TerrainCenter_correction.y,
+                        1.0f, 1.0f,
+                        0.0f, 0.0f,
+                        CHIP_SIZE_F, CHIP_SIZE_F,
+                        CHIP_SIZE_F * 0.5f, CHIP_SIZE_F * 0.5f,
+                        0,
+                        1, 1, 1, 1
+                    );
+                }
                 if ((terrainData[s][y][x].status == TerrainStatus::Bomb) || (terrainData[s][y][x].status == TerrainStatus::InExplosion && !terrainData[s][y][x].isChained) && terrainData[s][y][x].DelayTimer >= 25)
                 {
                     texture::draw(
@@ -958,10 +1026,6 @@ void TutorialBG::drawTerrain()
     }
 
     texture::end(Bomb01);
-
-    debug::setString("act:%d", act);
-    debug::setString("score:%d", score);
-    debug::setString("stage:%d", nowStage);
 
     texture::begin(Explosion);
     for (int s = 0; s < STAGE_NUM; s++)
@@ -1025,7 +1089,7 @@ void TutorialBG::drawTerrain()
         {
             for (int y = 0; y < CHIP_NUM_Y; y++)
             {
-                if (!terrainData[s][y][x].isPutOn && (drag_con || isShowUnPutBle) && (terrainData[s][y][x].status == TerrainStatus::Normal || terrainData[s][y][x].status == TerrainStatus::BurningFuse))
+                if (!terrainData[s][y][x].isPutOn && (drag_con || isShowUnPutBle) && (terrainData[s][y][x].status == TerrainStatus::Normal || terrainData[s][y][x].status == TerrainStatus::BurningFuse) && !terrainData[s][y][x].isTutorialBomb)
                 {
                     texture::draw(
                         TexNo::Shape,
@@ -1051,10 +1115,23 @@ void TutorialBG::drawTerrain()
                         1, 1, 1, 0.75f
                     );
                 }
+                if (terrainData[s][y][x].isTutorialBomb)
+                {
+                    texture::draw(
+                        TexNo::Shape,
+                        terrainData[s][y][x].currentPos.x, terrainData[s][y][x].currentPos.y,
+                        4.0f, 4.0f,
+                        16.0f, 16.0f,
+                        16.0f, 16.0f,
+                        0, 0,
+                        0,
+                        1, 1, 1, 0.75f
+                    );
+                }
             }
         }
     }
-    
+
     texture::end(Shape);
 
     for (auto& focus : focuses)
@@ -1132,61 +1209,90 @@ void TutorialBG::Tutorial_0()
     {
         for (auto& textBox : textBoxes)
         {
-            textBox->SetTextTexture(TEXT1);
-            textBox->SetClickTexture(RESET);
+            textBox->SetClickTexture(LCLICK);
         }
 
-        textBoxes[4]->IsNotDrawClickHere();
+        textBoxes[0]->SetTextTexture(TEXT0);
+        textBoxes[1]->SetTextTexture(TEXT1);
+        textBoxes[2]->SetTextTexture(TEXT2);
+        textBoxes[3]->SetTextTexture(TEXT6);
+        textBoxes[4]->SetTextTexture(TEXT7);
+        textBoxes[5]->SetTextTexture(TEXT3);
+        textBoxes[6]->SetTextTexture(TEXT5);
+        textBoxes[7]->SetTextTexture(TEXT4);
+
+        //textBoxes[4]->IsNotDrawClickHere();
         textBoxes[3]->IsNotDrawClickHere();
         textBoxes[2]->IsNotDrawClickHere();
-        textBoxes[0]->SetPosition(VECTOR2(200, 400));
+
 
         //チュートリアルへようこそ
+        textBoxes[0]->SetPosition(VECTOR2(370, 420));
+        textBoxes[0]->SetBaseSize(VECTOR2(431.0f, 65.0f));
+        textBoxes[0]->SetCirclePosCorec(VECTOR2(0.75f, 0.65f));
         textBoxes[0]->SetPopUpFlag(timer > 10);
         textBoxes[0]->SetPopOutFlag(isClickL && textBoxes[0]->WaitTime(30));
 
         //火をつけて爆弾の爆発を連鎖させ、ハイスコアを狙いましょう
+        textBoxes[1]->SetPosition(VECTOR2(400, 420));
+        textBoxes[1]->SetBaseSize(VECTOR2(601.0f, 110.0f));
+        textBoxes[1]->SetCirclePosCorec(VECTOR2(0.55f, 0.8f));
         textBoxes[1]->SetPopUpFlag(textBoxes[0]->GetPopOutFlag());
         textBoxes[1]->SetPopOutFlag(isClickL && textBoxes[1]->WaitTime(30));
 
         //まず、火をつけたい場所にｘキーで火を付けましょう
+        textBoxes[2]->SetPosition(VECTOR2(500, 420));
+        textBoxes[2]->SetBaseSize(VECTOR2(854.0f, 69.0f));
         textBoxes[2]->SetPopUpFlag(textBoxes[1]->GetPopOutFlag());
         textBoxes[2]->SetPopOutFlag(isSetFuse && textBoxes[2]->WaitTime(45));
 
         //次に爆弾を設置しますが、いくつか注意すべきことがあります。
-
+        textBoxes[5]->SetPosition(VECTOR2(600, 420));
+        textBoxes[5]->SetBaseSize(VECTOR2(1024.0f, 68.0f));
+        textBoxes[5]->SetCirclePosCorec(VECTOR2(0.8f, 0.7f));
         if (textBoxes[5]->GetPopUpFlag())isShowUnPutBle = true;
         textBoxes[5]->SetPopUpFlag(textBoxes[2]->GetPopOutFlag());
         textBoxes[5]->SetPopOutFlag(isClickL && textBoxes[5]->WaitTime(45));
 
         //爆弾を設置する場所に赤いバツ印があればその場所に爆弾を置くことができません
-
-        textBoxes[6]->SetPopUpFlag(textBoxes[5]->GetPopOutFlag());
+        textBoxes[6]->SetPosition(VECTOR2(620, 420));
+        textBoxes[6]->SetScale(VECTOR2(0.9f, 0.9f));
+        textBoxes[6]->SetBaseSize(VECTOR2(1399.0f, 69.0f));
+        textBoxes[6]->SetCirclePosCorec(VECTOR2(0.78f, 0.7f));
+        textBoxes[6]->SetPopUpFlag(textBoxes[7]->GetPopOutFlag());
         textBoxes[6]->SetPopOutFlag(isClickL && textBoxes[6]->WaitTime(45));
 
         //また、設置予定の場所が全て紫の三角形ならばこの場合でも置くことができません
-
-        textBoxes[7]->SetPopUpFlag(textBoxes[6]->GetPopOutFlag());
+        textBoxes[7]->SetPosition(VECTOR2(620, 220));
+        textBoxes[7]->SetScale(VECTOR2(0.9f, 0.9f));
+        textBoxes[7]->SetBaseSize(VECTOR2(1377.0f, 69.0f));
+        textBoxes[7]->SetCirclePosCorec(VECTOR2(0.78f, 0.7f));
+        textBoxes[7]->SetPopUpFlag(textBoxes[5]->GetPopOutFlag());
         textBoxes[7]->SetPopOutFlag(isClickL && textBoxes[7]->WaitTime(45));
 
         //火のマスに爆弾を置くことで爆弾を爆発できます
+        textBoxes[3]->SetPosition(VECTOR2(500, 420));
+        textBoxes[3]->SetBaseSize(VECTOR2(826.0f, 68.0f));
         if (textBoxes[3]->GetPopUpFlag())isShowUnPutBle = false;
-        textBoxes[3]->SetPopUpFlag(textBoxes[7]->GetPopOutFlag());
+        textBoxes[3]->SetPopUpFlag(textBoxes[6]->GetPopOutFlag());
         textBoxes[3]->SetPopOutFlag(drag_con);
 
         //もし、火のマスに爆弾を置けない状況に陥ったら、リセットボタンを押しましょう
+        textBoxes[4]->SetPosition(VECTOR2(630, 420));
+        textBoxes[4]->SetBaseSize(VECTOR2(1282.0f, 68.0f));
+        textBoxes[4]->SetCirclePosCorec(VECTOR2(0.8f, 0.7f));
         textBoxes[4]->SetPopUpFlag(textBoxes[3]->GetPopOutFlag() && !focuses[0]->IsDraw());
-        textBoxes[4]->SetPopOutFlag(isTutorialClear[nowStage]);
+        textBoxes[4]->SetPopOutFlag((isClickL && textBoxes[4]->WaitTime(120)) || isTutorialClear[nowStage]);
     }
 
     //focus
     {
         focuses[0]->SetFocusPos(VECTOR2(400, 175));
-        focuses[0]->SetRadius(250.0f);
+        focuses[0]->SetRadius(300.0f);
         focuses[1]->SetFocusPos(VECTOR2(1150, 360));
         focuses[1]->SetFocusSize(VECTOR2(1.1f, 1.9f));
-        focuses[2]->SetFocusPos(VECTOR2(800, 175));
-        focuses[3]->SetFocusPos(VECTOR2(800, 480));
+        focuses[2]->SetFocusPos(VECTOR2(800, 225));
+        focuses[3]->SetFocusPos(VECTOR2(800, 520));
 
         focuses[0]->SetFocusFlag(textBoxes[2]->GetPopUpFlag());
         focuses[0]->SetUnFocusFlag(textBoxes[2]->GetPopOutFlag());
@@ -1221,7 +1327,7 @@ void TutorialBG::Tutorial_1()
             {
                 isActionTerrain = true;
             }
-            if ((terrain_back_T[nowStage][y][x] == 2))
+            if ((terrainData[nowStage][y][x].terrain_back_change == 2 || terrainData[nowStage][y][x].terrain_back_change == 3))
             {
                 isNotBrakbleTerrain = false;
             }
@@ -1229,52 +1335,72 @@ void TutorialBG::Tutorial_1()
     }
     if (stageAct[nowStage] > 1 && !isActionTerrain)
     {
-        isTutorialClear[nowStage] = true;
+        //isTutorialClear[nowStage] = true;
     }
 
     //stageMover
     {
-        stageMovers[1]->SetMoveFlag(textBoxes[3]->GetPopOutFlag());
+        stageMovers[1]->SetMoveFlag(textBoxes[4]->GetPopOutFlag());
     }
 
     //textBox
     {
         for (auto& textBox : textBoxes)
         {
-            textBox->SetTextTexture(TEXT1);
-            textBox->SetClickTexture(RESET);
+            textBox->SetClickTexture(LCLICK);
         }
-
-        textBoxes[4]->IsNotDrawClickHere();
-
-        textBoxes[1]->IsNotDrawClickHere();
-        textBoxes[2]->IsNotDrawClickHere();
+        textBoxes[0]->SetTextTexture(TEXT8);
+        textBoxes[1]->SetTextTexture(TEXT9);
+        textBoxes[2]->SetTextTexture(TEXT10);
+        textBoxes[3]->SetTextTexture(TEXT11);
+        textBoxes[5]->SetTextTexture(TEXT12);
+        textBoxes[4]->SetTextTexture(TEXT13);
 
         //他のブロックと見た目が違うブロックがあります
         //壊してみましょう
+        textBoxes[0]->SetPosition(VECTOR2(400, 420));
+        textBoxes[0]->SetBaseSize(VECTOR2(799.0f, 69.0f));
+        textBoxes[0]->SetCirclePosCorec(VECTOR2(0.6f, 0.6f));
         textBoxes[0]->SetPopUpFlag(true);
         textBoxes[0]->SetPopOutFlag(isClickL);
 
-        //火を置きたい場所にカーソルを向けてＸ
+        textBoxes[1]->SetPosition(VECTOR2(400, 420));
+        textBoxes[1]->SetBaseSize(VECTOR2(293.0f, 67.0f));
+        textBoxes[1]->SetCirclePosCorec(VECTOR2(0.9f, 0.9f));
         textBoxes[1]->SetPopUpFlag(textBoxes[0]->GetPopOutFlag());
-        textBoxes[1]->SetPopOutFlag(isSetFuse);
+        textBoxes[1]->SetPopOutFlag(isClickL);
+
+        //火を置きたい場所にカーソルを向けてx
+        textBoxes[2]->SetPosition(VECTOR2(400, 420));
+        textBoxes[2]->SetBaseSize(VECTOR2(668.0f, 68.0f));
+        textBoxes[2]->SetPopUpFlag(textBoxes[1]->GetPopOutFlag());
+        textBoxes[2]->SetPopOutFlag(isSetFuse);
+        textBoxes[2]->IsNotDrawClickHere();
 
         //Ｄ＆Ｄで爆弾を設置
-        textBoxes[2]->SetPopUpFlag(textBoxes[1]->GetPopOutFlag());
-        textBoxes[2]->SetPopOutFlag(drag_con);
+        textBoxes[3]->SetPosition(VECTOR2(650, 420));
+        textBoxes[3]->SetBaseSize(VECTOR2(351.0f, 68.0f));
+        textBoxes[3]->SetPopUpFlag(textBoxes[2]->GetPopOutFlag());
+        textBoxes[3]->SetPopOutFlag(drag_con);
+        textBoxes[3]->IsNotDrawClickHere();
 
         //ヒビが入っているブロックを全て壊す
-        textBoxes[4]->SetPopUpFlag(textBoxes[1]->GetPopOutFlag());
-        textBoxes[4]->SetPopOutFlag(isNotBrakbleTerrain);
+        //textBoxes[5]->SetPosition(VECTOR2());
+        textBoxes[5]->SetBaseSize(VECTOR2(628.0f, 69.0f));
+        textBoxes[5]->SetPopUpFlag(textBoxes[3]->GetPopOutFlag());
+        textBoxes[5]->SetPopOutFlag(isNotBrakbleTerrain || !isActionTerrain);
+        textBoxes[5]->IsNotDrawClickHere();
 
-        //このようにひびが入っているブロックは一度爆風を当てると壊れてしまいます
-        textBoxes[3]->SetPopUpFlag(textBoxes[4]->GetPopOutFlag() && textBoxes[4]->WaitTime(40));
-        textBoxes[3]->SetPopOutFlag(isClickL);
+        //このようにヒビが入っているブロックは一度爆風を当てると壊れてしまいます
+        textBoxes[4]->SetBaseSize(VECTOR2(1268.0f, 69.0f));
+        textBoxes[4]->SetCirclePosCorec(VECTOR2(0.9f, 1.0f));
+        textBoxes[4]->SetPopUpFlag(textBoxes[5]->GetPopOutFlag() && textBoxes[5]->WaitTime(40));
+        textBoxes[4]->SetPopOutFlag(isClickL);
     }
 
     //focus
     {
-        focuses[0]->SetFocusPos(VECTOR2(400, 175));
+        focuses[0]->SetFocusPos(VECTOR2(420, 200));
         focuses[0]->SetRadius(250.0f);
         focuses[1]->SetFocusPos(VECTOR2(1150, 360));
         focuses[1]->SetFocusSize(VECTOR2(1.1f, 1.9f));
@@ -1282,7 +1408,7 @@ void TutorialBG::Tutorial_1()
         focuses[0]->SetFocusFlag(textBoxes[0]->GetPopUpFlag());
         focuses[0]->SetUnFocusFlag(textBoxes[1]->GetPopOutFlag());
 
-        focuses[1]->SetFocusFlag(!focuses[0]->IsDraw() && textBoxes[2]->GetPopUpFlag());
+        focuses[1]->SetFocusFlag(!focuses[0]->IsDraw() && textBoxes[3]->GetPopUpFlag());
         focuses[1]->SetUnFocusFlag(drag_con);   //ボムを持っている時
     }
 }
@@ -1711,6 +1837,8 @@ void TutorialBG::InitTerrain(TerrainStatus terrainStatus, int stageNum, DirectX:
     terrainData[stageNum][terrainPos.y][terrainPos.x].DelayTimer      = delayTime;
     terrainData[stageNum][terrainPos.y][terrainPos.x].isAlredyChanged = false;
     terrainData[stageNum][terrainPos.y][terrainPos.x].isChained       = false;
+    terrainData[stageNum][terrainPos.y][terrainPos.x].isTutorialBomb  =
+        (stageNum == 4 && terrainPos.y > 6) && terrainData[stageNum][terrainPos.y][terrainPos.x].status == TerrainStatus::Normal ? true : false;
 }
 
 void TutorialBG::InitTerrain(TerrainStatus terrainStatus, int s, int x, int y)
@@ -1776,8 +1904,8 @@ bool TutorialBG::IsPutOnFuse()
         }
     }
 
-    isPutOnFuse = true;
-    return true;
+    isPutOnFuse = nowStage == 0 && !textBoxes[2]->GetIsAlreadyPopUp() ? false : true;
+    return nowStage == 0 && !textBoxes[2]->GetIsAlreadyPopUp() ? false : true;
 }
 
 //--------------------------------

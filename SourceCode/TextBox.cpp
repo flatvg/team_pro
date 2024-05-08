@@ -27,7 +27,7 @@ void TextBox::Update()
 
     size = baseSize * scaleFactor;
     center = size * 0.5f;
-    circlePos = position + center;
+    circlePos = position + VECTOR2(size.x * circlePosCorrection.x, size.y * circlePosCorrection.y);
     circlePos.y += cosf(circleAngle) * AMPLITUDE_CORREC;
     circleAngle += DirectX::XMConvertToRadians(2);
 
@@ -58,7 +58,7 @@ void TextBox::Render(/*int boxTexNo, int clickTexNo*/)
         sprite_render(
             textTexture,
             position.x, position.y,
-            1.0f, 1.0f,
+            scale.x, scale.y,
             0.0f, 0.0f,
             size.x, size.y,
             center.x, center.y,
@@ -106,9 +106,9 @@ void TextBox::Render(/*int boxTexNo, int clickTexNo*/)
             sprite_render(
                 clickTexture,
                 circlePos.x, circlePos.y,
-                1.0f, 1.0f,
+                0.7f, 0.7f,
                 0.0f, 0.0f,
-                size.x, size.y,
+                circleSize.x, circleSize.y,
                 center.x, center.y,
                 0,
                 1, 1, 1, 1);
@@ -155,4 +155,6 @@ void TextBox::Reset()
     popOutFlag = false;
     isStartTimer = false;
     timer = 0;
+    circlePosCorrection = VECTOR2(1.0f, 1.0f);
+    scale = VECTOR2(1, 1);
 }

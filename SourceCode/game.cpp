@@ -198,10 +198,6 @@ void Game::draw()
         0, 0, 0, A_timer
     );
 
-    // デバッグ文字列表示
-    debug::setString("state:%d", state);
-    debug::setString("timer:%d", timer);
-
     delete kanban;
     delete box;
     delete back;

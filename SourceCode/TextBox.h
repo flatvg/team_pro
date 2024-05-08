@@ -30,6 +30,7 @@ public:
         timer = 0;
         textTextureFileName = nullptr;
         clickTextureFileName = nullptr;
+        circlePosCorrection = VECTOR2(1.0f, 1.0f);
     }
 
     TextBox(VECTOR2 pos, VECTOR2 Bsize, VECTOR4 color)
@@ -49,6 +50,8 @@ public:
         timer = 0;
         textTextureFileName = nullptr;
         clickTextureFileName = nullptr;
+        circlePosCorrection = VECTOR2(1.0f, 1.0f);
+        scale = VECTOR2(1, 1);
     }
     ~TextBox() {}
 
@@ -61,9 +64,17 @@ public:
 
     void SetPosition(VECTOR2 pos) { position = pos; }
 
+    void SetScale(VECTOR2 scale) { this->scale = scale; }
+
+    void SetBaseSize(VECTOR2 size) { baseSize = size; }
+
+    void SetCirclePosCorec(VECTOR2 corec) { circlePosCorrection = corec; }
+
     bool GetPopUpFlag() { return popUpFlag; }
 
     bool GetPopOutFlag() { return popOutFlag; }
+
+    bool GetIsAlreadyPopUp() { return isAlreadyPopUp; }
 
     void SetPopUpFlag(bool flag);
 
@@ -87,11 +98,14 @@ private:
     const wchar_t* clickTextureFileName;
 
     VECTOR2 position;
+    VECTOR2 scale;
     VECTOR2 baseSize;
     VECTOR2 size;
     VECTOR2 center;
     VECTOR4 color;
     VECTOR2 circlePos;
+    VECTOR2 circlePosCorrection;
+    VECTOR2 circleSize = { 128.0f,128.0f };
     float radius;
     float circleAngle;
     float scaleFactor;

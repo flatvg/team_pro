@@ -109,9 +109,6 @@ void Tutorial::draw()
         0, 0, 0, A_timer
     );
 
-    // デバッグ文字列表示
-    debug::setString("timer:%d", timer);
-
     delete back_img;
 }
 
