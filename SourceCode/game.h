@@ -40,6 +40,8 @@ private:
     float A_timer;
     BG bg;
 
+    VECTOR2 cursorPos;
+
     static Game instance_;
 };
 

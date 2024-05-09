@@ -57,7 +57,8 @@ public:
         Text10,
         Text11,
         Text12,
-        Text13
+        Text13,
+        Number
     };
 
     enum class MoveType
@@ -139,7 +140,12 @@ private:
 
     TerrainEffect TerrainBomb[TutorialBG::STAGE_NUM][TutorialBG::CHIP_NUM_Y][TutorialBG::CHIP_NUM_X];
 
-
+    struct MovePos
+    {
+        DirectX::XMFLOAT2 startPos;
+        DirectX::XMFLOAT2 currentPos;
+        DirectX::XMFLOAT2 endPos;
+    };
 public:
     TutorialBG();
     ~TutorialBG();
@@ -194,6 +200,10 @@ public:
     //エフェクトを更新
     void updateEffect(TerrainEffect& effect);
 
+    void InitMovePos();
+
+    void MoveScores();
+
     //爆発箇所計算
     DirectX::XMINT2 CalcExplosionPoint(DirectX::XMINT2 BaseExplosionPoint, ExplosionPoint point);
     DirectX::XMINT2 CalcCenterPoint(DirectX::XMINT2 BaseExplosionPoint);
@@ -233,12 +243,17 @@ public:
 
     bool finish_game;
 
+    bool ClickIsFuse;
+
+    bool ClickIspa;
+
+    bool ClickIsgoo;
 private:
 
     int stageNum;
     int timer;                      //全体の時間
     int explosionTime = 50;         //爆発が残留する時間
-    int delayTime = 20;             //爆発の連鎖する間隔
+    int delayTime = 10;             //爆発の連鎖する間隔
     int operatbleCursorTime = 5;    //誤操作を防ぐための操作不能時間
     DirectX::XMFLOAT2  cursorPos;   //カーソルの位置
     bool drag_con = false;
@@ -248,6 +263,31 @@ private:
     int score;
     int score_add;
     int score_counter;
+    int score_vault;
+
+    MovePos scorePos;
+    MovePos scoreNumPos;
+    MovePos goalPos;
+    MovePos goalNumPos;
+    MovePos actPos;
+    MovePos actNumPos;
+    MovePos limitPos;
+    MovePos limitNumPos;
+
+    MovePos MovePoses[9];
+
+    enum MoveScore
+    {
+        Score,
+        ScoreNum,
+        Goal,
+        GoalNum,
+        Act,
+        ActNum,
+        Limit,
+        LimitNum,
+        Kamban
+    };
 
     DirectX::XMFLOAT2     reset_scale = { 0.45,0.45 };
     DirectX::XMFLOAT2     reset_pos = { 90,650 };
@@ -272,7 +312,7 @@ private:
 
     Effect burningFuse;
 
-    std::unique_ptr<Focus> focuses[4];
+    std::unique_ptr<Focus> focuses[6];
 
     bool moveStageFlags[STAGE_NUM];
 
@@ -296,6 +336,9 @@ private:
 
     //線形保管の重み
     float weight = 0.041f;
+    float weight_score = 0.041f;
 
     bool isShowUnPutBle;
+
+    bool isMoveScore;
 };

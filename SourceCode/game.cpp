@@ -47,6 +47,7 @@ void Game::init()
     bg.init(stageNum);  //BGで地形データ読み込み
     A_timer = 1;
     isPaused = false;   // ポーズフラグの初期化
+    cursorPos = VECTOR2(GameLib::input::getCursorPosX(), GameLib::input::getCursorPosY());
 }
 
 //--------------------------------
@@ -73,6 +74,7 @@ void Game::deinit()
 void Game::update()
 {
     using namespace input;
+
     if (A_timer > 0)A_timer -= 0.02f;
     if (A_timer <= 0)
     {
@@ -145,6 +147,8 @@ void Game::update()
             changeScene(Result::instance());  // ゲームシーンに切り替え
         }
     }
+
+    cursorPos = VECTOR2(GameLib::input::getCursorPosX(), GameLib::input::getCursorPosY());
 }
 
 //--------------------------------
@@ -198,6 +202,30 @@ void Game::draw()
         0, 0, 0, A_timer
     );
 
+    static GameLib::Sprite* cursor = nullptr;
+    if (bg.ClickIsgoo)
+    {
+        cursor = sprite_load(CURSORGOO);
+    }
+    else if (bg.ClickIspa)
+    {
+        cursor = sprite_load(CURSORPA);
+    }
+    else if (bg.ClickIsFuse)
+    {
+        cursor = sprite_load(CLOSEHAND);
+    }
+    else cursor = sprite_load(CURSOR);
+    sprite_render(
+        cursor,
+        cursorPos.x, cursorPos.y,
+        0.4f, 0.4f,
+        0, 0,
+        64, 64,
+        32, 32,
+        0);
+
+    delete cursor;
     delete kanban;
     delete box;
     delete back;

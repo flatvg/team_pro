@@ -28,5 +28,7 @@ private:
     float A_timer;
     TutorialBG T_bg;
 
+    VECTOR2 cursorPos;
+
     static Tutorial instance_;
 };

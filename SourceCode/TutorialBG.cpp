@@ -438,6 +438,7 @@ void TutorialBG::init(int stagenum)
     texture::load(Text11,TEXT11,2U);
     texture::load(Text12,TEXT12,2U);
     texture::load(Text13,TEXT13,2U);
+    texture::load(Number, NUMBER, 256U);
 
     //バクダンの種類を初期化
     for (int i = 0; i < BOMB_TYPE_MAX; i++)
@@ -475,10 +476,17 @@ void TutorialBG::init(int stagenum)
 
     //線形保管の重み
     weight = 0.041f;
+    weight_score = 0.041f;
 
     isPutOnFuse = true;
 
     isShowUnPutBle = false;
+
+    isMoveScore = false;
+
+    score_vault = 0;
+
+    InitMovePos();
 }
 
 //--------------------------------
@@ -513,6 +521,50 @@ void TutorialBG::update()
                   && cursorPos.x < (Mapterrain_correction.x + CHIP_SIZE * TutorialBG::CHIP_NUM_X)
                   && cursorPos.y >  Mapterrain_correction.y
                   && cursorPos.y < (Mapterrain_correction.y + CHIP_SIZE * TutorialBG::CHIP_NUM_Y);
+
+    bool isNotActionTerrain = true;
+
+    for (int x = 0; x < CHIP_NUM_X; x++)
+    {
+        for (int y = 0; y < CHIP_NUM_Y; y++)
+        {
+            if (terrainData[nowStage][y][x].status == TerrainStatus::InExplosion)isNotActionTerrain = false;
+        }
+    }
+
+    ClickIsFuse = isInStage && !burningFuse.exist && isNotActionTerrain && terrainData[nowStage][Cpos.y][Cpos.x].status != TerrainStatus::UnBreakble ? true : false;
+
+    bool afk = false;
+
+    for (int bomb_array = 0; bomb_array < BOMB_ROTATE_MAX; bomb_array++)
+    {
+        for (int x = 0; x < 3; ++x)
+        {
+            for (int y = 0; y < 3; ++y)
+            {
+                //爆弾の種類取得
+                int pt_bomb = bomb_pattern_T[bomb_typenum[bomb_array]][bomb_trun[bomb_array]][y][x];
+
+                if (pt_bomb == PatternStatus::IsBomb)
+                {
+                    int bomb_array_vaut = bomb_array;
+                    if (bomb_movingtype)bomb_array = bomb_waitingarea;
+                    DirectX::XMFLOAT2 bomb_pos;
+                    //爆弾1ブロック中心座標(スクリーン座標＋配列[y][x]目のブロック)
+                    bomb_pos = { bomb_changepos[bomb_array].x + CHIP_SIZE * x,bomb_changepos[bomb_array].y + CHIP_SIZE * y };
+                    //あたり判定
+                    if (collision_center(cursorPos, bomb_pos, chip_size_xmfloat2))
+                    {
+                        afk = true;
+                    }
+                }
+            }
+        }
+    }
+
+    ClickIspa = afk;
+
+    ClickIsgoo = drag_con && burningFuse.exist ? true : false;
 
     //右、左クリックなどをしているか否か
     isClickL = timer > operatbleCursorTime && GameLib::input::STATE(0) & GameLib::input::PAD_LC;
@@ -694,6 +746,7 @@ void TutorialBG::update()
     if (act > 200)finish_game = true;
 
     Tutorial();
+    if (isMoveScore)MoveScores();
 
     for (auto& textBox : textBoxes)
     {
@@ -713,6 +766,15 @@ void TutorialBG::update()
 //--------------------------------
 void TutorialBG::drawTerrain()
 {
+    //timer&score
+    static GameLib::Sprite* kanban = nullptr;
+    float txsX2 = 200;
+    float txsY = 720;
+    kanban = sprite_load(L"./Data/Images/kanban.png");
+    sprite_render(kanban, MovePoses[Kamban].currentPos.x, MovePoses[Kamban].currentPos.y, txsX2 / 310, txsY / 1551, 0, 0, 310, 1551, ToRadian(0));
+    delete kanban;
+
+
     //マップ
     texture::begin(Tile01);
     for (int s = 0; s < STAGE_NUM; s++)
@@ -788,6 +850,77 @@ void TutorialBG::drawTerrain()
         }
     }
     texture::end(BreakbleTile);
+
+    //スコアなど
+    GameLib::text_out(4, " SCORE:", MovePoses[Score].currentPos.x, MovePoses[Score].currentPos.y, 1.4f, 1.4f, 1, 0, 0);
+    GameLib::text_out(4, " :GOAL", MovePoses[Goal].currentPos.x, MovePoses[Goal].currentPos.y, 1.5f, 1.5f, 1, 0, 0);
+    GameLib::text_out(4, " ACT:", MovePoses[Act].currentPos.x, MovePoses[Act].currentPos.y, 1.5f, 1.5f, 1, 0, 0);
+    GameLib::text_out(4, " :LIMIT", MovePoses[Limit].currentPos.x, MovePoses[Limit].currentPos.y, 1.4f, 1.4f, 1, 0, 0);
+    texture::begin(Number);
+    score_vault += score / 60;
+    int goal = 10000;
+    int limit = 200;
+    if (score_vault >= score)score_vault = score;
+    for (int i = 0; i < 5; ++i)
+    {
+        int n = 10;
+        int score_re;
+        int act_re;
+        int goal_re;
+        int limit_re;
+        for (int m = 0; m < i; ++m)
+        {
+            n *= 10;
+        }
+        score_re = (score_vault % n) / (n / 10);
+        if (score_re == 0)score_re = 10;
+        texture::draw(
+            Number,
+            MovePoses[ScoreNum].currentPos.x - (25 * i), MovePoses[ScoreNum].currentPos.y,
+            0.25f, 0.25f,
+            50 * ((score_re - 1) * 2), 0,
+            50 * 2, 1000,
+            0, 0,
+            0,
+            1, 1, 1, 1);
+
+        goal_re = (goal % n) / (n / 10);
+        if (goal_re == 0)goal_re = 10;
+        texture::draw(
+            Number,
+            MovePoses[GoalNum].currentPos.x - (25 * i), MovePoses[GoalNum].currentPos.y,
+            0.25f, 0.25f,
+            50 * ((goal_re - 1) * 2), 0,
+            50 * 2, 1000,
+            0, 0,
+            0,
+            1, 1, 1, 1);
+
+        act_re = (act % n) / (n / 10);
+        if (act_re == 0)act_re = 10;
+        texture::draw(
+            Number,
+            MovePoses[ActNum].currentPos.x - (25 * i), MovePoses[ActNum].currentPos.y,
+            0.25f, 0.25f,
+            50 * ((act_re - 1) * 2), 0,
+            50 * 2, 1000,
+            0, 0,
+            0,
+            1, 1, 1, 1);
+
+        limit_re = (limit % n) / (n / 10);
+        if (limit_re == 0)limit_re = 10;
+        texture::draw(
+            Number,
+            MovePoses[LimitNum].currentPos.x - (25 * i), MovePoses[LimitNum].currentPos.y,
+            0.25f, 0.25f,
+            50 * ((limit_re - 1) * 2), 0,
+            50 * 2, 1000,
+            0, 0,
+            0,
+            1, 1, 1, 1);
+    }
+    texture::end(Number);
 
     //バクダン
     texture::begin(Tile02);
@@ -1281,8 +1414,9 @@ void TutorialBG::Tutorial_0()
         textBoxes[4]->SetPosition(VECTOR2(630, 420));
         textBoxes[4]->SetBaseSize(VECTOR2(1282.0f, 68.0f));
         textBoxes[4]->SetCirclePosCorec(VECTOR2(0.8f, 0.7f));
+        textBoxes[4]->IsNotDrawClickHere();
         textBoxes[4]->SetPopUpFlag(textBoxes[3]->GetPopOutFlag() && !focuses[0]->IsDraw());
-        textBoxes[4]->SetPopOutFlag((isClickL && textBoxes[4]->WaitTime(120)) || isTutorialClear[nowStage]);
+        textBoxes[4]->SetPopOutFlag((textBoxes[4]->WaitTime(120)) || isTutorialClear[nowStage]);
     }
 
     //focus
@@ -1321,8 +1455,7 @@ void TutorialBG::Tutorial_1()
             {
                 isSetFuse = true;
             }
-            if (terrainData[nowStage][y][x].status == TerrainStatus::Bomb
-                || terrainData[nowStage][y][x].status == TerrainStatus::InExplosion
+            if (terrainData[nowStage][y][x].status == TerrainStatus::InExplosion
                 || terrainData[nowStage][y][x].status == TerrainStatus::BurningFuse)
             {
                 isActionTerrain = true;
@@ -1360,13 +1493,13 @@ void TutorialBG::Tutorial_1()
         //壊してみましょう
         textBoxes[0]->SetPosition(VECTOR2(400, 420));
         textBoxes[0]->SetBaseSize(VECTOR2(799.0f, 69.0f));
-        textBoxes[0]->SetCirclePosCorec(VECTOR2(0.6f, 0.6f));
+        textBoxes[0]->SetCirclePosCorec(VECTOR2(0.8f, 0.6f));
         textBoxes[0]->SetPopUpFlag(true);
         textBoxes[0]->SetPopOutFlag(isClickL);
 
         textBoxes[1]->SetPosition(VECTOR2(400, 420));
         textBoxes[1]->SetBaseSize(VECTOR2(293.0f, 67.0f));
-        textBoxes[1]->SetCirclePosCorec(VECTOR2(0.9f, 0.9f));
+        textBoxes[1]->SetCirclePosCorec(VECTOR2(0.8f, 0.9f));
         textBoxes[1]->SetPopUpFlag(textBoxes[0]->GetPopOutFlag());
         textBoxes[1]->SetPopOutFlag(isClickL);
 
@@ -1388,15 +1521,18 @@ void TutorialBG::Tutorial_1()
         //textBoxes[5]->SetPosition(VECTOR2());
         textBoxes[5]->SetBaseSize(VECTOR2(628.0f, 69.0f));
         textBoxes[5]->SetPopUpFlag(textBoxes[3]->GetPopOutFlag());
-        textBoxes[5]->SetPopOutFlag(isNotBrakbleTerrain || !isActionTerrain);
+        textBoxes[5]->SetPopOutFlag(isNotBrakbleTerrain && !isActionTerrain);
         textBoxes[5]->IsNotDrawClickHere();
 
         //このようにヒビが入っているブロックは一度爆風を当てると壊れてしまいます
         textBoxes[4]->SetBaseSize(VECTOR2(1268.0f, 69.0f));
         textBoxes[4]->SetCirclePosCorec(VECTOR2(0.9f, 1.0f));
+        textBoxes[4]->SetCirclePosCorec(VECTOR2(0.8f, 0.7f));
         textBoxes[4]->SetPopUpFlag(textBoxes[5]->GetPopOutFlag() && textBoxes[5]->WaitTime(40));
         textBoxes[4]->SetPopOutFlag(isClickL);
     }
+
+    if (textBoxes[4]->GetPopOutFlag())isMoveScore = true;
 
     //focus
     {
@@ -1446,35 +1582,118 @@ void TutorialBG::Tutorial_2()
 
     //textBox
     {
-        textBoxes[1]->IsNotDrawClickHere();
-        textBoxes[2]->IsNotDrawClickHere();
+        textBoxes[0]->SetTextTexture(TEXT14);
+        textBoxes[1]->SetTextTexture(TEXT15);
+        textBoxes[2]->SetTextTexture(TEXT16);
+        textBoxes[3]->SetTextTexture(TEXT17);
+        textBoxes[4]->SetTextTexture(TEXT18);
+        textBoxes[5]->SetTextTexture(TEXT19);
+        textBoxes[6]->SetTextTexture(TEXT20);
 
+        for (auto& textBox : textBoxes)
+        {
+            textBox->SetClickTexture(LCLICK);
+        }
+
+        float width = window::getWidth();
+        float height = window::getHeight();
+        float hw = width * 0.5f;
+        float hh = height * 0.5f;
+
+        //スコアなどを解説します
+        textBoxes[0]->SetPosition(VECTOR2(hw, hh));
+        textBoxes[0]->SetBaseSize(VECTOR2(530.0f, 68.0f));
+        textBoxes[0]->SetCirclePosCorec(VECTOR2(0.8f, 0.75f));
+        textBoxes[0]->IsDrawClickHere();
         textBoxes[0]->SetPopUpFlag(true);
         textBoxes[0]->SetPopOutFlag(isClickL);
 
-        //textBoxes[1]->SetPopUpFlag(textBoxes[0]->GetPopOutFlag());
-        //textBoxes[1]->SetPopOutFlag(isSetFuse);
+        //スコアは爆弾が連鎖するほど増えていきます
+        textBoxes[1]->SetPosition(VECTOR2(hw, hh));
+        textBoxes[1]->SetBaseSize(VECTOR2(765.0f, 68.0f));
+        textBoxes[1]->SetCirclePosCorec(VECTOR2(0.8f, 0.7f));
+        textBoxes[1]->IsDrawClickHere();
+        textBoxes[1]->SetPopUpFlag(textBoxes[0]->GetPopOutFlag());
+        textBoxes[1]->SetPopOutFlag(isClickL);
 
-        //textBoxes[2]->SetPopUpFlag(textBoxes[1]->GetPopOutFlag());
-        //textBoxes[2]->SetPopOutFlag(drag_con);
+        //逆に連鎖しないとスコアが増えません
+        textBoxes[2]->SetPosition(VECTOR2(hw, hh));
+        textBoxes[2]->SetBaseSize(VECTOR2(645.0f, 67.0f));
+        textBoxes[2]->SetCirclePosCorec(VECTOR2(0.8f, 0.7f));
+        textBoxes[2]->IsDrawClickHere();
+        textBoxes[2]->SetPopUpFlag(textBoxes[1]->GetPopOutFlag());
+        textBoxes[2]->SetPopOutFlag(isClickL);
 
-        //textBoxes[3]->SetPopUpFlag(isNotBrakbleTerrain);
-        //textBoxes[3]->SetPopOutFlag(isClickL);
+        //この目標値を越えるとステージをクリアできます
+        textBoxes[3]->SetPosition(VECTOR2(hw, hh));
+        textBoxes[3]->SetBaseSize(VECTOR2(805.0f, 69.0f));
+        textBoxes[3]->SetCirclePosCorec(VECTOR2(0.8f, 0.7f));
+        textBoxes[3]->IsDrawClickHere();
+        textBoxes[3]->SetPopUpFlag(textBoxes[2]->GetPopOutFlag());
+        textBoxes[3]->SetPopOutFlag(isClickL);
+
+        //この値はこれまでの爆弾の設置数です
+        textBoxes[4]->SetPosition(VECTOR2(hw, hh));
+        textBoxes[4]->SetBaseSize(VECTOR2(668.0f, 68.0f));
+        textBoxes[4]->SetCirclePosCorec(VECTOR2(0.8f, 0.7f));
+        textBoxes[4]->IsDrawClickHere();
+        textBoxes[4]->SetPopUpFlag(textBoxes[3]->GetPopOutFlag());
+        textBoxes[4]->SetPopOutFlag(isClickL);
+
+        //actがこの制限値を越えると失敗になります
+        textBoxes[5]->SetPosition(VECTOR2(hw, hh));
+        textBoxes[5]->SetBaseSize(VECTOR2(734.0f, 68.0f));
+        textBoxes[5]->SetCirclePosCorec(VECTOR2(0.8f, 0.7f));
+        textBoxes[5]->IsDrawClickHere();
+        textBoxes[5]->SetPopUpFlag(textBoxes[4]->GetPopOutFlag());
+        textBoxes[5]->SetPopOutFlag(isClickL);
+
+        //目標値を越えるかBackSpaceでチュートリアルを終了できます
+        textBoxes[6]->SetPosition(VECTOR2(hw, hh));
+        textBoxes[6]->SetBaseSize(VECTOR2(1055.0f, 73.0f));
+        textBoxes[6]->SetCirclePosCorec(VECTOR2(0.8f, 0.7f));
+        textBoxes[6]->IsDrawClickHere();
+        textBoxes[6]->SetPopUpFlag(textBoxes[5]->GetPopOutFlag());
+        textBoxes[6]->SetPopOutFlag(isClickL);
     }
 
     //focus
     {
-    //    focuses[0]->SetFocusPos(VECTOR2(400, 175));
-    //    focuses[0]->SetRadius(250.0f);
+        focuses[0]->SetFocusPos(VECTOR2(115, 240));
+        focuses[0]->SetFocusSize(VECTOR2(1.0f, 1.9f));
+        focuses[0]->SetRadius(235.0f);
+        focuses[0]->SetFocusFlag(textBoxes[0]->GetPopUpFlag());
+        focuses[0]->SetUnFocusFlag(textBoxes[0]->GetPopOutFlag());
 
-        //focuses[0]->SetFocusFlag(true);
-        //focuses[0]->SetUnFocusFlag(textBoxes[1]->GetPopOutFlag());
+        focuses[1]->SetFocusPos(VECTOR2(115, 75));
+        focuses[1]->SetFocusSize(VECTOR2(1.0f, 0.5f));
+        focuses[1]->SetRadius(200.0f);
+        focuses[1]->SetFocusFlag(textBoxes[1]->GetPopUpFlag());
+        focuses[1]->SetUnFocusFlag(textBoxes[2]->GetPopOutFlag());
 
-        for (auto& focus : focuses)
-        {
-            focus->isDraw = false;
-            //focus->Reset();
-        }
+        focuses[2]->SetFocusPos(VECTOR2(115, 190));
+        focuses[2]->SetFocusSize(VECTOR2(1.0f, 0.5f));
+        focuses[2]->SetRadius(200.0f);
+        focuses[2]->SetFocusFlag(textBoxes[3]->GetPopUpFlag());
+        focuses[2]->SetUnFocusFlag(textBoxes[3]->GetPopOutFlag());
+
+        focuses[3]->SetFocusPos(VECTOR2(115, 300));
+        focuses[3]->SetFocusSize(VECTOR2(1.0f, 0.5f));
+        focuses[3]->SetRadius(200.0f);
+        focuses[3]->SetFocusFlag(textBoxes[4]->GetPopUpFlag());
+        focuses[3]->SetUnFocusFlag(textBoxes[4]->GetPopOutFlag());
+
+        focuses[4]->SetFocusPos(VECTOR2(115.0f, 415.0f));
+        focuses[4]->SetFocusSize(VECTOR2(1.0f, 0.5f));
+        focuses[4]->SetRadius(200.0f);
+        focuses[4]->SetFocusFlag(textBoxes[5]->GetPopUpFlag());
+        focuses[4]->SetUnFocusFlag(textBoxes[5]->GetPopOutFlag());
+
+        focuses[5]->SetFocusPos(VECTOR2(-300.0f, -300.0f));
+        focuses[5]->SetFocusSize(VECTOR2(1.0f, 0.5f));
+        focuses[5]->SetRadius(200.0f);
+        focuses[5]->SetFocusFlag(textBoxes[6]->GetPopUpFlag());
+        focuses[5]->SetUnFocusFlag(textBoxes[6]->GetPopOutFlag());
     }
 }
 
@@ -1904,6 +2123,11 @@ bool TutorialBG::IsPutOnFuse()
         }
     }
 
+    for (auto& stageMove : stageMovers)
+    {
+        if (stageMove->IsMove())return false;
+    }
+
     isPutOnFuse = nowStage == 0 && !textBoxes[2]->GetIsAlreadyPopUp() ? false : true;
     return nowStage == 0 && !textBoxes[2]->GetIsAlreadyPopUp() ? false : true;
 }
@@ -1938,6 +2162,77 @@ void TutorialBG::updateEffect(TerrainEffect& effect)
                 effect.timer = 0;
                 effect.animeNum = 0;
                 effect.exist = false;
+            }
+        }
+    }
+}
+
+void TutorialBG::InitMovePos()
+{
+    MovePoses[0] = {
+        {0 - window::getWidth(),50},
+        {0 - window::getWidth(),50},
+        {0,50}
+    };
+    MovePoses[1] = {
+        {150 - window::getWidth(),75},
+        {150 - window::getWidth(),75},
+        {150,75}
+    };
+    MovePoses[2] = {
+        {0 - window::getWidth(),190},
+        {0 - window::getWidth(),190},
+        {0,190}
+    };
+    MovePoses[3] = {
+        {150 - window::getWidth(),125},
+        {150 - window::getWidth(),125},
+        {150,125}
+    };
+    MovePoses[4] = {
+        {0 - window::getWidth(),270},
+        {0 - window::getWidth(),270},
+        {0,270}
+    };
+    MovePoses[5] = {
+        {150 - window::getWidth(),300},
+        {150 - window::getWidth(),300},
+        {150,300}
+    };
+    MovePoses[6] = {
+        {-10 - window::getWidth(),410},
+        {-10 - window::getWidth(),410},
+        {-10,410}
+    };
+    MovePoses[7] = {
+        {150 - window::getWidth(),350},
+        {150 - window::getWidth(),350},
+        {150,350}
+    };
+    MovePoses[8] = {
+        {0 - window::getWidth(),0},
+        {0 - window::getWidth(),0},
+        {0,0}
+    };
+}
+
+void TutorialBG::MoveScores()
+{
+    for (auto& movePos : MovePoses)
+    {
+        XMVECTOR CurrentPos = XMVectorSet(movePos.currentPos.x, movePos.currentPos.y, 0, 0);
+        XMVECTOR EndPos = XMVectorSet(movePos.endPos.x, movePos.endPos.y, 0, 0);
+        XMStoreFloat2(&movePos.currentPos, XMVectorLerp(CurrentPos, EndPos, weight_score));
+        XMVECTOR LengthSq = XMVector2Length(XMVectorSubtract(EndPos, CurrentPos));
+        float lengthSq;
+        XMStoreFloat(&lengthSq, LengthSq);
+        if (lengthSq < 10.0f)
+        {
+            weight_score = 0.082f;
+            if (lengthSq < 2.0f)
+            {
+                weight_score = 0.041f;
+                movePos.currentPos = movePos.endPos;
             }
         }
     }

@@ -298,6 +298,18 @@ void Title::draw()
         effect_click.effectBakuhatu(Click, 6);
     }
 
+    static GameLib::Sprite* cursor = nullptr;
+    cursor = sprite_load(CURSOR);
+    sprite_render(
+        cursor,
+        cursorPos.x, cursorPos.y,
+        0.4f, 0.4f,
+        0, 0,
+        64, 64,
+        32, 32,
+        0);
+
+    delete cursor;
     delete Click;
     delete title;
 }

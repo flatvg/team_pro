@@ -4,6 +4,7 @@
 #include "select.h"
 #include "collision.h"
 #include "sprite_data.h"
+#include "audio.h"
 
 using namespace GameLib;
 
@@ -35,6 +36,7 @@ void Result::update()
 {
     using namespace input;
 
+    cursorPos = VECTOR2(GameLib::input::getCursorPosX(), GameLib::input::getCursorPosY());
 
     // デバッグ文字列表示
     debug::setString("state:%d", state);
@@ -72,6 +74,16 @@ void Result::update()
         //////// 通常時の処理 ////////
         title_scale = { 1.0f, 1.0f };
         select_scale = { 1.0f, 1.0f };
+
+        if (TRG(0) & PAD_LC) {
+
+            // マウスのクリック位置を取得
+            float mouseX = static_cast<float>(GameLib::input::getCursorPosX());
+            float mouseY = static_cast<float>(GameLib::input::getCursorPosY());
+
+            Effect::addEffect(&effect_click, 100, { mouseX - 62,mouseY - 62 });
+            sound::play(XWB_SOUNDS, BAKUHATU);
+        }
 
         float mouseX = static_cast<float>(GameLib::input::getCursorPosX());
         float mouseY = static_cast<float>(GameLib::input::getCursorPosY());
@@ -161,5 +173,28 @@ void Result::draw()
             1, 1, 1, 1);
     }
     texture::end(20);
+
+    static GameLib::Sprite* Click = nullptr;
+    effect_click.isLoop = false;
+    Click = sprite_load(CLICKEXPLODE);
+
+    if (effect_click.exist)
+    {
+        effect_click.effectBakuhatu(Click, 6);
+    }
+
+    static GameLib::Sprite* cursor = nullptr;
+    cursor = sprite_load(CURSOR);
+    sprite_render(
+        cursor,
+        cursorPos.x, cursorPos.y,
+        0.4f, 0.4f,
+        0, 0,
+        64, 64,
+        32, 32,
+        0);
+
+    delete Click;
+    delete cursor;
     delete title;
 }

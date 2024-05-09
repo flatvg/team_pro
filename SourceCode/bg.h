@@ -183,12 +183,17 @@ public:
 
     bool finish_game;
 
+    bool ClickIsFuse;
+
+    bool ClickIspa;
+
+    bool ClickIsgoo;
 private:
 
     int stageNum;
     int timer;                      //全体の時間
     int explosionTime = 45;         //爆発が残留する時間
-    int delayTime = 20;             //爆発の連鎖する間隔
+    int delayTime = 10;             //爆発の連鎖する間隔
     int operatbleCursorTime = 5;    //誤操作を防ぐための操作不能時間
     DirectX::XMFLOAT2  cursorPos;   //カーソルの位置
     bool drag_con = false;
@@ -218,6 +223,4 @@ private:
     float focusFactor;
     bool focusFlag;
     bool unFocusFlag;
-
-    std::unique_ptr<Focus> focus;
 };

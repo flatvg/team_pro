@@ -62,6 +62,8 @@ public:
 
     void IsNotDrawClickHere() { isDrawClickHere = false; }
 
+    void IsDrawClickHere() { isDrawClickHere = true; }
+
     void SetPosition(VECTOR2 pos) { position = pos; }
 
     void SetScale(VECTOR2 scale) { this->scale = scale; }

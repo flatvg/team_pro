@@ -436,7 +436,9 @@ void BG::init(int stagenum)
     focusFlag = false;
     unFocusFlag = false;
 
-    focus = std::make_unique<Focus>(VECTOR2(500.0f, 300.0f), 300.0f);
+    ClickIsFuse = false;
+    ClickIspa = false;
+    ClickIsgoo = false;
 }
 
 //--------------------------------
@@ -472,15 +474,56 @@ void BG::update()
                   && cursorPos.y >  Mapterrain_correction.y
                   && cursorPos.y < (Mapterrain_correction.y + CHIP_SIZE * BG::CHIP_NUM_Y);
 
+    bool isNotActionTerrain = true;
+
+    for (int x = 0; x < CHIP_NUM_X; x++)
+    {
+        for (int y = 0; y < CHIP_NUM_Y; y++)
+        {
+            if (terrainData[y][x].status == TerrainStatus::InExplosion)isNotActionTerrain = false;
+        }
+    }
+
+    ClickIsFuse = isInStage && !burningFuse.exist && isNotActionTerrain && terrainData[Cpos.y][Cpos.x].status!=TerrainStatus::UnBreakble ? true : false;
+
+    bool afk = false;
+
+    for (int bomb_array = 0; bomb_array < BOMB_ROTATE_MAX; bomb_array++)
+    {
+        for (int x = 0; x < 3; ++x)
+        {
+            for (int y = 0; y < 3; ++y)
+            {
+                //爆弾の種類取得
+                int pt_bomb = bomb_pattern[bomb_typenum[bomb_array]][bomb_trun[bomb_array]][y][x];
+
+                if (pt_bomb == PatternStatus::IsBomb)
+                {
+                    int bomb_array_vaut = bomb_array;
+                    if (bomb_movingtype)bomb_array = bomb_waitingarea;
+                    DirectX::XMFLOAT2 bomb_pos;
+                    //爆弾1ブロック中心座標(スクリーン座標＋配列[y][x]目のブロック)
+                    bomb_pos = { bomb_changepos[bomb_array].x + CHIP_SIZE * x,bomb_changepos[bomb_array].y + CHIP_SIZE * y };
+                    //あたり判定
+                    if (collision_center(cursorPos, bomb_pos, chip_size_xmfloat2))
+                    {
+                        afk = true;
+                    }
+                }
+            }
+        }
+    }
+
+    ClickIspa = afk;
+
+    ClickIsgoo = drag_con && burningFuse.exist ? true : false;
+
     //右、左クリックなどをしているか否か
     bool isClickL = timer > operatbleCursorTime && GameLib::input::STATE(0) & GameLib::input::PAD_LC;
     bool isClickR = timer > operatbleCursorTime && GameLib::input::STATE(0) & GameLib::input::PAD_RC;
     bool isZ      = timer > operatbleCursorTime && GameLib::input::STATE(0) & GameLib::input::PAD_TRG1;
     bool isX      = timer > operatbleCursorTime && GameLib::input::STATE(0) & GameLib::input::PAD_TRG2;
     bool isC      = timer > operatbleCursorTime && GameLib::input::STATE(0) & GameLib::input::PAD_TRG3;
-
-    focus->SetFocusFlag(isC);
-    focus->SetUnFocusFlag(isX);
 
     //導火線マスからバクダンマスに変更されたか
     bool isChangeedFuelToBomb = false;
@@ -695,16 +738,22 @@ void BG::drawTerrain()
     texture::end(BreakbleTile);
 
     //スコアなど
-    GameLib::text_out(4, "SCORE:", 0, 50, 1.5f, 1.5f, 1, 0, 0);
-    GameLib::text_out(4, "ACT:", 0, 200, 1.5f, 1.5f, 1, 0, 0);
+    GameLib::text_out(4, " SCORE:", 0, 50, 1.4f, 1.4f, 1, 0, 0);
+    GameLib::text_out(4, " :GOAL", 0, 190, 1.5f, 1.5f, 1, 0, 0);
+    GameLib::text_out(4, " ACT:", 0, 270, 1.5f, 1.5f, 1, 0, 0);
+    GameLib::text_out(4, " :LIMIT", -10, 410, 1.4f, 1.4f, 1, 0, 0);
     texture::begin(Number);
     score_vault += score / 60;
+    int goal = 10000;
+    int limit = 200;
     if (score_vault >= score)score_vault = score;
     for (int i = 0; i < 5; ++i)
     {
         int n = 10;
         int score_re;
         int act_re;
+        int goal_re;
+        int limit_re;
         for (int m = 0; m < i; ++m)
         {
             n *= 10;
@@ -720,13 +769,38 @@ void BG::drawTerrain()
             0, 0,
             0,
             1, 1, 1, 1);
+
+        goal_re = (goal % n) / (n / 10);
+        if (goal_re == 0)goal_re = 10;
+        texture::draw(
+            Number,
+            150 - (25 * i), 125,
+            0.25f, 0.25f,
+            50 * ((goal_re - 1) * 2), 0,
+            50 * 2, 1000,
+            0, 0,
+            0,
+            1, 1, 1, 1);
+
         act_re = (act_ext % n) / (n / 10);
         if (act_re == 0)act_re = 10;
         texture::draw(
             Number,
-            150 - (25 * i), 230,
+            150 - (25 * i), 300,
             0.25f, 0.25f,
             50 * ((act_re - 1) * 2), 0,
+            50 * 2, 1000,
+            0, 0,
+            0,
+            1, 1, 1, 1);
+
+        limit_re = (limit % n) / (n / 10);
+        if (limit_re == 0)limit_re = 10;
+        texture::draw(
+            Number,
+            150 - (25 * i), 350,
+            0.25f, 0.25f,
+            50 * ((limit_re - 1) * 2), 0,
             50 * 2, 1000,
             0, 0,
             0,

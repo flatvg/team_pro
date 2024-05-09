@@ -15,6 +15,7 @@
 
 #include "bg.h"
 #include "scene.h"
+#include "Effect.h"
 
 class Result : public Scene
 {
@@ -37,6 +38,10 @@ private:
     bool isPaused;
     DirectX::XMFLOAT2 title_scale;
     DirectX::XMFLOAT2 select_scale;
+
+    VECTOR2 cursorPos;
+
+    Effect effect_click;
 
     static Result instance_;
 };

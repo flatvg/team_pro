@@ -83,6 +83,8 @@ void Tutorial::update()
             changeScene(Title::instance());  // ÉQÅ[ÉÄÉVÅ[ÉìÇ…êÿÇËë÷Ç¶
         }
     }
+
+    cursorPos = VECTOR2(GameLib::input::getCursorPosX(), GameLib::input::getCursorPosY());
 }
 
 //--------------------------------
@@ -109,6 +111,22 @@ void Tutorial::draw()
         0, 0, 0, A_timer
     );
 
+    static GameLib::Sprite* cursor = nullptr;
+    if (T_bg.ClickIsFuse)
+    {
+        cursor = sprite_load(CLOSEHAND);
+    }
+    else cursor = sprite_load(CURSOR);
+    sprite_render(
+        cursor,
+        cursorPos.x, cursorPos.y,
+        0.4f, 0.4f,
+        0, 0,
+        64, 64,
+        32, 32,
+        0);
+
+    delete cursor;
     delete back_img;
 }
 

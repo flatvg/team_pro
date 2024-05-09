@@ -1,5 +1,6 @@
 #pragma once
 #include "scene.h"
+#include "Effect.h"
 
 struct RectData
 {
@@ -38,6 +39,8 @@ private:
     RectData stages[STAGE_MAX];
 
     RectData stage1;
+
+    Effect effect_click;
 
     static Select instance_;
 };
